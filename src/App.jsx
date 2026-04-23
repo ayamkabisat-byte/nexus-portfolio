@@ -148,7 +148,7 @@ export default function App() {
       genre: "Dystopian Thriller",
       src: "/Cover_Manifesto.webp",
       tagline: "An idea cannot be killed.",
-      synopsis: "A desperate father. A corrupt system. And a nightmare that fights back. Banyu stamps fake environmental reports by day. By night, his rage manifests as a masked entity that hunts the powerful in their dreams. But the line between justice and blind terror is thin — and Banyu is losing control. Manifesto is a dark psychological thriller about power, guilt, and the monster we become when the world gives us no other choice.
+      synopsis: "A desperate father. A corrupt system. And a nightmare that fights back. Banyu stamps fake environmental reports by day. By night, his rage manifests as a masked entity that hunts the powerful in their dreams. But the line between justice and blind terror is thin — and Banyu is losing control. Manifesto is a dark psychological thriller about power, guilt, and the monster we become when the world gives us no other choice."
     { 
       id: "sillage",
       title: "SILLAGE", 
