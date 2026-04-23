@@ -91,55 +91,128 @@ function Rain() {
   return <canvas ref={canvasRef} style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 1, opacity: 0.4 }} />;
 }
 
-// ── BOOK MODAL ────────────────────────────────────────────────────────────────
+// ── 3D BOOK MODAL ────────────────────────────────────────────────────────────
 
 function BookModal({ book, onClose }) {
-  const [open, setOpen] = useState(false);
-  useEffect(() => { setTimeout(() => setOpen(true), 30); }, []);
+  const [stage, setStage] = useState('closed'); // closed → opening → open → closing
+
+  useEffect(() => {
+    setTimeout(() => setStage('opening'), 30);
+    setTimeout(() => setStage('open'), 200);
+  }, []);
+
   useEffect(() => {
     const fn = (e) => { if (e.key === 'Escape') handleClose(); };
     window.addEventListener('keydown', fn);
     return () => window.removeEventListener('keydown', fn);
   }, []);
-  useEffect(() => { document.body.style.overflow = 'hidden'; return () => { document.body.style.overflow = ''; }; }, []);
 
-  const handleClose = () => { setOpen(false); setTimeout(onClose, 600); };
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
+
+  const handleClose = () => {
+    setStage('closing');
+    setTimeout(() => { setStage('closed'); onClose(); }, 800);
+  };
+
+  const isOpen    = stage === 'open';
+  const isVisible = stage !== 'closed';
+  const BW = 220;
+  const BH = 360;
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', perspective: 2000 }}>
+
       {/* Backdrop */}
-      <div onClick={handleClose} style={{ position: 'absolute', inset: 0, background: 'rgba(6,13,31,0.94)', backdropFilter: 'blur(10px)', opacity: open ? 1 : 0, transition: 'opacity 0.6s' }} />
+      <div onClick={handleClose} style={{ position: 'absolute', inset: 0, background: 'rgba(4,9,22,0.96)', backdropFilter: 'blur(12px)', opacity: isVisible ? 1 : 0, transition: 'opacity 0.5s' }} />
 
-      {/* Modal */}
+      {/* Close button */}
+      <button onClick={handleClose} aria-label="Close" style={{
+        position: 'absolute', top: 24, right: 24, zIndex: 300,
+        background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+        color: 'rgba(255,255,255,0.6)', borderRadius: '50%',
+        width: 36, height: 36, fontSize: 16, cursor: 'pointer',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s',
+      }}
+        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.12)'; e.currentTarget.style.color = '#fff'; }}
+        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; }}>✕</button>
+
+      {/* 3D Book scene */}
       <div style={{
-        position: 'relative', zIndex: 10, display: 'flex', maxWidth: 760, width: '100%',
-        borderRadius: 16, overflow: 'hidden', boxShadow: '0 40px 80px rgba(0,0,0,0.8)',
-        transform: open ? 'scale(1) translateY(0)' : 'scale(0.94) translateY(20px)',
-        opacity: open ? 1 : 0, transition: 'all 0.6s cubic-bezier(0.25,1,0.5,1)',
+        position: 'relative', zIndex: 10,
+        transformStyle: 'preserve-3d',
+        transform: isVisible
+          ? (isOpen ? `translateX(${BW / 2}px) scale(1)` : 'translateX(0px) scale(0.92)')
+          : 'translateX(0px) scale(0.88)',
+        opacity: isVisible ? 1 : 0,
+        transition: 'transform 0.85s cubic-bezier(0.25,1,0.5,1), opacity 0.4s',
+        width: BW, height: BH,
       }}>
-        {/* Cover */}
-        <div className="modal-cover" style={{ width: 200, flexShrink: 0, position: 'relative' }}>
-          <img src={book.src} alt={book.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-            onError={(e) => { if (!e.target.src.includes('placehold')) e.target.src = `https://placehold.co/200x320/0b1428/00F0FF?text=${book.title}`; }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, transparent 70%, rgba(11,20,40,1))' }} />
-        </div>
 
-        {/* Content */}
-        <div style={{ flex: 1, background: '#0b1428', padding: '2.5rem 2rem', overflowY: 'auto', maxHeight: '80vh', position: 'relative' }}>
-          <button onClick={handleClose} style={{ position: 'absolute', top: 16, right: 16, background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: 20, cursor: 'pointer', lineHeight: 1 }} aria-label="Close">✕</button>
-          <p style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, letterSpacing: '0.25em', color: 'var(--cyan)', textTransform: 'uppercase', marginBottom: 8 }}>{book.genre}</p>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: '#fff', marginBottom: 8, lineHeight: 1.1 }}>{book.title}</h2>
-          <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 14, fontStyle: 'italic', color: 'rgba(255,255,255,0.5)', marginBottom: 24 }}>{book.tagline}</p>
-          <div style={{ width: 32, height: 1, background: 'var(--cyan)', marginBottom: 24, opacity: 0.6 }} />
-          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 13, lineHeight: 1.9, color: 'rgba(255,255,255,0.75)' }}>
-            {book.synopsis.split('\n\n').map((p, i) => <p key={i} style={{ marginBottom: 12 }}>{p}</p>)}
+        {/* Right page — synopsis */}
+        <div style={{
+          position: 'absolute', top: 0, left: 0, width: BW, height: BH,
+          background: '#0d1a35',
+          borderRadius: '0 10px 10px 0',
+          border: '1px solid rgba(255,255,255,0.08)', borderLeft: 'none',
+          boxShadow: '12px 0 40px rgba(0,0,0,0.6)',
+          overflowY: 'auto',
+          padding: '28px 24px 28px 20px',
+          display: 'flex', flexDirection: 'column',
+          backgroundImage: 'linear-gradient(to right, rgba(0,0,0,0.25) 0%, transparent 18%)',
+        }}>
+          <p style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '0.28em', color: 'var(--cyan)', textTransform: 'uppercase', marginBottom: 8 }}>{book.genre}</p>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 800, color: '#fff', lineHeight: 1.15, marginBottom: 6 }}>{book.title}</h2>
+          <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 12, fontStyle: 'italic', color: 'rgba(255,255,255,0.4)', marginBottom: 16, lineHeight: 1.5 }}>{book.tagline}</p>
+          <div style={{ width: 20, height: 1, background: 'var(--cyan)', marginBottom: 16, opacity: 0.5, flexShrink: 0 }} />
+          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, lineHeight: 1.85, color: 'rgba(255,255,255,0.65)', flex: 1, overflowY: 'auto' }}>
+            {book.synopsis.split('\n\n').map((p, i) => <p key={i} style={{ marginBottom: 10 }}>{p}</p>)}
           </div>
           {book.link && (
-            <a href={book.link} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="btn-primary" style={{ marginTop: 28, fontSize: 13 }}>
-              Read First Chapter →
-            </a>
+            <a href={book.link} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}
+              style={{ display: 'block', marginTop: 16, padding: '9px 16px', background: 'var(--cyan)', color: '#060d1f', borderRadius: 6, fontSize: 11, fontWeight: 700, textDecoration: 'none', fontFamily: "'DM Sans', sans-serif", textAlign: 'center', letterSpacing: '0.05em', flexShrink: 0, transition: 'opacity 0.2s' }}
+              onMouseEnter={e => e.target.style.opacity = 0.82}
+              onMouseLeave={e => e.target.style.opacity = 1}>Read First Chapter →</a>
           )}
         </div>
+
+        {/* Cover — flips open */}
+        <div style={{
+          position: 'absolute', top: 0, left: 0, width: BW, height: BH,
+          transformStyle: 'preserve-3d',
+          transformOrigin: 'left center',
+          transform: isOpen ? 'rotateY(-175deg)' : 'rotateY(0deg)',
+          transition: 'transform 0.85s cubic-bezier(0.25,1,0.5,1)',
+          zIndex: 10,
+        }}>
+          {/* Front face */}
+          <div style={{ position: 'absolute', inset: 0, backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', borderRadius: '4px 10px 10px 4px', overflow: 'hidden', boxShadow: isOpen ? 'none' : '-6px 6px 30px rgba(0,0,0,0.8)', transition: 'box-shadow 0.4s' }}>
+            <img src={book.src} alt={book.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+              onError={(e) => { if (!e.target.src.includes('placehold')) e.target.src = `https://placehold.co/220x360/0b1428/00F0FF?text=${book.title}`; }} />
+            <div style={{ position: 'absolute', top: 0, right: 0, width: 18, height: '100%', background: 'linear-gradient(to left,rgba(0,0,0,0.5),transparent)' }} />
+          </div>
+          {/* Back face — inside cover */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden',
+            transform: 'rotateY(180deg)',
+            background: '#0a1428',
+            borderRadius: '10px 4px 4px 10px',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            padding: 28, border: '1px solid rgba(255,255,255,0.06)',
+            backgroundImage: 'linear-gradient(to left, rgba(0,0,0,0.2) 0%, transparent 20%)',
+          }}>
+            <div style={{ fontSize: 48, fontFamily: "'Playfair Display',serif", color: 'var(--cyan)', opacity: 0.12, lineHeight: 1, marginBottom: 16, fontWeight: 700 }}>"</div>
+            <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 13, fontStyle: 'italic', color: 'rgba(255,255,255,0.7)', textAlign: 'center', lineHeight: 1.8 }}>{book.tagline}</p>
+            <div style={{ marginTop: 20, width: 24, height: 1, background: 'var(--cyan)', opacity: 0.3 }} />
+            <p style={{ marginTop: 12, fontFamily: "'DM Mono',monospace", fontSize: 9, letterSpacing: '0.25em', color: 'rgba(255,255,255,0.2)', textTransform: 'uppercase' }}>FILE // CLASSIFIED</p>
+          </div>
+        </div>
+
+        {/* Spine */}
+        <div style={{ position: 'absolute', top: 0, left: 0, width: 8, height: BH, background: 'linear-gradient(to right,#050b1a,#0d1a35)', zIndex: 5, boxShadow: 'inset -2px 0 6px rgba(0,0,0,0.5)' }} />
       </div>
     </div>
   );
@@ -158,12 +231,53 @@ function useReveal() {
   }, []);
 }
 
+// ── SPLIT TEXT — letter by letter reveal ─────────────────────────────────────
+
+function SplitText({ children, tag: Tag = 'span', baseDelay = 0, stagger = 38, style = {} }) {
+  const [visible, setVisible] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) { setVisible(true); obs.disconnect(); }
+    }, { threshold: 0.1 });
+    if (ref.current) obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, []);
+  const chars = children.split('');
+  return (
+    <Tag ref={ref} style={{ display: 'inline', ...style }} aria-label={children}>
+      {chars.map((ch, i) => (
+        <span key={i} aria-hidden="true" style={{
+          display: ch === ' ' ? 'inline' : 'inline-block',
+          opacity: visible ? 1 : 0,
+          transform: visible ? 'translateY(0) rotate(0deg)' : 'translateY(60px) rotate(6deg)',
+          transition: `opacity 0.55s ease ${baseDelay + i * stagger}ms, transform 0.55s cubic-bezier(0.22,1,0.36,1) ${baseDelay + i * stagger}ms`,
+        }}>{ch === ' ' ? '\u00A0' : ch}</span>
+      ))}
+    </Tag>
+  );
+}
+
+// ── PARALLAX HOOK ─────────────────────────────────────────────────────────────
+
+function useParallax() {
+  const [py, setPy] = useState(0);
+  useEffect(() => {
+    const fn = () => setPy(window.scrollY);
+    window.addEventListener('scroll', fn, { passive: true });
+    return () => window.removeEventListener('scroll', fn);
+  }, []);
+  return py;
+}
+
 // ── APP ───────────────────────────────────────────────────────────────────────
 
 export default function App() {
   const [scrolled, setScrolled] = useState(false);
   const [activeBook, setActiveBook] = useState(null);
   const [activeLore, setActiveLore] = useState(LORE[0]);
+  const [navOpen, setNavOpen] = useState(false);
+  const parallax = useParallax();
   useReveal();
 
   useEffect(() => {
@@ -171,6 +285,13 @@ export default function App() {
     window.addEventListener('scroll', fn);
     return () => window.removeEventListener('scroll', fn);
   }, []);
+
+  useEffect(() => {
+    if (!navOpen) return;
+    const fn = (e) => { if (!e.target.closest('#mobile-nav') && !e.target.closest('#hamburger')) setNavOpen(false); };
+    window.addEventListener('click', fn);
+    return () => window.removeEventListener('click', fn);
+  }, [navOpen]);
 
   const handleSubmit = (e) => { e.preventDefault(); };
 
@@ -195,12 +316,27 @@ export default function App() {
             {['Works', 'Lore', 'About', 'Contact'].map(s => (
               <a key={s} href={`#${s.toLowerCase()}`} className="nav-link">{s}</a>
             ))}
-            <a href="https://www.royalroad.com/fiction/163820/nexus-echoes-of-another-self" target="_blank" rel="noreferrer" className="nav-cta">
-              START READING
-            </a>
+            <a href="https://www.royalroad.com/fiction/163820/nexus-echoes-of-another-self" target="_blank" rel="noreferrer" className="nav-cta">START READING</a>
           </div>
+          <button id="hamburger" onClick={() => setNavOpen(o => !o)}
+            style={{ display: 'none', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: 5, width: 40, height: 40, background: 'transparent', border: 'none', cursor: 'pointer', padding: 4, zIndex: 150 }}
+            className="hamburger-btn" aria-label="Toggle menu">
+            <span style={{ display: 'block', width: 22, height: 1.5, background: '#fff', borderRadius: 2, transition: 'all 0.3s', transform: navOpen ? 'rotate(45deg) translate(4.5px,4.5px)' : 'none' }} />
+            <span style={{ display: 'block', width: 22, height: 1.5, background: '#fff', borderRadius: 2, transition: 'all 0.3s', opacity: navOpen ? 0 : 1 }} />
+            <span style={{ display: 'block', width: 22, height: 1.5, background: '#fff', borderRadius: 2, transition: 'all 0.3s', transform: navOpen ? 'rotate(-45deg) translate(4.5px,-4.5px)' : 'none' }} />
+          </button>
         </div>
       </nav>
+
+      <div id="mobile-nav" style={{ position: 'fixed', inset: 0, zIndex: 120, background: 'rgba(4,9,22,0.97)', backdropFilter: 'blur(16px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, opacity: navOpen ? 1 : 0, pointerEvents: navOpen ? 'all' : 'none', transition: 'opacity 0.35s ease' }}>
+        {['Works', 'Lore', 'About', 'Contact'].map((s, i) => (
+          <a key={s} href={`#${s.toLowerCase()}`} onClick={() => setNavOpen(false)}
+            style={{ fontFamily: "'Playfair Display',serif", fontSize: 36, fontWeight: 700, color: '#fff', textDecoration: 'none', letterSpacing: '-0.02em', padding: '10px 0', transform: navOpen ? 'translateY(0)' : 'translateY(20px)', opacity: navOpen ? 1 : 0, transition: `transform 0.4s ease ${i * 70}ms, opacity 0.4s ease ${i * 70}ms, color 0.2s` }}
+            onMouseEnter={e => e.target.style.color = 'var(--cyan)'} onMouseLeave={e => e.target.style.color = '#fff'}>{s}</a>
+        ))}
+        <a href="https://www.royalroad.com/fiction/163820/nexus-echoes-of-another-self" target="_blank" rel="noreferrer" onClick={() => setNavOpen(false)}
+          style={{ marginTop: 24, padding: '12px 32px', border: '1px solid var(--cyan)', borderRadius: 100, color: 'var(--cyan)', textDecoration: 'none', fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', transform: navOpen ? 'translateY(0)' : 'translateY(20px)', opacity: navOpen ? 1 : 0, transition: `all 0.4s ease ${4 * 70}ms` }}>START READING</a>
+      </div>
 
       <main style={{ position: 'relative', zIndex: 2 }}>
 
@@ -211,11 +347,11 @@ export default function App() {
             <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, letterSpacing: '0.3em', color: 'var(--cyan)', textTransform: 'uppercase' }}>Sci-Fi Thriller · Author Portfolio</span>
           </div>
 
-          <div className="reveal reveal-delay-1" style={{ marginBottom: 24 }}>
-            <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(64px, 8vw, 108px)', fontWeight: 900, lineHeight: 0.92, color: '#fff', letterSpacing: '-0.02em', textWrap: 'balance' }}>
-              Stories<br />
-              <em style={{ color: 'var(--cyan)', fontStyle: 'italic' }}>Between</em><br />
-              Worlds.
+          <div style={{ position: 'relative', marginBottom: 24, transform: `translateY(${parallax * 0.18}px)` }}>
+            <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(64px, 8vw, 108px)', fontWeight: 900, lineHeight: 0.92, letterSpacing: '-0.02em', textWrap: 'balance', color: '#fff' }}>
+              <SplitText baseDelay={200} stagger={40}>Stories</SplitText><br />
+              <SplitText baseDelay={520} stagger={40} style={{ color: 'var(--cyan)', fontStyle: 'italic' }}>Between</SplitText><br />
+              <SplitText baseDelay={840} stagger={40}>Worlds.</SplitText>
             </h1>
           </div>
 
@@ -344,10 +480,12 @@ export default function App() {
           <div className="about-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 40, alignItems: 'start' }}>
             {/* Photo */}
             <div className="reveal photo-sticky" style={{ position: 'sticky', top: 120 }}>
-              <div style={{ aspectRatio: '3/4', borderRadius: 16, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', position: 'relative', marginBottom: 24 }}>
-                <img src="/author.jpeg" alt="Michael Dinko" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(30%)' }}
+              <div style={{ aspectRatio: '3/4', borderRadius: 16, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', position: 'relative', marginBottom: 24 }}
+                onMouseEnter={e => { e.currentTarget.querySelector('img').style.filter = 'grayscale(0%) brightness(1)'; e.currentTarget.querySelector('.photo-overlay').style.opacity = 0; }}
+                onMouseLeave={e => { e.currentTarget.querySelector('img').style.filter = 'grayscale(100%) brightness(0.55)'; e.currentTarget.querySelector('.photo-overlay').style.opacity = 1; }}>
+                <img src="/author.jpeg" alt="Michael Dinko" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(100%) brightness(0.55)', transition: 'filter 0.7s ease' }}
                   onError={e => { e.target.style.background = '#0b1428'; }} />
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(6,13,31,0.7) 0%, transparent 50%)' }} />
+                <div className="photo-overlay" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(6,13,31,0.75) 0%, transparent 50%)', transition: 'opacity 0.7s ease' }} />
                 <div style={{ position: 'absolute', bottom: 20, left: 20 }}>
                   <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: '#fff' }}>Michael Dinko</h3>
                   <p style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--cyan)', letterSpacing: '0.2em', textTransform: 'uppercase', marginTop: 4 }}>Jakarta, Indonesia</p>

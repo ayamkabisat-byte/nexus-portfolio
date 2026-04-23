@@ -218,6 +218,7 @@ body::before {
 }
 @media (max-width: 768px) {
   .desktop-nav { display: none !important; }
+  .hamburger-btn { display: flex !important; }
   .quotes-grid { grid-template-columns: 1fr !important; }
   .works-grid { grid-template-columns: 1fr !important; }
   .lore-grid { grid-template-columns: 1fr !important; }
