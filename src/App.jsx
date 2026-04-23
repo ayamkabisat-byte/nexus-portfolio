@@ -24,42 +24,36 @@ const InstagramIcon = ({ size = 24, className = "" }) => (
 // --- FLUID CANVAS RAIN EFFECT ---
 const RainEffect = () => {
   const canvasRef = useRef(null);
-  const animationRef = useRef(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
+    let animationFrameId;
     let width = window.innerWidth;
     let height = window.innerHeight;
-    let drops = [];
 
-    const wind = -0.5;
+    const drops = [];
     const dropCount = 100;
+    const wind = -0.5;
 
-    const initDrops = (w, h) => {
-      const newDrops = [];
-      for (let i = 0; i < dropCount; i++) {
-        newDrops.push({
-          x: Math.random() * w,
-          y: Math.random() * h,
-          length: Math.random() * 20 + 15,
-          speed: Math.random() * 8 + 10,
-          thickness: Math.random() * 1.5 + 0.8,
-        });
-      }
-      return newDrops;
-    };
+    for (let i = 0; i < dropCount; i++) {
+      drops.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        length: Math.random() * 20 + 15,
+        speed: Math.random() * 8 + 10,
+        thickness: Math.random() * 1.5 + 0.8,
+      });
+    }
 
     const resizeCanvas = () => {
       width = window.innerWidth;
       height = window.innerHeight;
       canvas.width = width;
       canvas.height = height;
-      drops = initDrops(width, height);
     };
 
     const draw = () => {
-      if (!ctx) return;
       ctx.clearRect(0, 0, width, height);
       drops.forEach(drop => {
         const gradient = ctx.createLinearGradient(
@@ -86,7 +80,7 @@ const RainEffect = () => {
         if (drop.x < -50) drop.x = width + 20;
         if (drop.x > width + 50) drop.x = -20;
       });
-      animationRef.current = requestAnimationFrame(draw);
+      animationFrameId = requestAnimationFrame(draw);
     };
 
     resizeCanvas();
@@ -95,7 +89,7 @@ const RainEffect = () => {
 
     return () => {
       window.removeEventListener('resize', resizeCanvas);
-      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+      cancelAnimationFrame(animationFrameId);
     };
   }, []);
 
@@ -103,7 +97,7 @@ const RainEffect = () => {
     <canvas
       ref={canvasRef}
       className="fixed top-0 left-0 w-full h-full pointer-events-none z-[1] opacity-40"
-      style={{ willChange: 'opacity' }}
+      style={{ willChange: 'transform' }}
     />
   );
 };
@@ -154,7 +148,7 @@ export default function App() {
       genre: "Dystopian Thriller",
       src: "/Cover_Manifesto.webp",
       tagline: "An idea cannot be killed.",
-      synopsis: "A desperate father. A corrupt system. And a nightmare that fights back. Banyu stamps fake environmental reports by day. By night, his rage manifests as a masked entity that hunts the powerful in their dreams. But the line between justice and blind terror is thin — and Banyu is losing control. Manifesto is a dark psychological thriller about power, guilt, and the monster we become when the world gives us no other choice."
+      synopsis: "Banyu is a low-level civil servant trapped in the suffocating grind of Megapolitan. His six-year-old daughter gasps for air every night because of the toxic smog. His job forces him to stamp fraudulent environmental impact assessments for the very corporation poisoning the city. And his salary is being bled dry by new taxes and a mandatory housing fund that will never buy him a home.\n\nThen, one exhausted afternoon at his desk, Banyu falls asleep — and wakes up somewhere else.\n\nDraped in a shadowy black robe, wearing a blank white porcelain mask, he stands in the parliamentary hall. Corrupt politicians are bound to their floating chairs. And Banyu discovers he can move objects, crush throats, and deliver judgment with nothing but his will.\n\nBut the power has a mind of its own. It leaks from his nightmares when he is angriest. And it does not always strike the right target. As the masked vigilante becomes a national terror, Banyu must learn to control the monster inside him — before it destroys the only thing he has left: his family."
     },
     { 
       id: "sillage",
@@ -194,35 +188,16 @@ export default function App() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close modal with Escape key
-  useEffect(() => {
-    const handleEsc = (e) => {
-      if (e.key === 'Escape' && openedBook) {
-        closeBook();
-      }
-    };
-    window.addEventListener('keydown', handleEsc);
-    return () => window.removeEventListener('keydown', handleEsc);
-  }, [openedBook]);
-
   // Universal 3D Book Open Logic
   const openBook = (book) => {
     setOpenedBook(book);
-    // Small delay to allow DOM update before animation starts
-    setTimeout(() => setIsBookAnimating(true), 50);
+    setTimeout(() => setIsBookAnimating(true), 100);
   };
 
   // Universal 3D Book Close Logic
   const closeBook = () => {
     setIsBookAnimating(false); 
-    // Wait for closing animation to finish before removing from DOM
-    setTimeout(() => setOpenedBook(null), 800);
-  };
-
-  // Handle form submit (prevent page reload)
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Form submitted (demo)');
+    setTimeout(() => setOpenedBook(null), 800); // Wait for closing animation
   };
 
   return (
@@ -289,7 +264,6 @@ export default function App() {
           <div 
             className={`absolute inset-0 bg-[#0A1128]/95 backdrop-blur-md transition-opacity duration-700 ${isBookAnimating ? 'opacity-100' : 'opacity-0'}`}
             onClick={closeBook}
-            aria-hidden="true"
           ></div>
           
           {/* 3D Scene Container */}
@@ -298,13 +272,12 @@ export default function App() {
               
               {/* --- RIGHT PAGE (Synopsis & Details) --- */}
               <div 
-                className="absolute inset-0 bg-dark-paper rounded-r-xl border-y border-r border-white/10 shadow-[20px_20px_50px_rgba(0,0,0,0.8)] p-6 md:p-10 overflow-y-auto flex flex-col"
-                style={{ transform: 'translateZ(-1px)' }}
+                className="absolute inset-0 bg-dark-paper rounded-r-xl border-y border-r border-white/10 shadow-[20px_20px_50px_rgba(0,0,0,0.8)] p-6 md:p-10 overflow-y-auto flex flex-col z-10"
               >
                   {/* Close Button - fixed positioning relative to this container */}
                   <button 
-                    onClick={closeBook}
-                    className="absolute top-4 right-4 p-2 text-white hover:text-[#FF2A2A] transition-colors z-30 focus:outline-none focus:ring-2 focus:ring-[#FF2A2A] rounded-full"
+                    onClick={(e) => { e.stopPropagation(); closeBook(); }}
+                    className="absolute top-4 right-4 p-2 text-white hover:text-[#FF2A2A] transition-colors z-50 focus:outline-none focus:ring-2 focus:ring-[#FF2A2A] rounded-full cursor-pointer"
                     aria-label="Close book"
                   >
                     <X size={20} />
@@ -315,7 +288,7 @@ export default function App() {
                   <div className="w-12 h-0.5 bg-[#00F0FF] mb-4 md:mb-6"></div>
                   
                   {/* Typewriter Synopsis */}
-                  <div className="font-typewriter text-white leading-relaxed text-justify text-[11px] md:text-sm space-y-3 md:space-y-4 mb-6">
+                  <div className="font-typewriter text-white leading-relaxed text-justify text-[11px] md:text-sm space-y-3 md:space-y-4 mb-6 relative z-20">
                     {openedBook.synopsis.split('\n\n').map((paragraph, idx) => (
                       <p key={idx}>{paragraph}</p>
                     ))}
@@ -327,7 +300,8 @@ export default function App() {
                       href={openedBook.link} 
                       target="_blank" 
                       rel="noreferrer" 
-                      className="mt-auto px-4 py-2.5 md:px-6 md:py-3 bg-gradient-to-r from-[#00F0FF] to-[#3A86FF] text-[#0A1128] text-xs md:text-sm font-bold rounded-md shadow-[0_0_15px_rgba(0,240,255,0.3)] transition-all duration-300 font-sans text-center hover:scale-105 hover:shadow-[0_0_25px_rgba(0,240,255,0.6)] focus:outline-none focus:ring-2 focus:ring-[#00F0FF] focus:ring-offset-2 focus:ring-offset-[#0A1128]"
+                      onClick={(e) => e.stopPropagation()}
+                      className="mt-auto px-4 py-2.5 md:px-6 md:py-3 bg-gradient-to-r from-[#00F0FF] to-[#3A86FF] text-[#0A1128] text-xs md:text-sm font-bold rounded-md shadow-[0_0_15px_rgba(0,240,255,0.3)] transition-all duration-300 font-sans text-center hover:scale-105 hover:shadow-[0_0_25px_rgba(0,240,255,0.6)] focus:outline-none focus:ring-2 focus:ring-[#00F0FF] focus:ring-offset-2 focus:ring-offset-[#0A1128] relative z-50 cursor-pointer"
                     >
                       Read First Chapter
                     </a>
@@ -336,12 +310,12 @@ export default function App() {
 
               {/* --- BOOK COVER (Swinging Left Page) --- */}
               <div 
-                className={`absolute inset-0 origin-left preserve-3d transition-transform duration-[800ms] ease-[cubic-bezier(0.25,1,0.5,1)] ${isBookAnimating ? '-rotate-y-180' : 'rotate-y-0'}`}
+                className={`absolute inset-0 origin-left preserve-3d transition-transform duration-[800ms] ease-[cubic-bezier(0.25,1,0.5,1)] ${isBookAnimating ? '-rotate-y-180 pointer-events-none' : 'rotate-y-0'}`}
                 style={{ zIndex: 20 }}
               >
                   {/* Front Cover */}
                   <div className="absolute inset-0 backface-hidden rounded-r-xl overflow-hidden border border-gray-700/50 bg-[#0A1128] shadow-[10px_10px_30px_rgba(0,0,0,0.8)]">
-                      <img src={openedBook.src} alt={`${openedBook.title} cover`} className="w-full h-full object-cover" 
+                      <img src={openedBook.src} alt={openedBook.title} className="w-full h-full object-cover" 
                            onError={(e) => {
                              if (!e.target.src.includes('placehold')) e.target.src = `https://placehold.co/400x600/0A1128/00F0FF?text=${openedBook.title}`;
                            }} />
@@ -381,11 +355,11 @@ export default function App() {
               <img src="/favicon.png" alt="Logo" className="w-6 h-6 object-contain" />
               <span className="font-serif font-bold text-xs tracking-tighter hidden sm:block uppercase">M. Dinko</span>
             </div>
-            <a href="#home" className="text-xs md:text-sm font-medium text-white hover:text-[#00F0FF] transition-colors focus:outline-none focus:ring-2 focus:ring-[#00F0FF] rounded-full px-2">Home</a>
-            <a href="#works" className="text-xs md:text-sm font-medium text-white hover:text-[#00F0FF] transition-colors focus:outline-none focus:ring-2 focus:ring-[#00F0FF] rounded-full px-2 hidden md:block">Works</a>
-            <a href="#lore" className="text-xs md:text-sm font-medium text-white hover:text-[#00F0FF] transition-colors focus:outline-none focus:ring-2 focus:ring-[#00F0FF] rounded-full px-2 hidden md:block">Lore</a>
-            <a href="#about" className="text-xs md:text-sm font-medium text-white hover:text-[#00F0FF] transition-colors focus:outline-none focus:ring-2 focus:ring-[#00F0FF] rounded-full px-2">About</a>
-            <a href="#contact" className="text-xs md:text-sm font-semibold text-[#00F0FF] hover:text-white bg-[#00F0FF]/10 px-4 py-1.5 rounded-full border border-[#00F0FF]/30 transition-all duration-300 hover:bg-[#00F0FF]/20 focus:outline-none focus:ring-2 focus:ring-[#00F0FF] focus:ring-offset-2 focus:ring-offset-[#0A1128]">Contact</a>
+            <a href="#home" className="text-xs md:text-sm font-medium text-white hover:text-[#00F0FF]">Home</a>
+            <a href="#works" className="text-xs md:text-sm font-medium text-white hover:text-[#00F0FF] hidden md:block">Works</a>
+            <a href="#lore" className="text-xs md:text-sm font-medium text-white hover:text-[#00F0FF] hidden md:block">Lore</a>
+            <a href="#about" className="text-xs md:text-sm font-medium text-white hover:text-[#00F0FF]">About</a>
+            <a href="#contact" className="text-xs md:text-sm font-semibold text-[#00F0FF] hover:text-white bg-[#00F0FF]/10 px-4 py-1.5 rounded-full border border-[#00F0FF]/30">Contact</a>
           </div>
         </div>
       </nav>
@@ -396,15 +370,12 @@ export default function App() {
         <section id="home" className="min-h-[85vh] flex flex-col items-center justify-center px-4 mb-24 text-center">
           <h2 className="font-sans text-sm tracking-[0.3em] text-[#00F0FF] uppercase mb-4">Sci-Fi Thriller</h2>
           <h1 className="font-serif text-5xl md:text-7xl font-bold text-white mb-2 neon-text-glow">NEXUS</h1>
-          <p className="font-typewriter text-white italic text-lg md:text-xl mb-10">Echoes of Another Self</p>
+          <p className="font-typewriter text-white italic text-lg md:text-xl mb-10">The Lazuardi Loop Saga</p>
 
           <div className="relative group animate-float mb-12">
             <div 
-              className="relative w-56 md:w-72 aspect-[2/3] rounded-r-lg rounded-l-sm shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-gray-700/50 overflow-hidden bg-[#0A1128] cursor-pointer transition-transform duration-300 hover:scale-105 focus-within:ring-2 focus-within:ring-[#00F0FF]" 
+              className="relative w-56 md:w-72 aspect-[2/3] rounded-r-lg rounded-l-sm shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-gray-700/50 overflow-hidden bg-[#0A1128] cursor-pointer" 
               onClick={() => openBook(featuredWorks[2])}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => e.key === 'Enter' && openBook(featuredWorks[2])}
             >
               <img 
                 src="/Cover_Nexus.webp" 
@@ -423,10 +394,10 @@ export default function App() {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-6">
-            <a href="https://www.royalroad.com/fiction/163820/nexus-echoes-of-another-self" target="_blank" rel="noreferrer" className="px-8 py-3 bg-gradient-to-r from-[#00F0FF] to-[#3A86FF] text-[#0A1128] font-bold rounded-full shadow-[0_0_15px_rgba(0,240,255,0.4)] hover:shadow-[0_0_25px_rgba(0,240,255,0.6)] transform hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2 font-sans focus:outline-none focus:ring-2 focus:ring-[#00F0FF] focus:ring-offset-2 focus:ring-offset-[#0A1128]">
+            <a href="https://www.royalroad.com/fiction/163820/nexus-echoes-of-another-self" target="_blank" rel="noreferrer" className="px-8 py-3 bg-gradient-to-r from-[#00F0FF] to-[#3A86FF] text-[#0A1128] font-bold rounded-full shadow-[0_0_15px_rgba(0,240,255,0.4)] hover:shadow-[0_0_25px_rgba(0,240,255,0.6)] transform hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2 font-sans">
               <BookOpen size={18} /> Start Reading
             </a>
-            <a href="#lore" className="px-8 py-3 glass-panel rounded-full text-white font-medium flex items-center justify-center gap-2 hover:bg-white/10 transition-colors duration-300 font-sans focus:outline-none focus:ring-2 focus:ring-[#00F0FF] focus:ring-offset-2 focus:ring-offset-[#0A1128]">
+            <a href="#lore" className="px-8 py-3 glass-panel rounded-full text-white font-medium flex items-center justify-center gap-2 hover:bg-white/10 transition-colors font-sans">
               <Database size={18} className="text-[#00F0FF]"/> Access Database
             </a>
           </div>
@@ -437,24 +408,21 @@ export default function App() {
           <div className="lg:col-span-5 glass-panel rounded-2xl p-8 flex flex-col">
             <h3 className="font-serif text-2xl text-white text-center mb-8 uppercase tracking-widest">Featured Works</h3>
             <div className="flex justify-center gap-6 flex-wrap">
-              {featuredWorks.map((book) => (
+              {featuredWorks.map((book, i) => (
                 <div 
-                  key={book.id} 
-                  className="group relative cursor-pointer focus-within:ring-2 focus-within:ring-[#00F0FF] focus-within:ring-offset-2 focus-within:ring-offset-[#0A1128] rounded-md"
+                  key={i} 
+                  className="group relative cursor-pointer"
                   onClick={() => openBook(book)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => e.key === 'Enter' && openBook(book)}
                 >
                   <img 
                     src={book.src} 
-                    alt={`${book.title} cover`}
-                    className="w-24 md:w-28 rounded-md shadow-lg border border-white/10 transition-all duration-300 group-hover:-translate-y-2 object-cover aspect-[2/3]" 
+                    alt={book.title}
+                    className="w-24 md:w-28 rounded-md shadow-lg border border-white/10 transition-transform duration-300 group-hover:-translate-y-2 object-cover aspect-[2/3]" 
                     onError={(e) => e.target.src = `https://placehold.co/200x300/1a202c/00F0FF?text=${book.title}`}
                   />
                   <div className="absolute inset-0 bg-[#00F0FF]/10 opacity-0 group-hover:opacity-100 rounded-md transition-opacity pointer-events-none"></div>
                   
-                  <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-max opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                  <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-max opacity-0 group-hover:opacity-100 transition-opacity">
                     <span className="bg-[#0A1128] text-[#00F0FF] text-[10px] py-1 px-2 rounded font-mono border border-white/10">OPEN</span>
                   </div>
                 </div>
@@ -467,7 +435,7 @@ export default function App() {
             <div className="flex flex-col md:flex-row gap-6 flex-grow">
               <div className="flex md:flex-col gap-2 md:w-2/5 border-b md:border-b-0 md:border-r border-white/10 pr-2 overflow-x-auto">
                 {loreData.map(item => (
-                  <button key={item.id} onClick={() => setActiveLore(item)} className={`text-left px-4 py-3 rounded-lg text-sm flex items-center gap-3 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#00F0FF] ${activeLore.id === item.id ? 'bg-[#00F0FF]/10 text-[#00F0FF]' : 'text-white hover:text-[#00F0FF] hover:bg-white/5'}`}>
+                  <button key={item.id} onClick={() => setActiveLore(item)} className={`text-left px-4 py-3 rounded-lg text-sm flex items-center gap-3 transition-colors ${activeLore.id === item.id ? 'bg-[#00F0FF]/10 text-[#00F0FF]' : 'text-white hover:text-[#00F0FF]'}`}>
                     {item.icon} {item.title}
                   </button>
                 ))}
@@ -487,17 +455,17 @@ export default function App() {
           <p className="text-sm text-gray-400 mt-[-2rem] mb-10 font-sans">Recovered transmissions from across the multiverse.</p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="glass-panel p-6 rounded-xl relative text-left group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-[#00F0FF]/50">
+            <div className="glass-panel p-6 rounded-xl relative text-left group hover:border-[#00F0FF]/50 transition-colors">
               <Quote className="w-6 h-6 text-[#00F0FF]/30 mb-4" />
               <p className="font-typewriter text-white italic mb-6 leading-relaxed">"Every time I borrow the skills of my other selves, I lose a little memory of who I truly am."</p>
               <div className="text-sm font-sans text-white mt-auto">Luckas Lazuardi, <span className="text-[#00F0FF] font-bold">PRIME</span></div>
             </div>
-            <div className="glass-panel p-6 rounded-xl relative text-left group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-[#FF2A2A]/50">
+            <div className="glass-panel p-6 rounded-xl relative text-left group hover:border-[#FF2A2A]/50 transition-colors">
               <Quote className="w-6 h-6 text-[#FF2A2A]/30 mb-4" />
               <p className="font-typewriter text-white italic mb-6 leading-relaxed">"My job was just to observe. But the protocols in my head are starting to feel like suggestions, not commands."</p>
               <div className="text-sm font-sans text-white mt-auto">Natasha, <span className="text-[#FF2A2A] font-bold">CUSTODIAN</span></div>
             </div>
-            <div className="glass-panel p-6 rounded-xl relative text-left group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-yellow-400/50">
+            <div className="glass-panel p-6 rounded-xl relative text-left group hover:border-yellow-400/50 transition-colors">
               <Quote className="w-6 h-6 text-yellow-400/30 mb-4" />
               <p className="font-typewriter text-white italic mb-6 leading-relaxed">"There are twelve versions of you out there. The other eleven are trash."</p>
               <div className="text-sm font-sans text-white mt-auto">Mysterious Variant, <span className="text-yellow-400 font-bold">HUNTER</span></div>
@@ -533,7 +501,7 @@ export default function App() {
 
             {/* Right: Three Worlds of the Author */}
             <div className="w-full lg:w-2/3 grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-              <div className="glass-panel p-8 rounded-xl relative overflow-hidden group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-[#00F0FF]/50 flex flex-col justify-center">
+              <div className="glass-panel p-8 rounded-xl relative overflow-hidden group hover:border-[#00F0FF]/50 transition-colors flex flex-col justify-center">
                 <Calculator className="w-10 h-10 text-[#00F0FF] mb-4" />
                 <h3 className="font-serif text-2xl font-bold text-white mb-3">The Auditor</h3>
                 <p className="text-white font-typewriter text-sm leading-relaxed">
@@ -541,7 +509,7 @@ export default function App() {
                 </p>
               </div>
               
-              <div className="glass-panel p-8 rounded-xl relative overflow-hidden group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-[#3A86FF]/50 flex flex-col justify-center">
+              <div className="glass-panel p-8 rounded-xl relative overflow-hidden group hover:border-[#3A86FF]/50 transition-colors flex flex-col justify-center">
                 <FlaskConical className="w-10 h-10 text-[#3A86FF] mb-4" />
                 <h3 className="font-serif text-2xl font-bold text-white mb-3">The Collector</h3>
                 <p className="text-white font-typewriter text-sm leading-relaxed">
@@ -549,7 +517,7 @@ export default function App() {
                 </p>
               </div>
               
-              <div className="glass-panel p-8 rounded-xl relative overflow-hidden group md:col-span-2 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-[#FF2A2A]/50 flex flex-col justify-center">
+              <div className="glass-panel p-8 rounded-xl relative overflow-hidden group md:col-span-2 hover:border-[#FF2A2A]/50 transition-colors flex flex-col justify-center">
                 <PenTool className="w-10 h-10 text-[#FF2A2A] mb-4" />
                 <h3 className="font-serif text-2xl font-bold text-white mb-3">The Author</h3>
                 <p className="text-white font-typewriter text-sm md:text-base leading-relaxed">
@@ -566,29 +534,20 @@ export default function App() {
           <div className="glass-panel p-8 rounded-xl space-y-8 flex flex-col">
             <h3 className="font-serif text-2xl text-white flex items-center gap-3"><Satellite className="text-[#00F0FF]" /> Comm Channels</h3>
             <div className="space-y-6 flex-grow">
-              <div className="flex gap-4"><Mail className="text-[#00F0FF]" /> <div><p className="text-xs text-white uppercase tracking-wider mb-1">Primary Email</p><a href="mailto:michaeldinko01@gmail.com" className="text-white font-typewriter text-sm hover:text-[#00F0FF] transition-colors focus:outline-none focus:ring-2 focus:ring-[#00F0FF] rounded">michaeldinko01@gmail.com</a></div></div>
-              <div className="flex gap-4"><InstagramIcon className="text-[#3A86FF]" /> <div><p className="text-xs text-white uppercase tracking-wider mb-1">Instagram</p><a href="https://instagram.com/michaeldinko01" target="_blank" rel="noreferrer" className="text-white font-typewriter text-sm hover:text-[#3A86FF] transition-colors focus:outline-none focus:ring-2 focus:ring-[#3A86FF] rounded">@michaeldinko01</a></div></div>
-              <div className="flex gap-4"><BookOpen className="text-[#FF2A2A]" /> <div><p className="text-xs text-white uppercase tracking-wider mb-1">Royal Road</p><a href="https://www.royalroad.com/fiction/163820/nexus-echoes-of-another-self" target="_blank" rel="noreferrer" className="text-white font-typewriter text-sm hover:text-[#FF2A2A] transition-colors focus:outline-none focus:ring-2 focus:ring-[#FF2A2A] rounded">NEXUS Fiction</a></div></div>
+              <div className="flex gap-4"><Mail className="text-[#00F0FF]" /> <div><p className="text-xs text-white uppercase tracking-wider mb-1">Primary Email</p><a href="mailto:michaeldinko01@gmail.com" className="text-white font-typewriter text-sm hover:text-[#00F0FF] transition-colors">michaeldinko01@gmail.com</a></div></div>
+              <div className="flex gap-4"><InstagramIcon className="text-[#3A86FF]" /> <div><p className="text-xs text-white uppercase tracking-wider mb-1">Instagram</p><a href="https://instagram.com/michaeldinko01" target="_blank" rel="noreferrer" className="text-white font-typewriter text-sm hover:text-[#3A86FF] transition-colors">@michaeldinko01</a></div></div>
+              <div className="flex gap-4"><BookOpen className="text-[#FF2A2A]" /> <div><p className="text-xs text-white uppercase tracking-wider mb-1">Royal Road</p><a href="https://www.royalroad.com/fiction/163820/nexus-echoes-of-another-self" target="_blank" rel="noreferrer" className="text-white font-typewriter text-sm hover:text-[#FF2A2A] transition-colors">NEXUS Fiction</a></div></div>
             </div>
             <div className="mt-8 border-l-4 border-[#00F0FF] p-4 bg-[#0A1128]/50"><p className="font-typewriter text-white italic text-sm">"Sometimes signals from another universe are clearer than chatter in an audit office."</p></div>
           </div>
           
           <div className="glass-panel p-8 rounded-xl">
             <h3 className="font-serif text-2xl text-white mb-6 flex items-center gap-3"><Send className="text-[#00F0FF]" /> Transmit Message</h3>
-            <form className="space-y-6" onSubmit={handleSubmit}>
-              <div>
-                <label htmlFor="name" className="sr-only">Identifier (Name)</label>
-                <input type="text" id="name" placeholder="Identifier (Name)" className="w-full bg-[#0A1128]/60 border border-white/10 rounded-md py-3 px-4 text-white font-typewriter text-sm focus:border-[#00F0FF] focus:outline-none focus:ring-1 focus:ring-[#00F0FF] transition-all" />
-              </div>
-              <div>
-                <label htmlFor="email" className="sr-only">Email Frequency</label>
-                <input type="email" id="email" placeholder="Email Frequency" className="w-full bg-[#0A1128]/60 border border-white/10 rounded-md py-3 px-4 text-white font-typewriter text-sm focus:border-[#00F0FF] focus:outline-none focus:ring-1 focus:ring-[#00F0FF] transition-all" />
-              </div>
-              <div>
-                <label htmlFor="message" className="sr-only">Message Body</label>
-                <textarea id="message" rows="4" placeholder="Message Body" className="w-full bg-[#0A1128]/60 border border-white/10 rounded-md py-3 px-4 text-white font-typewriter text-sm focus:border-[#00F0FF] focus:outline-none focus:ring-1 focus:ring-[#00F0FF] transition-all resize-none"></textarea>
-              </div>
-              <button type="submit" className="w-full bg-gradient-to-r from-[#00F0FF] to-[#3A86FF] text-[#0A1128] font-bold py-3 rounded-md flex justify-center gap-2 shadow-lg hover:shadow-[#00F0FF]/20 transition-all duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[#00F0FF] focus:ring-offset-2 focus:ring-offset-[#0A1128]"><RadioTower /> Broadcast</button>
+            <form className="space-y-6">
+              <input type="text" placeholder="Identifier (Name)" className="w-full bg-[#0A1128]/60 border border-white/10 rounded-md py-3 px-4 text-white font-typewriter text-sm focus:border-[#00F0FF] outline-none" />
+              <input type="email" placeholder="Email Frequency" className="w-full bg-[#0A1128]/60 border border-white/10 rounded-md py-3 px-4 text-white font-typewriter text-sm focus:border-[#00F0FF] outline-none" />
+              <textarea rows="4" placeholder="Message Body" className="w-full bg-[#0A1128]/60 border border-white/10 rounded-md py-3 px-4 text-white font-typewriter text-sm focus:border-[#00F0FF] outline-none resize-none"></textarea>
+              <button type="button" className="w-full bg-gradient-to-r from-[#00F0FF] to-[#3A86FF] text-[#0A1128] font-bold py-3 rounded-md flex justify-center gap-2 shadow-lg hover:shadow-[#00F0FF]/20 transition-all font-sans"><RadioTower /> Broadcast</button>
             </form>
           </div>
         </section>
