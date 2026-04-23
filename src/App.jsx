@@ -1,0 +1,349 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { BookOpen, Compass, Mail, User, ChevronRight, Send, Database, Target, ShieldAlert, Cpu, Quote, Radio, Satellite, RadioTower, Calculator, FlaskConical, PenTool } from 'lucide-react';
+
+// Ikon Instagram Manual (SVG)
+const InstagramIcon = ({ size = 24, className = "" }) => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    className={className}
+  >
+    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+  </svg>
+);
+
+// --- KOMPONEN EFEK HUJAN (FLUID CANVAS) ---
+const RainEffect = () => {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    let animationFrameId;
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+
+    const drops = [];
+    const dropCount = 100;
+    const wind = -0.5;
+
+    for (let i = 0; i < dropCount; i++) {
+      drops.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        length: Math.random() * 20 + 15,
+        speed: Math.random() * 8 + 10,
+        thickness: Math.random() * 1.5 + 0.8,
+      });
+    }
+
+    const resizeCanvas = () => {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+    };
+
+    const draw = () => {
+      ctx.clearRect(0, 0, width, height);
+      drops.forEach(drop => {
+        const gradient = ctx.createLinearGradient(
+          drop.x, drop.y, 
+          drop.x + wind * 5, drop.y + drop.length
+        );
+        gradient.addColorStop(0, 'rgba(0, 240, 255, 0.6)');
+        gradient.addColorStop(0.8, 'rgba(0, 240, 255, 0.05)');
+        
+        ctx.beginPath();
+        ctx.moveTo(drop.x, drop.y);
+        ctx.lineTo(drop.x + wind, drop.y + drop.length);
+        ctx.strokeStyle = gradient;
+        ctx.lineWidth = drop.thickness;
+        ctx.stroke();
+
+        drop.y += drop.speed;
+        drop.x += wind;
+
+        if (drop.y > height + 50) {
+          drop.y = -20;
+          drop.x = Math.random() * width;
+        }
+        if (drop.x < -50) drop.x = width + 20;
+        if (drop.x > width + 50) drop.x = -20;
+      });
+      animationFrameId = requestAnimationFrame(draw);
+    };
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    draw();
+
+    return () => {
+      window.removeEventListener('resize', resizeCanvas);
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="fixed top-0 left-0 w-full h-full pointer-events-none z-[1] opacity-40"
+      style={{ willChange: 'transform' }}
+    />
+  );
+};
+
+// --- KOMPONEN UTAMA (APP) ---
+export default function App() {
+  const [scrolled, setScrolled] = useState(false);
+  
+  const loreData = [
+    {
+      id: 'gawai_nexus',
+      icon: <Cpu size={18} />,
+      title: 'Gawai Nexus',
+      subtitle: 'Artefak Kuantum Antar-Dimensi',
+      content: 'Sebuah liontin logam perak kusam dengan pola geometris rumit dan batu sehitam obsidian. Benda ini bukan sekadar alat, melainkan "Kunci menuju Multiverse". Memungkinkan penggunanya meminjam keahlian (Gema Abadi) dari versi alternatif diri mereka melintasi batas semesta.'
+    },
+    {
+      id: 'kustodian',
+      icon: <Database size={18} />,
+      title: 'Fraksi Kustodian',
+      subtitle: 'Penjaga Stabilitas Kosmik',
+      content: 'Organisasi antar-dimensi yang bertugas mencegah inkursi garis waktu dan paradoks yang mengancam realitas. Mereka menggunakan teknologi mutakhir seperti Portable Quantum Entanglement Communicator and Sequencer (PQECS) yang dienkripsi dan tak bisa diretas.'
+    },
+    {
+      id: 'klasifikasi',
+      icon: <ShieldAlert size={18} />,
+      title: 'Klasifikasi Anomali',
+      subtitle: 'Tingkatan Kekuatan (Tier)',
+      content: 'Berdasarkan arsip Kustodian: Tingkat 1 (Gema) untuk peminjaman kemampuan non-invasif. Tingkat 2 (Manifestasi) yang melanggar hukum fiksi ilmiah lokal seperti telekinesis atau ledakan energi defensif. Tingkat 3 (Lengkungan) merupakan pembengkokan realitas absolut (Tingkat Dewa).'
+    },
+    {
+      id: 'buronan',
+      icon: <Target size={18} />,
+      title: 'Sang Buronan',
+      subtitle: 'Ancaman Multiverse Utama',
+      content: 'Pengguna Nexus menyimpang dengan implan sibernetika mematikan di jantungnya. Alih-alih meminjam, ia merampas kemampuan dengan membunuh versi dirinya di semesta lain, merobek tatanan realitas demi mencari jalan pulang ke semesta asalnya.'
+    }
+  ];
+
+  // Daftar Karya Terkait untuk Grid
+  const featuredWorks = [
+    { title: "Manifesto", src: "/Cover_Manifesto.webp" },
+    { title: "Sillage", src: "/Cover_Sillage.webp" },
+    { title: "Nexus", src: "/Cover_Nexus.webp" }
+  ];
+
+  const [activeLore, setActiveLore] = useState(loreData[0]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  return (
+    <div className="relative min-h-screen bg-[#0A1128] text-[#E2E8F0] font-sans selection:bg-[#00F0FF] selection:text-[#0A1128] overflow-x-hidden">
+      
+      <style dangerouslySetInnerHTML={{__html: `
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap');
+        html { scroll-behavior: smooth; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .font-sans { font-family: 'Inter', sans-serif; }
+        .glass-panel {
+          background: rgba(28, 43, 75, 0.35);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+        .neon-text-glow { text-shadow: 0 0 15px rgba(0, 240, 255, 0.6); }
+        @keyframes float {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-15px) rotate(1deg); }
+        }
+        .animate-float { animation: float 7s ease-in-out infinite; }
+        .stars-bg {
+          background-image: 
+            radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
+            radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
+            radial-gradient(2px 2px at 50px 160px, #ddd, rgba(0,0,0,0)),
+            radial-gradient(2px 2px at 90px 40px, #fff, rgba(0,0,0,0)),
+            radial-gradient(2px 2px at 130px 80px, #fff, rgba(0,0,0,0));
+          background-repeat: repeat;
+          background-size: 200px 200px;
+          opacity: 0.15;
+        }
+      `}} />
+
+      <div className="fixed inset-0 pointer-events-none z-0 stars-bg"></div>
+      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-gradient-to-b from-[#00F0FF]/10 via-[#3A86FF]/5 to-transparent rounded-full blur-[120px] pointer-events-none z-0"></div>
+      <RainEffect />
+
+      <nav className={`fixed w-full z-50 transition-all duration-500 ${scrolled ? 'top-4' : 'top-8'}`}>
+        <div className="max-w-4xl mx-auto px-4 flex justify-center">
+          <div className="glass-panel rounded-full px-6 py-3 flex items-center gap-4 md:gap-8 transition-all duration-300">
+            {/* Logo Favicon terintegrasi ke Navbar */}
+            <div className="flex items-center gap-2 pr-2 border-r border-white/10">
+              <img src="/favicon.png" alt="Logo" className="w-6 h-6 object-contain" />
+              <span className="font-serif font-bold text-xs tracking-tighter hidden sm:block uppercase">M. Dinko</span>
+            </div>
+            <a href="#home" className="text-xs md:text-sm font-medium text-white hover:text-[#00F0FF]">Beranda</a>
+            <a href="#works" className="text-xs md:text-sm font-medium text-[#E2E8F0] hover:text-[#00F0FF] hidden md:block">Karya</a>
+            <a href="#lore" className="text-xs md:text-sm font-medium text-[#E2E8F0] hover:text-[#00F0FF] hidden md:block">Lore</a>
+            <a href="#about" className="text-xs md:text-sm font-medium text-[#E2E8F0] hover:text-[#00F0FF]">Profil</a>
+            <a href="#contact" className="text-xs md:text-sm font-semibold text-[#00F0FF] hover:text-white bg-[#00F0FF]/10 px-4 py-1.5 rounded-full border border-[#00F0FF]/30">Kontak</a>
+          </div>
+        </div>
+      </nav>
+
+      <main className="relative z-10 pt-32 pb-20">
+        <section id="home" className="min-h-[85vh] flex flex-col items-center justify-center px-4 mb-24 text-center">
+          <h2 className="font-sans text-sm tracking-[0.3em] text-[#00F0FF] uppercase mb-4">Thriller Fiksi Ilmiah</h2>
+          <h1 className="font-serif text-5xl md:text-7xl font-bold text-white mb-2 neon-text-glow">NEXUS</h1>
+          <p className="font-serif italic text-xl text-gray-400 mb-10">Echoes of Another Self</p>
+
+          <div className="relative group animate-float mb-12">
+            <div className="relative w-56 md:w-72 aspect-[2/3] rounded-r-lg rounded-l-sm shadow-2xl border border-gray-700/50 overflow-hidden bg-[#0A1128]">
+              <img 
+                src="/Cover_Nexus.webp" 
+                alt="Cover Nexus" 
+                className="w-full h-full object-cover" 
+                onError={(e) => {
+                  if (!e.target.src.includes('placehold')) {
+                    e.target.src = "https://placehold.co/400x600/0A1128/00F0FF?text=NEXUS";
+                  }
+                }} 
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-6">
+            <a href="https://www.royalroad.com/fiction/163820/nexus-echoes-of-another-self" target="_blank" rel="noreferrer" className="px-8 py-3 bg-gradient-to-r from-[#00F0FF] to-[#3A86FF] text-[#0A1128] font-bold rounded-full shadow-lg">Mulai Membaca</a>
+            <a href="#lore" className="px-8 py-3 glass-panel rounded-full text-white font-medium">Akses Database</a>
+          </div>
+        </section>
+
+        <section id="works" className="max-w-7xl mx-auto px-4 mb-32 grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="lg:col-span-5 glass-panel rounded-2xl p-8 flex flex-col">
+            <h3 className="font-serif text-2xl text-white text-center mb-8 uppercase tracking-widest">Karya Terkait</h3>
+            <div className="flex justify-center gap-6">
+              {featuredWorks.map((book, i) => (
+                <div key={i} className="group relative">
+                  <img 
+                    src={book.src} 
+                    alt={book.title}
+                    className="w-24 md:w-28 rounded-md shadow-lg border border-white/10 transition-transform duration-300 group-hover:-translate-y-2" 
+                    onError={(e) => e.target.src = `https://placehold.co/200x300/1a202c/00F0FF?text=${book.title}`}
+                  />
+                  <div className="absolute inset-0 bg-[#00F0FF]/10 opacity-0 group-hover:opacity-100 rounded-md transition-opacity pointer-events-none"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          <div id="lore" className="lg:col-span-7 glass-panel rounded-2xl p-8 flex flex-col">
+            <h3 className="font-serif text-2xl text-white text-center mb-8 uppercase tracking-widest">Database Lore</h3>
+            <div className="flex flex-col md:flex-row gap-6 flex-grow">
+              <div className="flex md:flex-col gap-2 md:w-2/5 border-b md:border-b-0 md:border-r border-white/10 pr-2 overflow-x-auto">
+                {loreData.map(item => (
+                  <button key={item.id} onClick={() => setActiveLore(item)} className={`text-left px-4 py-3 rounded-lg text-sm flex items-center gap-3 transition-colors ${activeLore.id === item.id ? 'bg-[#00F0FF]/10 text-[#00F0FF]' : 'text-gray-400 hover:text-white'}`}>
+                    {item.icon} {item.title}
+                  </button>
+                ))}
+              </div>
+              <div className="md:w-3/5 p-4 flex flex-col">
+                <h4 className="font-serif text-2xl text-white mb-1">{activeLore.title}</h4>
+                <p className="text-xs font-sans text-[#FF2A2A] mb-4 uppercase tracking-widest">{activeLore.subtitle}</p>
+                <p className="text-gray-300 text-sm leading-relaxed text-justify">{activeLore.content}</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="fragments" className="max-w-7xl mx-auto px-4 mb-32 text-center">
+          <h3 className="font-serif text-3xl text-white mb-12 uppercase tracking-widest">[ Fragmen ]</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="glass-panel p-6 rounded-xl relative text-left group">
+              <Quote className="w-6 h-6 text-[#00F0FF]/30 mb-4" />
+              <p className="font-serif text-gray-300 italic mb-6">"Setiap kali aku meminjam keahlian dari diriku yang lain, aku kehilangan sedikit ingatan tentang siapa aku sebenarnya."</p>
+              <div className="text-sm font-sans text-gray-400 mt-auto">Luckas Lazuardi, <span className="text-[#00F0FF]">PRIME</span></div>
+            </div>
+            <div className="glass-panel p-6 rounded-xl relative text-left group">
+              <Quote className="w-6 h-6 text-[#FF2A2A]/30 mb-4" />
+              <p className="font-serif text-gray-300 italic mb-6">"Tugasku hanya mengamati. Tapi protokol di kepalaku mulai terasa seperti saran, bukan perintah."</p>
+              <div className="text-sm font-sans text-gray-400 mt-auto">Natasha, <span className="text-[#FF2A2A]">KUSTODIAN</span></div>
+            </div>
+            <div className="glass-panel p-6 rounded-xl relative text-left group">
+              <Quote className="w-6 h-6 text-yellow-400/30 mb-4" />
+              <p className="font-serif text-gray-300 italic mb-6">"Ada dua belas versi dirimu di luar sana. Sebelas lainnya adalah sampah."</p>
+              <div className="text-sm font-sans text-gray-400 mt-auto">Varian Hunter, <span className="text-yellow-400">HUNTER</span></div>
+            </div>
+          </div>
+        </section>
+
+        <section id="about" className="max-w-7xl mx-auto px-4 mb-32 text-center">
+          <h2 className="font-serif text-4xl text-white mb-16 uppercase tracking-wider">Sang Penulis</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="glass-panel p-8 rounded-xl text-left relative overflow-hidden group">
+              <Calculator className="w-10 h-10 text-[#00F0FF] mb-6" />
+              <h3 className="font-serif text-2xl font-bold text-white mb-3">Sang Auditor</h3>
+              <p className="text-sm text-gray-400 leading-relaxed">Di siang hari, ia menyusuri labirin birokrasi pemerintahan di Jakarta. Angka dan laporan adalah senjatanya.</p>
+            </div>
+            <div className="glass-panel p-8 rounded-xl text-left relative overflow-hidden group">
+              <FlaskConical className="w-10 h-10 text-[#3A86FF] mb-6" />
+              <h3 className="font-serif text-2xl font-bold text-white mb-3">Sang Kolektor</h3>
+              <p className="text-sm text-gray-400 leading-relaxed">Seorang kolektor parfum niche yang percaya bahwa aroma adalah bahasa paling purba yang tak pernah berbohong.</p>
+            </div>
+            <div className="glass-panel p-8 rounded-xl text-left relative overflow-hidden group">
+              <PenTool className="w-10 h-10 text-[#FF2A2A] mb-6" />
+              <h3 className="font-serif text-2xl font-bold text-white mb-3">Sang Penulis</h3>
+              <p className="text-sm text-gray-400 leading-relaxed">Di malam hari, ia mengubah birokrasi dan obsesi sensorik menjadi thriller fiksi ilmiah.</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="contact" className="max-w-6xl mx-auto px-4 mb-20 grid grid-cols-1 lg:grid-cols-2 gap-8 text-left">
+          <div className="glass-panel p-8 rounded-xl space-y-8 flex flex-col">
+            <h3 className="font-serif text-2xl text-white flex items-center gap-3"><Satellite className="text-[#00F0FF]" /> Jalur Komunikasi</h3>
+            <div className="space-y-6 flex-grow">
+              <div className="flex gap-4"><Mail className="text-[#00F0FF]" /> <div><p className="text-xs text-gray-400">Email Utama</p><a href="mailto:michaeldinko01@gmail.com" className="text-white hover:text-[#00F0FF] transition-colors">michaeldinko01@gmail.com</a></div></div>
+              <div className="flex gap-4"><InstagramIcon className="text-[#3A86FF]" /> <div><p className="text-xs text-gray-400">Instagram</p><a href="https://instagram.com/michaeldinko01" target="_blank" rel="noreferrer" className="text-white hover:text-[#3A86FF] transition-colors">@michaeldinko01</a></div></div>
+              <div className="flex gap-4"><BookOpen className="text-[#FF2A2A]" /> <div><p className="text-xs text-gray-400">Royal Road</p><a href="https://www.royalroad.com/fiction/163820/nexus-echoes-of-another-self" target="_blank" rel="noreferrer" className="text-white hover:text-[#FF2A2A] transition-colors">NEXUS Fiction</a></div></div>
+            </div>
+            <div className="mt-8 border-l-4 border-[#00F0FF] p-4 bg-[#0A1128]/50"><p className="font-serif text-gray-400 italic text-sm">"Kadang sinyal dari semesta lain lebih jelas daripada obrolan di kantor audit."</p></div>
+          </div>
+          <div className="glass-panel p-8 rounded-xl">
+            <h3 className="font-serif text-2xl text-white mb-6 flex items-center gap-3"><Send className="text-[#00F0FF]" /> Kirim Transmisi</h3>
+            <form className="space-y-6">
+              <input type="text" placeholder="Identifier (Nama)" className="w-full bg-[#0A1128]/60 border border-white/10 rounded-md py-3 px-4 text-white focus:border-[#00F0FF] outline-none font-sans" />
+              <input type="email" placeholder="Email" className="w-full bg-[#0A1128]/60 border border-white/10 rounded-md py-3 px-4 text-white focus:border-[#00F0FF] outline-none font-sans" />
+              <textarea rows="4" placeholder="Isi Pesan" className="w-full bg-[#0A1128]/60 border border-white/10 rounded-md py-3 px-4 text-white focus:border-[#00F0FF] outline-none resize-none font-sans"></textarea>
+              <button className="w-full bg-gradient-to-r from-[#00F0FF] to-[#3A86FF] text-[#0A1128] font-bold py-3 rounded-md flex justify-center gap-2 shadow-lg hover:shadow-[#00F0FF]/20 transition-all font-sans"><RadioTower /> Siarkan Pesan</button>
+            </form>
+          </div>
+        </section>
+      </main>
+
+      <footer className="border-t border-white/10 bg-[#060a18] py-8 text-center relative z-10">
+        <div className="font-serif text-xl font-bold text-white tracking-widest uppercase flex items-center justify-center gap-3">
+          <img src="/favicon.png" alt="Logo Small" className="w-5 h-5 opacity-80" />
+          MICHAEL <span className="text-[#00F0FF]">DINKO</span>.
+        </div>
+        <p className="text-gray-600 text-[10px] mt-2 tracking-widest uppercase opacity-50">&copy; 2026 Michael Dinko. Hak Cipta Dilindungi.</p>
+      </footer>
+    </div>
+  );
+}
