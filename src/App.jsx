@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { BookOpen, Compass, Mail, User, ChevronRight, Send, Database, Target, ShieldAlert, Cpu, Quote, Radio, Satellite, RadioTower, Calculator, FlaskConical, PenTool } from 'lucide-react';
+import { BookOpen, Compass, Mail, User, ChevronRight, Send, Database, Target, ShieldAlert, Cpu, Quote, Radio, Satellite, RadioTower, Calculator, FlaskConical, PenTool, X } from 'lucide-react';
 
 // Ikon Instagram Manual (SVG)
 const InstagramIcon = ({ size = 24, className = "" }) => (
@@ -105,6 +105,7 @@ const RainEffect = () => {
 // --- KOMPONEN UTAMA (APP) ---
 export default function App() {
   const [scrolled, setScrolled] = useState(false);
+  const [selectedWork, setSelectedWork] = useState(null); // State untuk kontrol pop-up buku
   
   const loreData = [
     {
@@ -137,14 +138,41 @@ export default function App() {
     }
   ];
 
-  // Daftar Karya Terkait untuk Grid
+  // Daftar Karya Terkait dilengkapi dengan Sinopsis
   const featuredWorks = [
-    { title: "Manifesto", src: "/Cover_Manifesto.webp" },
-    { title: "Sillage", src: "/Cover_Sillage.webp" },
-    { title: "Nexus", src: "/Cover_Nexus.webp" }
+    { 
+      id: "manifesto",
+      title: "Manifesto", 
+      genre: "Dystopian Thriller",
+      src: "/Cover_Manifesto.webp",
+      synopsis: "Di kota yang dibungkam oleh kabut polusi dan pengawasan absolut, sebuah topeng putih tanpa ekspresi menjadi satu-satunya simbol perlawanan. Manifesto bukanlah tentang siapa yang berada di balik topeng tersebut, melainkan tentang ide yang tak bisa dibunuh. Ketika seorang warga sipil biasa menemukan manuskrip terlarang, ia terseret ke dalam konspirasi besar yang mengancam para elit penguasa kota."
+    },
+    { 
+      id: "sillage",
+      title: "Sillage: Jejak Bisikan", 
+      genre: "Mystery / Crime",
+      src: "/Cover_Sillage.webp",
+      synopsis: "Raka, seorang auditor yang pendiam, memiliki senjata yang tak dimiliki siapa pun: indra penciuman yang sangat tajam. Menyadari bahwa aroma adalah bahasa paling purba yang tak pernah berbohong, ia mulai mengupas lapisan-lapisan busuk dari sistem birokrasi kementerian tempatnya bekerja. Namun, saat batas antara keadilan dan balas dendam menipis, Raka harus memutuskan apakah ia adalah sang korban, atau monster baru yang sedang bangkit."
+    },
+    { 
+      id: "nexus",
+      title: "NEXUS", 
+      genre: "Sci-Fi Thriller",
+      src: "/Cover_Nexus.webp",
+      synopsis: "Luckas Lazuardi, seorang pemuda biasa, menemukan Gawai Nexus yang memberinya akses untuk meminjam kemampuan dari versi alternatif dirinya di semesta lain. Namun, liontin tersebut juga menjadi suar yang menarik perhatian Kustodian dan seorang Buronan pembunuh antar-dimensi. Kini, ia harus lari, bukan hanya demi kebebasannya, namun demi mempertahankan eksistensinya di multiverse."
+    }
   ];
 
   const [activeLore, setActiveLore] = useState(loreData[0]);
+
+  // Efek untuk mencegah scroll di belakang saat pop-up terbuka
+  useEffect(() => {
+    if (selectedWork) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+  }, [selectedWork]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -157,6 +185,62 @@ export default function App() {
   return (
     <div className="relative min-h-screen bg-[#0A1128] text-[#E2E8F0] font-sans selection:bg-[#00F0FF] selection:text-[#0A1128] overflow-x-hidden">
       
+      {/* POP-UP DETAIL KARYA (MODAL) */}
+      {selectedWork && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 opacity-100 transition-opacity duration-300">
+          {/* Backdrop Blur */}
+          <div 
+            className="absolute inset-0 bg-[#0A1128]/80 backdrop-blur-sm cursor-pointer" 
+            onClick={() => setSelectedWork(null)}
+          ></div>
+          
+          {/* Konten Modal */}
+          <div className="relative glass-panel rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto flex flex-col md:flex-row shadow-[0_0_50px_rgba(0,240,255,0.15)] transform transition-all">
+            {/* Tombol Tutup */}
+            <button 
+              onClick={() => setSelectedWork(null)} 
+              className="absolute top-4 right-4 p-2 bg-[#0A1128]/50 hover:bg-[#FF2A2A]/20 text-gray-400 hover:text-[#FF2A2A] rounded-full transition-colors z-20"
+            >
+              <X size={20} />
+            </button>
+
+            {/* Kiri: Cover Buku */}
+            <div className="md:w-1/2 p-8 flex justify-center items-center bg-[#0A1128]/40 border-r border-white/5 relative">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-[#00F0FF] opacity-10 blur-[60px] rounded-full pointer-events-none"></div>
+              <img 
+                src={selectedWork.src} 
+                alt={selectedWork.title} 
+                className="w-full max-w-[240px] rounded-lg shadow-2xl border border-white/10 relative z-10"
+                onError={(e) => e.target.src = `https://placehold.co/400x600/1a202c/00F0FF?text=${selectedWork.title}`}
+              />
+            </div>
+
+            {/* Kanan: Detail & Sinopsis */}
+            <div className="md:w-1/2 p-8 md:p-10 flex flex-col justify-center">
+              <h3 className="font-serif text-3xl font-bold text-white mb-2">{selectedWork.title}</h3>
+              <p className="font-sans text-[#00F0FF] text-xs font-bold tracking-[0.2em] uppercase mb-6">
+                {selectedWork.genre}
+              </p>
+              
+              <div className="w-12 h-0.5 bg-[#FF2A2A] mb-6"></div>
+              
+              <div className="font-sans text-gray-300 leading-relaxed text-justify text-sm space-y-4 mb-8">
+                <p>{selectedWork.synopsis}</p>
+              </div>
+
+              <div className="mt-auto pt-6">
+                <button 
+                  onClick={() => setSelectedWork(null)}
+                  className="px-6 py-2.5 bg-gradient-to-r from-[#00F0FF] to-[#3A86FF] text-[#0A1128] font-bold rounded-md shadow-[0_0_15px_rgba(0,240,255,0.3)] hover:shadow-[0_0_25px_rgba(0,240,255,0.6)] transition-all w-fit font-sans"
+                >
+                  Tutup Arsip
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <style dangerouslySetInnerHTML={{__html: `
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap');
         html { scroll-behavior: smooth; }
@@ -192,10 +276,9 @@ export default function App() {
       <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-gradient-to-b from-[#00F0FF]/10 via-[#3A86FF]/5 to-transparent rounded-full blur-[120px] pointer-events-none z-0"></div>
       <RainEffect />
 
-      <nav className={`fixed w-full z-50 transition-all duration-500 ${scrolled ? 'top-4' : 'top-8'}`}>
+      <nav className={`fixed w-full z-40 transition-all duration-500 ${scrolled ? 'top-4' : 'top-8'}`}>
         <div className="max-w-4xl mx-auto px-4 flex justify-center">
           <div className="glass-panel rounded-full px-6 py-3 flex items-center gap-4 md:gap-8 transition-all duration-300">
-            {/* Logo Favicon terintegrasi ke Navbar */}
             <div className="flex items-center gap-2 pr-2 border-r border-white/10">
               <img src="/favicon.png" alt="Logo" className="w-6 h-6 object-contain" />
               <span className="font-serif font-bold text-xs tracking-tighter hidden sm:block uppercase">M. Dinko</span>
@@ -216,7 +299,7 @@ export default function App() {
           <p className="font-serif italic text-xl text-gray-400 mb-10">Echoes of Another Self</p>
 
           <div className="relative group animate-float mb-12">
-            <div className="relative w-56 md:w-72 aspect-[2/3] rounded-r-lg rounded-l-sm shadow-2xl border border-gray-700/50 overflow-hidden bg-[#0A1128]">
+            <div className="relative w-56 md:w-72 aspect-[2/3] rounded-r-lg rounded-l-sm shadow-2xl border border-gray-700/50 overflow-hidden bg-[#0A1128] cursor-pointer" onClick={() => setSelectedWork(featuredWorks[2])}>
               <img 
                 src="/Cover_Nexus.webp" 
                 alt="Cover Nexus" 
@@ -227,28 +310,44 @@ export default function App() {
                   }
                 }} 
               />
+              <div className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                 <span className="font-sans text-white text-sm tracking-widest border border-white px-4 py-2 rounded-md">LIHAT SINOPSIS</span>
+              </div>
             </div>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-6">
-            <a href="https://www.royalroad.com/fiction/163820/nexus-echoes-of-another-self" target="_blank" rel="noreferrer" className="px-8 py-3 bg-gradient-to-r from-[#00F0FF] to-[#3A86FF] text-[#0A1128] font-bold rounded-full shadow-lg">Mulai Membaca</a>
-            <a href="#lore" className="px-8 py-3 glass-panel rounded-full text-white font-medium">Akses Database</a>
+            <a href="https://www.royalroad.com/fiction/163820/nexus-echoes-of-another-self" target="_blank" rel="noreferrer" className="px-8 py-3 bg-gradient-to-r from-[#00F0FF] to-[#3A86FF] text-[#0A1128] font-bold rounded-full shadow-[0_0_15px_rgba(0,240,255,0.4)] hover:shadow-[0_0_25px_rgba(0,240,255,0.6)] transform hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2 font-sans">
+              <BookOpen size={18} /> Mulai Membaca
+            </a>
+            <a href="#lore" className="px-8 py-3 glass-panel rounded-full text-white font-medium flex items-center justify-center gap-2 hover:bg-white/10 transition-colors font-sans">
+              <Database size={18} className="text-[#00F0FF]"/> Akses Database
+            </a>
           </div>
         </section>
 
         <section id="works" className="max-w-7xl mx-auto px-4 mb-32 grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-5 glass-panel rounded-2xl p-8 flex flex-col">
             <h3 className="font-serif text-2xl text-white text-center mb-8 uppercase tracking-widest">Karya Terkait</h3>
-            <div className="flex justify-center gap-6">
+            <div className="flex justify-center gap-6 flex-wrap">
               {featuredWorks.map((book, i) => (
-                <div key={i} className="group relative">
+                <div 
+                  key={i} 
+                  className="group relative cursor-pointer"
+                  onClick={() => setSelectedWork(book)}
+                >
                   <img 
                     src={book.src} 
                     alt={book.title}
-                    className="w-24 md:w-28 rounded-md shadow-lg border border-white/10 transition-transform duration-300 group-hover:-translate-y-2" 
+                    className="w-24 md:w-28 rounded-md shadow-lg border border-white/10 transition-transform duration-300 group-hover:-translate-y-2 object-cover aspect-[2/3]" 
                     onError={(e) => e.target.src = `https://placehold.co/200x300/1a202c/00F0FF?text=${book.title}`}
                   />
                   <div className="absolute inset-0 bg-[#00F0FF]/10 opacity-0 group-hover:opacity-100 rounded-md transition-opacity pointer-events-none"></div>
+                  
+                  {/* Tooltip Hover Sederhana */}
+                  <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-max opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="bg-[#0A1128] text-[#00F0FF] text-[10px] py-1 px-2 rounded font-mono border border-white/10">BACA</span>
+                  </div>
                 </div>
               ))}
             </div>
