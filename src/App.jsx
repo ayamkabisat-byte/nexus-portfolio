@@ -304,7 +304,7 @@ export default function App() {
               {/* --- RIGHT PAGE (Synopsis & Details) --- */}
               <div 
                 className="absolute inset-0 bg-dark-paper rounded-r-xl border-y border-r border-white/10 shadow-[20px_20px_50px_rgba(0,0,0,0.8)] p-6 md:p-10 overflow-y-auto flex flex-col"
-                style={{ transform: 'translateZ(-1px)' }}
+                style={{ transform: isBookAnimating ? 'translateZ(0px)' : 'translateZ(-1px)' }}
               >
                   {/* Close Button - fixed positioning relative to this container */}
                   <button 
