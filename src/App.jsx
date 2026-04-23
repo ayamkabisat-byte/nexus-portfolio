@@ -148,7 +148,7 @@ export default function App() {
       genre: "Dystopian Thriller",
       src: "/Cover_Manifesto.webp",
       tagline: "An idea cannot be killed.",
-      synopsis: "Banyu is a low-level civil servant trapped in the suffocating grind of Megapolitan. His six-year-old daughter gasps for air every night because of the toxic smog. His job forces him to stamp fraudulent environmental impact assessments for the very corporation poisoning the city. And his salary is being bled dry by new taxes and a mandatory housing fund that will never buy him a home.\n\nThen, one exhausted afternoon at his desk, Banyu falls asleep — and wakes up somewhere else.\n\nDraped in a shadowy black robe, wearing a blank white porcelain mask, he stands in the parliamentary hall. Corrupt politicians are bound to their floating chairs. And Banyu discovers he can move objects, crush throats, and deliver judgment with nothing but his will.\n\nBut the power has a mind of its own. It leaks from his nightmares when he is angriest. And it does not always strike the right target. As the masked vigilante becomes a national terror, Banyu must learn to control the monster inside him — before it destroys the only thing he has left: his family."
+      synopsis: "A desperate father. A corrupt system. And a nightmare that fights back. Banyu stamps fake environmental reports by day. By night, his rage manifests as a masked entity that hunts the powerful in their dreams. But the line between justice and blind terror is thin — and Banyu is losing control. Manifesto is a dark psychological thriller about power, guilt, and the monster we become when the world gives us no other choice."
     },
     { 
       id: "sillage",
