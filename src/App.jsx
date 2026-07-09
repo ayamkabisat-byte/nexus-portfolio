@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { BookOpen, Mail, Send, Database, Quote, RadioTower, Satellite, Calculator, FlaskConical, PenTool, X } from 'lucide-react';
+import { useLenis, makeAnchorClickHandler } from './hooks/useLenis';
 import './App.css';
 
 // ── DATA ─────────────────────────────────────────────────────────────────────
@@ -278,6 +279,8 @@ export default function App() {
   const [activeLore, setActiveLore] = useState(LORE[0]);
   const [navOpen, setNavOpen] = useState(false);
   const parallax = useParallax();
+  const lenisRef = useLenis();
+  const handleAnchorClick = makeAnchorClickHandler(lenisRef);
   useReveal();
 
   useEffect(() => {
@@ -309,12 +312,12 @@ export default function App() {
       {/* ── NAVBAR ── */}
       <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, padding: scrolled ? '12px 0' : '24px 0', transition: 'padding 0.4s' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <a href="#home" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 18, color: '#fff', textDecoration: 'none', letterSpacing: '0.05em' }}>
+          <a href="#home" onClick={handleAnchorClick} style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 18, color: '#fff', textDecoration: 'none', letterSpacing: '0.05em' }}>
             M.<span style={{ color: 'var(--cyan)' }}>Dinko</span>
           </a>
           <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: 40 }}>
             {['Works', 'Lore', 'About', 'Contact'].map(s => (
-              <a key={s} href={`#${s.toLowerCase()}`} className="nav-link">{s}</a>
+              <a key={s} href={`#${s.toLowerCase()}`} onClick={handleAnchorClick} className="nav-link">{s}</a>
             ))}
             <a href="https://www.royalroad.com/fiction/163820/nexus-echoes-of-another-self" target="_blank" rel="noreferrer" className="nav-cta">START READING</a>
           </div>
@@ -330,7 +333,7 @@ export default function App() {
 
       <div id="mobile-nav" style={{ position: 'fixed', inset: 0, zIndex: 120, background: 'rgba(4,9,22,0.97)', backdropFilter: 'blur(16px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, opacity: navOpen ? 1 : 0, pointerEvents: navOpen ? 'all' : 'none', transition: 'opacity 0.35s ease' }}>
         {['Works', 'Lore', 'About', 'Contact'].map((s, i) => (
-          <a key={s} href={`#${s.toLowerCase()}`} onClick={() => setNavOpen(false)}
+          <a key={s} href={`#${s.toLowerCase()}`} onClick={(e) => { handleAnchorClick(e); setNavOpen(false); }}
             style={{ fontFamily: "'Playfair Display',serif", fontSize: 36, fontWeight: 700, color: '#fff', textDecoration: 'none', letterSpacing: '-0.02em', padding: '10px 0', transform: navOpen ? 'translateY(0)' : 'translateY(20px)', opacity: navOpen ? 1 : 0, transition: `transform 0.4s ease ${i * 70}ms, opacity 0.4s ease ${i * 70}ms, color 0.2s` }}
             onMouseEnter={e => e.target.style.color = 'var(--cyan)'} onMouseLeave={e => e.target.style.color = '#fff'}>{s}</a>
         ))}
@@ -361,8 +364,8 @@ export default function App() {
 
           <div className="reveal reveal-delay-3" style={{ display: 'flex', alignItems: 'flex-start', gap: 48, flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <a href="#works" className="btn-primary"><BookOpen size={16} /> Explore Works</a>
-              <a href="#lore" className="btn-outline"><Database size={16} style={{ color: 'var(--cyan)' }} /> Access Lore Database</a>
+              <a href="#works" onClick={handleAnchorClick} className="btn-primary"><BookOpen size={16} /> Explore Works</a>
+              <a href="#lore" onClick={handleAnchorClick} className="btn-outline"><Database size={16} style={{ color: 'var(--cyan)' }} /> Access Lore Database</a>
             </div>
             {/* Floating book cover */}
             <div onClick={() => setActiveBook(BOOKS[0])} className="animate-float"

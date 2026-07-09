@@ -1,5 +1,4 @@
 @import "tailwindcss";
 
-html {
-  scroll-behavior: smooth;
-}
+/* scroll-behavior intentionally omitted — Lenis (see src/hooks/useLenis.js)
+   now owns scroll smoothing. Combining both causes stutter. */
