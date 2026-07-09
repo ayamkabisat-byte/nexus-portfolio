@@ -11,7 +11,7 @@
 
 /* ── RESET & BASE ──────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+/* scroll-behavior intentionally omitted — Lenis now owns scroll smoothing */
 body {
   background: var(--bg);
   color: #e8eaf0;
