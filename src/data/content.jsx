@@ -26,6 +26,30 @@ export const BOOKS = [
     tagline: 'An idea cannot be killed.',
     synopsis: 'A desperate father. A corrupt system. And a nightmare that fights back. Banyu stamps fake environmental reports by day. By night, his rage manifests as a masked entity that hunts the powerful in their dreams.\n\nBut the line between justice and blind terror is thin — and Banyu is losing control.',
   },
+  {
+  "id": "hydra",
+  "title": "HYDRA",
+  "genre": "Sci-Fi Action Thriller",
+  "src": "/Cover_Hydra.webp",
+  "tagline": "One man. Nine lives. One fight for reality.",
+  "synopsis": "A debt-ridden government auditor awakens one night with superhuman senses, a crypto fortune, and a terrifying truth: he is the Hydra — absorbing the memories, skills, and wealth of nine alternate versions of himself from parallel realities.\n\nBut with each new identity comes the grief and trauma of lives he never lived. To protect his family from shadow syndicates hunting him, Morgan must master his fractured soul.\n\nIf he fails, the nine heads within him will tear him apart — and everything he knows will be erased."
+  },
+  {
+  "id": "lucidreamer",
+  "title": "LUCIDREAMER",
+  "genre": "LitRPG Fantasy",
+  "src": "/Cover_Lucidreamer.webp",
+  "tagline": "One hour asleep. One month to survive. One dream to conquer reality.",
+  "synopsis": "Bahrizal is a disposable Porter, left to die in a Dungeon Break. His useless skill, Lucid Manifestation, awakens — dragging his consciousness into Bumi Dwipa, a vivid dream world where martial arts masters forge monsters.\n\nOne month in the dream equals one hour in reality. Every swing of his blade, every drop of sweat, rebuilds his real body. Carrying legendary weapons and ancient elixirs across dimensions, he rises from Rank-F to Rank-C, earning a forgotten class: Pandeka.\n\nBut the Tower of Monas awaits. And the deeper he dives, the more the line between dream and nightmare begins to blur."
+  },
+  {
+  "id": "capture",
+  "title": "CAPTURE",
+  "genre": "Sci-Fi Crime Thriller",
+  "src": "/Cover_Capture.webp",
+  "tagline": "The past leaves a light. And his camera is the only one that can see it.",
+  "synopsis": "Nicolas Nostra hides his cursed heterochromatic eye — the left one sees ghostly ripples of trauma burned into the air. To him, they are just migraines. Until he looks through the pentaprism mirror of a DSLR.\n\nSuddenly, the past freezes. A murder that happened three years ago, a professor who vanished without a trace, re-projects in perfect detail. But his photos are on a clock — decaying within 72 hours — and forcing his eye to see too far back risks permanent blindness.\n\nTeaming up with a desperate detective, Nicolas becomes a ghost in the machine, exposing crimes erased by 'The Erasers' — a syndicate that wipes quantum evidence clean. Time is broken. His photos are the only proof. And someone is already hunting him."
+  },
 ];
 
 // ── LORE DATABASE ────────────────────────────────────────────────────────────
