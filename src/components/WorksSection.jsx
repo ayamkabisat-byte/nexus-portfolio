@@ -3,40 +3,37 @@ import { BOOKS } from '../data/content';
 import { SplitText } from './SplitText';
 import { gsap, ScrollTrigger } from '../lib/gsap';
 
+// Deterministic per-card "scattered" starting pose — mimics cards mid-flight,
+// tilted at different angles, before they settle flat into the grid.
+const SCATTER = [
+  { x: -70, y: -110, rotate: -13, rotateX: 10, scale: 1.18 },
+  { x: 40, y: -150, rotate: 9, rotateX: -8, scale: 1.22 },
+  { x: 110, y: -80, rotate: 16, rotateX: 12, scale: 1.15 },
+  { x: -90, y: 70, rotate: -11, rotateX: -10, scale: 1.18 },
+  { x: 30, y: 120, rotate: 7, rotateX: 9, scale: 1.2 },
+  { x: 120, y: 60, rotate: 15, rotateX: -11, scale: 1.15 },
+];
+
 export function WorksSection({ onOpenBook }) {
   const gridRef = useRef(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
       const cards = gsap.utils.toArray(gridRef.current.querySelectorAll('.book-card'));
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: gridRef.current,
+          start: 'top 92%',
+          end: 'top 15%', // long window = slow, smooth settle
+          scrub: 0.6,
+        },
+      });
       cards.forEach((card, i) => {
-        const colOffset = (i % 3) * 6; // stagger trigger point slightly per column so a row reveals left→right, not all at once
-        gsap.fromTo(card,
-          {
-            opacity: 0,
-            scale: 0.3,
-            x: 220,
-            y: -160,
-            rotateZ: 10,
-            rotateX: 12,
-            filter: 'blur(16px)',
-          },
-          {
-            opacity: 1,
-            scale: 1,
-            x: 0,
-            y: 0,
-            rotateZ: 0,
-            rotateX: 0,
-            filter: 'blur(0px)',
-            ease: 'none', // scrub drives the easing itself — a separate ease here would fight it
-            scrollTrigger: {
-              trigger: card,
-              start: `top ${95 - colOffset}%`,
-              end: `top ${45 - colOffset}%`, // longer window = slower, smoother reveal
-              scrub: 0.4,
-            },
-          }
+        const s = SCATTER[i % SCATTER.length];
+        tl.fromTo(card,
+          { opacity: 0, x: s.x, y: s.y, rotate: s.rotate, rotateX: s.rotateX, scale: s.scale, filter: 'blur(8px)', transformPerspective: 800 },
+          { opacity: 1, x: 0, y: 0, rotate: 0, rotateX: 0, scale: 1, filter: 'blur(0px)', ease: 'power2.out', duration: 1 },
+          i * 0.45 // one-by-one: each card's settle starts after the previous, but all still scrubbed to the same scroll range
         );
       });
     }, gridRef);
@@ -73,3 +70,4 @@ export function WorksSection({ onOpenBook }) {
     </section>
   );
 }
+

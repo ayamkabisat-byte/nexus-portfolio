@@ -1,6 +1,7 @@
 import { useRef, useEffect } from 'react';
 import { BookOpen, Database } from 'lucide-react';
 import { SplitText } from './SplitText';
+import { ArcCarousel } from './ArcCarousel';
 import { useParallax } from '../hooks/useParallax';
 import { useMagnetic } from '../hooks/useMagnetic';
 import { gsap, ScrollTrigger } from '../lib/gsap';
@@ -34,7 +35,8 @@ export function Hero({ handleAnchorClick, onOpenBook }) {
 
   return (
     <section id="home" ref={sectionRef} style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
-      <div ref={contentRef} style={{ maxWidth: 1100, margin: '0 auto', width: '100%', padding: '120px 2rem 80px', position: 'relative' }}>
+      <ArcCarousel triggerRef={sectionRef} />
+      <div ref={contentRef} style={{ maxWidth: 1100, margin: '0 auto', width: '100%', padding: '120px 2rem 80px', position: 'relative', zIndex: 1 }}>
         <div className="reveal" style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 32 }}>
           <div style={{ width: 32, height: 1, background: 'var(--cyan)', opacity: 0.6 }} />
           <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, letterSpacing: '0.3em', color: 'var(--cyan)', textTransform: 'uppercase' }}>Sci-Fi Thriller · Author Portfolio</span>
