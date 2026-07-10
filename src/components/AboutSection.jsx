@@ -1,10 +1,11 @@
 import { WORLDS } from '../data/content';
+import { SplitText } from './SplitText';
 
 export function AboutSection() {
   return (
     <section id="about" style={{ maxWidth: 1100, margin: '0 auto 120px', padding: '0 2rem' }}>
       <div className="reveal section-header">
-        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 40, fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>The Author</h2>
+        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 40, fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}><SplitText stagger={18}>The Author</SplitText></h2>
       </div>
       <div className="about-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 40, alignItems: 'start' }}>
         {/* Photo */}

@@ -225,3 +225,12 @@ body::before {
   .lore-sidebar { border-right: none !important; border-bottom: 1px solid rgba(255,255,255,0.06); }
   .modal-cover { display: none !important; }
 }
+
+/* Custom cursor (see src/components/Cursor.jsx) fully replaces the native
+   pointer on desktop — these elements previously forced `cursor: pointer`,
+   which would otherwise still show up alongside the custom ring. */
+@media (pointer: fine) {
+  .btn-primary, .btn-outline, .book-card, [data-cursor="hover"] {
+    cursor: none;
+  }
+}

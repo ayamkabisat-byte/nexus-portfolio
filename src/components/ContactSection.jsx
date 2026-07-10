@@ -1,4 +1,6 @@
 import { Mail, BookOpen, RadioTower } from 'lucide-react';
+import { SplitText } from './SplitText';
+import { useMagnetic } from '../hooks/useMagnetic';
 
 const CHANNELS = [
   { label: 'Email', val: 'michaeldinko01@gmail.com', href: 'mailto:michaeldinko01@gmail.com', color: 'var(--cyan)', icon: <Mail size={14} /> },
@@ -8,11 +10,12 @@ const CHANNELS = [
 
 export function ContactSection() {
   const handleSubmit = (e) => { e.preventDefault(); };
+  const magneticSubmit = useMagnetic(0.25);
 
   return (
     <section id="contact" style={{ maxWidth: 1100, margin: '0 auto 80px', padding: '0 2rem' }}>
       <div className="reveal section-header">
-        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 40, fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>Get in Touch</h2>
+        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 40, fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}><SplitText stagger={18}>Get in Touch</SplitText></h2>
       </div>
       <div className="contact-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
         {/* Channels */}
@@ -42,7 +45,7 @@ export function ContactSection() {
             <input type="text" placeholder="Identifier (Name)" className="contact-input" />
             <input type="email" placeholder="Email Frequency" className="contact-input" />
             <textarea placeholder="Message Body" rows={4} className="contact-input" style={{ resize: 'none' }} />
-            <button type="submit" className="btn-primary" style={{ justifyContent: 'center', borderRadius: 10 }}>
+            <button ref={magneticSubmit} type="submit" data-cursor="hover" className="btn-primary" style={{ justifyContent: 'center', borderRadius: 10 }}>
               <RadioTower size={16} /> BROADCAST
             </button>
           </form>

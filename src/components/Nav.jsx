@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useMagnetic } from '../hooks/useMagnetic';
 
 const SECTIONS = ['Works', 'Lore', 'About', 'Contact'];
 const READ_NOW_LINK = 'https://www.royalroad.com/fiction/163820/nexus-echoes-of-another-self';
 
 export function Nav({ scrolled, handleAnchorClick }) {
   const [navOpen, setNavOpen] = useState(false);
+  const magneticCta = useMagnetic(0.25);
 
   useEffect(() => {
     if (!navOpen) return;
@@ -17,16 +19,16 @@ export function Nav({ scrolled, handleAnchorClick }) {
     <>
       <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, padding: scrolled ? '12px 0' : '24px 0', transition: 'padding 0.4s' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <a href="#home" onClick={handleAnchorClick} style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 18, color: '#fff', textDecoration: 'none', letterSpacing: '0.05em' }}>
+          <a href="#home" onClick={handleAnchorClick} data-cursor="hover" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 18, color: '#fff', textDecoration: 'none', letterSpacing: '0.05em' }}>
             M.<span style={{ color: 'var(--cyan)' }}>Dinko</span>
           </a>
           <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: 40 }}>
             {SECTIONS.map(s => (
-              <a key={s} href={`#${s.toLowerCase()}`} onClick={handleAnchorClick} className="nav-link">{s}</a>
+              <a key={s} href={`#${s.toLowerCase()}`} onClick={handleAnchorClick} data-cursor="hover" className="nav-link">{s}</a>
             ))}
-            <a href={READ_NOW_LINK} target="_blank" rel="noreferrer" className="nav-cta">START READING</a>
+            <a ref={magneticCta} href={READ_NOW_LINK} target="_blank" rel="noreferrer" data-cursor="hover" className="nav-cta">START READING</a>
           </div>
-          <button id="hamburger" onClick={() => setNavOpen(o => !o)}
+          <button id="hamburger" onClick={() => setNavOpen(o => !o)} data-cursor="hover"
             style={{ display: 'none', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: 5, width: 40, height: 40, background: 'transparent', border: 'none', cursor: 'pointer', padding: 4, zIndex: 150 }}
             className="hamburger-btn" aria-label="Toggle menu">
             <span style={{ display: 'block', width: 22, height: 1.5, background: '#fff', borderRadius: 2, transition: 'all 0.3s', transform: navOpen ? 'rotate(45deg) translate(4.5px,4.5px)' : 'none' }} />

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import Lenis from 'lenis';
+import { gsap, ScrollTrigger } from '../lib/gsap';
 
 export function useLenis() {
   const lenisRef = useRef(null);
@@ -16,15 +17,17 @@ export function useLenis() {
     });
     lenisRef.current = lenis;
 
-    let rafId;
-    function raf(time) {
-      lenis.raf(time);
-      rafId = requestAnimationFrame(raf);
-    }
-    rafId = requestAnimationFrame(raf);
+    // Keep ScrollTrigger's cached scroll position in sync with Lenis.
+    lenis.on('scroll', ScrollTrigger.update);
+
+    // Drive Lenis from gsap.ticker (ms -> s) instead of a separate rAF loop,
+    // so Lenis and every GSAP/ScrollTrigger animation share one frame clock.
+    const tickerFn = (time) => lenis.raf(time * 1000);
+    gsap.ticker.add(tickerFn);
+    gsap.ticker.lagSmoothing(0);
 
     return () => {
-      cancelAnimationFrame(rafId);
+      gsap.ticker.remove(tickerFn);
       lenis.destroy();
       lenisRef.current = null;
     };

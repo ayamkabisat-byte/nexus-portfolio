@@ -12,6 +12,7 @@ import { AboutSection } from './components/AboutSection';
 import { ContactSection } from './components/ContactSection';
 import { Footer } from './components/Footer';
 import { BookModal } from './components/BookModal';
+import { Cursor } from './components/Cursor';
 import './App.css';
 
 export default function App() {
@@ -29,6 +30,7 @@ export default function App() {
 
   return (
     <div style={{ position: 'relative', minHeight: '100vh', overflowX: 'hidden' }}>
+      <Cursor />
       <Rain />
 
       {/* Ambient glows */}

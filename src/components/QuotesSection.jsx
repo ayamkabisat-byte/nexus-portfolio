@@ -1,10 +1,11 @@
 import { QUOTES } from '../data/content';
+import { SplitText } from './SplitText';
 
 export function QuotesSection() {
   return (
     <section style={{ maxWidth: 1100, margin: '0 auto 120px', padding: '0 2rem' }}>
       <div className="reveal section-header" style={{ justifyContent: 'flex-start', flexDirection: 'column', alignItems: 'flex-start', gap: 8 }}>
-        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 40, fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>[ Fragments ]</h2>
+        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 40, fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}><SplitText stagger={18}>[ Fragments ]</SplitText></h2>
         <p style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'rgba(255,255,255,0.25)', letterSpacing: '0.15em' }}>RECOVERED TRANSMISSIONS FROM ACROSS THE MULTIVERSE</p>
       </div>
       <div className="quotes-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24 }}>

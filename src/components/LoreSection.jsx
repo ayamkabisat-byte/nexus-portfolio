@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { LORE } from '../data/content';
+import { SplitText } from './SplitText';
 
 export function LoreSection() {
   const [activeLore, setActiveLore] = useState(LORE[0]);
@@ -7,7 +8,7 @@ export function LoreSection() {
   return (
     <section id="lore" style={{ maxWidth: 1100, margin: '0 auto 120px', padding: '0 2rem' }}>
       <div className="reveal section-header">
-        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 40, fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>Lore Database</h2>
+        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 40, fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}><SplitText stagger={18}>Lore Database</SplitText></h2>
         <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.2em' }}>NEXUS · CLASSIFIED</span>
       </div>
       <div className="reveal lore-grid" style={{ display: 'grid', gridTemplateColumns: '240px 1fr', gap: 1, borderRadius: 16, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.03)' }}>
@@ -20,7 +21,7 @@ export function LoreSection() {
             <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'rgba(255,255,255,0.2)', letterSpacing: '0.15em' }}>NEXUS_DB v2.4.1</span>
           </div>
           {LORE.map(item => (
-            <button key={item.id} onClick={() => setActiveLore(item)}
+            <button key={item.id} onClick={() => setActiveLore(item)} data-cursor="hover"
               className={`lore-btn ${activeLore.id === item.id ? 'active' : ''}`}
               style={{ display: 'block', width: '100%', textAlign: 'left', padding: '12px 20px', background: 'transparent', border: 'none', borderLeft: `2px solid ${activeLore.id === item.id ? 'var(--cyan)' : 'transparent'}`, cursor: 'pointer' }}>
               <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '0.2em', color: activeLore.id === item.id ? 'var(--cyan)' : 'rgba(255,255,255,0.25)', textTransform: 'uppercase', marginBottom: 4 }}>{item.tag}</div>

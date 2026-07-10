@@ -37,7 +37,7 @@ export function BookModal({ book, onClose }) {
       <div onClick={handleClose} style={{ position: 'absolute', inset: 0, background: 'rgba(4,9,22,0.96)', backdropFilter: 'blur(12px)', opacity: isVisible ? 1 : 0, transition: 'opacity 0.5s' }} />
 
       {/* Close button */}
-      <button onClick={handleClose} aria-label="Close" style={{
+      <button onClick={handleClose} data-cursor="hover" aria-label="Close" style={{
         position: 'absolute', top: 24, right: 24, zIndex: 300,
         background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
         color: 'rgba(255,255,255,0.6)', borderRadius: '50%',
@@ -79,7 +79,7 @@ export function BookModal({ book, onClose }) {
             {book.synopsis.split('\n\n').map((p, i) => <p key={i} style={{ marginBottom: 10 }}>{p}</p>)}
           </div>
           {book.link && (
-            <a href={book.link} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}
+            <a href={book.link} target="_blank" rel="noreferrer" data-cursor="hover" onClick={(e) => e.stopPropagation()}
               style={{ display: 'block', marginTop: 16, padding: '9px 16px', background: 'var(--cyan)', color: '#060d1f', borderRadius: 6, fontSize: 11, fontWeight: 700, textDecoration: 'none', fontFamily: "'DM Sans', sans-serif", textAlign: 'center', letterSpacing: '0.05em', flexShrink: 0, transition: 'opacity 0.2s' }}
               onMouseEnter={e => e.target.style.opacity = 0.82}
               onMouseLeave={e => e.target.style.opacity = 1}>Read First Chapter →</a>
