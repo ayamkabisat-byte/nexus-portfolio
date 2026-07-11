@@ -1,0 +1,433 @@
+.cinematic-works {
+  position: relative;
+  min-height: 100vh;
+  isolation: isolate;
+}
+
+.cinematic-stage {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  min-height: 680px;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(6, 13, 31, 0.72), rgba(6, 13, 31, 0.96)),
+    radial-gradient(circle at 50% 35%, rgba(41, 255, 151, 0.07), transparent 42%);
+}
+
+.works-stage-header {
+  position: absolute;
+  z-index: 5;
+  top: clamp(88px, 11vh, 122px);
+  left: clamp(24px, 4vw, 72px);
+  right: clamp(24px, 4vw, 72px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.works-stage-header h2 {
+  margin: 8px 0 0;
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(30px, 3.2vw, 48px);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: #fff;
+}
+
+.works-kicker,
+.works-count,
+.works-display-copy span,
+.works-grid-copy,
+.cinematic-book-index,
+.cinematic-book-genre,
+.cinematic-book-action {
+  font-family: 'DM Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+}
+
+.works-kicker,
+.works-count {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.36);
+}
+
+.works-count {
+  margin-top: 5px;
+}
+
+.works-kinetic-title {
+  position: absolute;
+  z-index: 0;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  translate: -50% -50%;
+  font-family: 'DM Sans', sans-serif;
+  font-size: clamp(76px, 13vw, 210px);
+  font-weight: 700;
+  line-height: 0.77;
+  letter-spacing: -0.085em;
+  text-align: center;
+  color: #fff;
+  opacity: 0.065;
+  white-space: nowrap;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.cinematic-deck {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  perspective: 1500px;
+  transform-style: preserve-3d;
+}
+
+.cinematic-book {
+  appearance: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: clamp(138px, 12vw, 184px);
+  aspect-ratio: 2 / 3;
+  translate: -50% -50%;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  color: inherit;
+  background: transparent;
+  text-align: left;
+  transform-style: preserve-3d;
+  transform-origin: center;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.48);
+  will-change: transform, opacity;
+  cursor: pointer;
+}
+
+.cinematic-book-cover {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  border-radius: inherit;
+  background: #0b1428;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  transition: border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+.cinematic-book-cover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(4, 9, 22, 0.94) 0%, rgba(4, 9, 22, 0.14) 47%, transparent 68%);
+}
+
+.cinematic-book img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  transition: transform 0.7s cubic-bezier(0.2, 0.75, 0.2, 1), filter 0.35s ease;
+}
+
+.cinematic-book-shine {
+  position: absolute;
+  z-index: 2;
+  inset: -35%;
+  background: linear-gradient(112deg, transparent 38%, rgba(255, 255, 255, 0.2) 48%, transparent 58%);
+  transform: translateX(-55%);
+  opacity: 0;
+  transition: transform 0.8s ease, opacity 0.35s ease;
+  pointer-events: none;
+}
+
+.cinematic-book-index {
+  position: absolute;
+  z-index: 4;
+  top: 12px;
+  right: 12px;
+  font-size: 8px;
+  color: rgba(255, 255, 255, 0.58);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
+}
+
+.cinematic-book-meta {
+  position: absolute;
+  z-index: 4;
+  right: 14px;
+  bottom: 14px;
+  left: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  pointer-events: none;
+}
+
+.cinematic-book-genre {
+  font-size: 7px;
+  line-height: 1.4;
+  color: var(--cyan);
+}
+
+.cinematic-book-meta strong {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(15px, 1.35vw, 20px);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: #fff;
+}
+
+.cinematic-book-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 3px;
+  font-size: 7px;
+  color: rgba(255, 255, 255, 0.46);
+  opacity: 0;
+  transform: translateY(5px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.cinematic-book:hover,
+.cinematic-book:focus-visible {
+  z-index: 8;
+  outline: none;
+}
+
+.cinematic-book:hover .cinematic-book-cover,
+.cinematic-book:focus-visible .cinematic-book-cover {
+  border-color: rgba(67, 255, 158, 0.58);
+  box-shadow: 0 0 0 1px rgba(67, 255, 158, 0.12), 0 24px 75px rgba(0, 0, 0, 0.7);
+}
+
+.cinematic-book:hover img,
+.cinematic-book:focus-visible img {
+  transform: scale(1.045);
+  filter: saturate(1.08) contrast(1.03);
+}
+
+.cinematic-book:hover .cinematic-book-shine,
+.cinematic-book:focus-visible .cinematic-book-shine {
+  opacity: 0.5;
+  transform: translateX(55%);
+}
+
+.cinematic-book:hover .cinematic-book-action,
+.cinematic-book:focus-visible .cinematic-book-action {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.works-display-copy,
+.works-grid-copy {
+  position: absolute;
+  z-index: 5;
+  bottom: clamp(54px, 7vh, 78px);
+  pointer-events: none;
+}
+
+.works-display-copy {
+  left: clamp(24px, 4vw, 72px);
+  width: min(350px, 34vw);
+}
+
+.works-display-copy p {
+  margin: 0 0 15px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.48);
+}
+
+.works-display-copy span {
+  font-size: 8px;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.works-grid-copy {
+  right: clamp(24px, 4vw, 72px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  font-size: 8px;
+  color: rgba(255, 255, 255, 0.34);
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+.works-grid-copy span:first-child {
+  color: var(--cyan);
+}
+
+.works-progress {
+  position: absolute;
+  z-index: 5;
+  right: clamp(24px, 4vw, 72px);
+  bottom: 31px;
+  left: clamp(24px, 4vw, 72px);
+  height: 1px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.works-progress-fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--cyan), rgba(255, 255, 255, 0.35));
+  transform: scaleX(0);
+  transform-origin: left center;
+  will-change: transform;
+}
+
+.works-ambient,
+.works-orbit {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.works-ambient {
+  width: 42vw;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.24;
+}
+
+.works-ambient-one {
+  top: -28%;
+  right: 5%;
+  background: rgba(31, 237, 137, 0.13);
+}
+
+.works-ambient-two {
+  bottom: -36%;
+  left: 8%;
+  background: rgba(74, 114, 255, 0.09);
+}
+
+.works-orbit {
+  top: 50%;
+  left: 50%;
+  width: min(74vw, 1050px);
+  height: min(48vh, 430px);
+  translate: -50% -50%;
+  border: 1px solid rgba(255, 255, 255, 0.035);
+  border-radius: 50%;
+  transform: rotate(-8deg);
+}
+
+.works-orbit-two {
+  width: min(88vw, 1240px);
+  height: min(60vh, 540px);
+  transform: rotate(7deg);
+  opacity: 0.55;
+}
+
+@media (pointer: fine) {
+  .cinematic-book[data-cursor='hover'] {
+    cursor: none;
+  }
+}
+
+@media (max-width: 860px) {
+  .cinematic-works {
+    min-height: auto;
+    padding: 92px 20px 104px;
+  }
+
+  .cinematic-stage {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+    padding: 0;
+    background: transparent;
+  }
+
+  .works-stage-header {
+    position: relative;
+    inset: auto;
+    margin-bottom: 48px;
+  }
+
+  .works-stage-header h2 {
+    font-size: clamp(34px, 9vw, 48px);
+  }
+
+  .works-kinetic-title,
+  .works-display-copy,
+  .works-grid-copy,
+  .works-progress,
+  .works-orbit {
+    display: none;
+  }
+
+  .cinematic-deck {
+    position: relative;
+    inset: auto;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    perspective: none;
+  }
+
+  .cinematic-book {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: 100%;
+    translate: none;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.42);
+  }
+
+  .cinematic-book-meta strong {
+    font-size: clamp(15px, 4.7vw, 21px);
+  }
+}
+
+@media (max-width: 480px) {
+  .cinematic-works {
+    padding-inline: 16px;
+  }
+
+  .works-stage-header {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .works-count {
+    margin: 0;
+  }
+
+  .cinematic-deck {
+    gap: 12px;
+  }
+
+  .cinematic-book-meta {
+    right: 10px;
+    bottom: 11px;
+    left: 10px;
+  }
+
+  .cinematic-book-genre,
+  .cinematic-book-action {
+    letter-spacing: 0.12em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cinematic-book,
+  .cinematic-book img,
+  .cinematic-book-cover,
+  .cinematic-book-shine,
+  .cinematic-book-action {
+    transition: none !important;
+  }
+}
