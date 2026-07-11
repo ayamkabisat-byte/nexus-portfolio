@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLenis, makeAnchorClickHandler } from './hooks/useLenis';
 import { useReveal } from './hooks/useReveal';
 import { BOOKS } from './data/content';
+import { ScrollTrigger } from './lib/gsap';
 import { Rain } from './components/Rain';
 import { Nav } from './components/Nav';
 import { Hero } from './components/Hero';
@@ -26,6 +27,27 @@ export default function App() {
     const fn = () => setScrolled(window.scrollY > 40);
     window.addEventListener('scroll', fn);
     return () => window.removeEventListener('scroll', fn);
+  }, []);
+
+  // Images (book covers, author photo) load asynchronously and change page
+  // height after GSAP/ScrollTrigger first measures it — refresh once
+  // everything's actually loaded so every scrub animation's start/end points
+  // are accurate, not calculated against a shorter, not-yet-loaded page.
+  useEffect(() => {
+    const images = Array.from(document.images);
+    let pending = images.filter((img) => !img.complete).length;
+    if (pending === 0) {
+      ScrollTrigger.refresh();
+      return;
+    }
+    const onOneLoaded = () => {
+      pending -= 1;
+      if (pending <= 0) ScrollTrigger.refresh();
+    };
+    images.forEach((img) => {
+      if (!img.complete) img.addEventListener('load', onOneLoaded, { once: true });
+    });
+    return () => images.forEach((img) => img.removeEventListener('load', onOneLoaded));
   }, []);
 
   return (
