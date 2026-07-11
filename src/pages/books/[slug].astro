@@ -1,0 +1,142 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Cursor from '@/components/Cursor.astro';
+import Nav from '@/components/Nav.astro';
+import Footer from '@/components/Footer.astro';
+import { BOOKS, type Book } from '@/data/books';
+import { SITE } from '@/config/site';
+import { withBase } from '@/lib/urls';
+import '@/styles/book.css';
+
+export function getStaticPaths() {
+  return BOOKS.map((book) => ({
+    params: { slug: book.slug },
+    props: { book },
+  }));
+}
+
+interface Props {
+  book: Book;
+}
+
+const { book } = Astro.props;
+const index = BOOKS.findIndex((item) => item.slug === book.slug);
+const previous = BOOKS[(index - 1 + BOOKS.length) % BOOKS.length];
+const next = BOOKS[(index + 1) % BOOKS.length];
+const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString() : Astro.url.toString();
+const coverUrl = Astro.site
+  ? new URL(withBase(book.cover), Astro.site).toString()
+  : new URL(withBase(book.cover), Astro.url).toString();
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Book',
+  name: book.title,
+  url: canonical,
+  image: coverUrl,
+  description: book.seoDescription,
+  genre: book.genre,
+  inLanguage: SITE.language,
+  author: {
+    '@type': 'Person',
+    name: SITE.name,
+    url: Astro.site?.toString() || Astro.url.origin,
+  },
+};
+---
+
+<BaseLayout
+  title={`${book.title} — ${SITE.name}`}
+  description={book.seoDescription}
+  image={`og/${book.slug}.png`}
+  imageAlt={`${book.title} by Michael Dinko`}
+  type="book"
+  accent={book.accent}
+  jsonLd={jsonLd}
+>
+  <Cursor />
+  <Nav />
+
+  <main id="main-content" class="book-page" style={`--book-accent:${book.accent}; --book-rgb:${book.accentRgb};`}>
+    <section class="book-hero" id="home" data-book-hero>
+      <div class="book-hero__grid" aria-hidden="true"></div>
+      <div class="book-hero__glow" aria-hidden="true"></div>
+      <div class="book-hero__title-bg" aria-hidden="true">{book.title}</div>
+
+      <a class="book-hero__back" href={`${withBase('')}#works`} data-cursor-label="BACK TO WORKS">
+        ← Fiction archive
+      </a>
+
+      <div class="book-hero__cover" data-book-cover>
+        <span class="book-hero__cover-code">{book.archiveCode}</span>
+        <img src={withBase(book.cover)} alt={`${book.title} book cover`} width="600" height="900" loading="eager" decoding="async" fetchpriority="high" />
+        <span class="book-hero__cover-glare" aria-hidden="true"></span>
+      </div>
+
+      <div class="book-hero__copy">
+        <span class="eyebrow">{book.number} / {book.genre}</span>
+        <h1>{book.title}</h1>
+        <p class="book-hero__tagline">{book.tagline}</p>
+        <div class="book-hero__actions">
+          <a class="button button--primary" href="#premise" data-cursor-label="READ PREMISE">
+            Enter the story <span aria-hidden="true">↓</span>
+          </a>
+          {book.externalUrl && (
+            <a
+              class="button button--ghost"
+              href={book.externalUrl}
+              target="_blank"
+              rel="noreferrer"
+              data-cursor-label="READ ONLINE"
+            >
+              {book.externalLabel} <span aria-hidden="true">↗</span>
+            </a>
+          )}
+        </div>
+      </div>
+
+      <div class="book-hero__signal" aria-hidden="true">
+        <span></span>
+        WORLD SIGNAL DETECTED
+      </div>
+    </section>
+
+    <section class="book-premise" id="premise">
+      <header data-reveal>
+        <span class="eyebrow">STORY FILE / PREMISE</span>
+        <h2>The world begins here.</h2>
+      </header>
+      <div class="book-premise__body">
+        <div class="book-premise__text">
+          {book.synopsis.map((paragraph) => <p data-reveal>{paragraph}</p>)}
+        </div>
+        <aside class="book-premise__motifs" data-reveal>
+          <span class="eyebrow">CORE MOTIFS</span>
+          <ul>
+            {book.motifs.map((motif, motifIndex) => (
+              <li><span>{String(motifIndex + 1).padStart(2, '0')}</span>{motif}</li>
+            ))}
+          </ul>
+        </aside>
+      </div>
+    </section>
+
+    <section class="book-fragment" aria-label="Book tagline">
+      <span aria-hidden="true">{book.title}</span>
+      <blockquote data-reveal>{book.tagline}</blockquote>
+    </section>
+
+    <nav class="book-navigation" aria-label="Other books">
+      <a href={withBase(`books/${previous.slug}/`)} data-cursor-label={`PREVIOUS ${previous.title}`}>
+        <small>PREVIOUS WORLD</small>
+        <strong>← {previous.title}</strong>
+      </a>
+      <a href={withBase(`books/${next.slug}/`)} data-cursor-label={`NEXT ${next.title}`}>
+        <small>NEXT WORLD</small>
+        <strong>{next.title} →</strong>
+      </a>
+    </nav>
+  </main>
+
+  <Footer />
+</BaseLayout>

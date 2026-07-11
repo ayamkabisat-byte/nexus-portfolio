@@ -1,0 +1,64 @@
+---
+import { ARCHIVE_ENTRIES } from '@/data/archive';
+---
+
+<section class="archive" id="archive" data-archive>
+  <header class="section-heading archive__heading" data-reveal>
+    <div>
+      <span class="eyebrow">WORLDBUILDING / RESTRICTED</span>
+      <h2>World index</h2>
+    </div>
+    <span class="section-heading__count">SELECT AN ENTRY</span>
+  </header>
+
+  <div class="archive__shell" data-reveal>
+    <div class="archive__nav" role="tablist" aria-label="World archive entries">
+      {ARCHIVE_ENTRIES.map((entry, index) => (
+        <button
+          type="button"
+          role="tab"
+          aria-selected={index === 0 ? 'true' : 'false'}
+          aria-controls={`archive-panel-${entry.id}`}
+          id={`archive-tab-${entry.id}`}
+          class:list={['archive__tab', { 'is-active': index === 0 }]}
+          data-archive-tab={entry.id}
+          style={`--entry-accent:${entry.accent}`}
+          data-cursor-label={`OPEN ${entry.index}`}
+        >
+          <span>{entry.index}</span>
+          <strong>{entry.title}</strong>
+          <small>{entry.code}</small>
+        </button>
+      ))}
+    </div>
+
+    <div class="archive__content">
+      <div class="archive__scan" aria-hidden="true"></div>
+      {ARCHIVE_ENTRIES.map((entry, index) => (
+        <article
+          id={`archive-panel-${entry.id}`}
+          role="tabpanel"
+          aria-labelledby={`archive-tab-${entry.id}`}
+          class:list={['archive__panel', { 'is-active': index === 0 }]}
+          data-archive-panel={entry.id}
+          style={`--entry-accent:${entry.accent}`}
+          hidden={index !== 0}
+        >
+          <div class="archive__panel-code">
+            <span>{entry.code}</span>
+            <span>ACCESS LEVEL / OBSERVER</span>
+          </div>
+          <div class="archive__panel-number" aria-hidden="true">{entry.index}</div>
+          <p class="archive__panel-subtitle">{entry.subtitle}</p>
+          <h3>{entry.title}</h3>
+          <p class="archive__panel-text">{entry.text}</p>
+          <div class="archive__coordinates" aria-hidden="true">
+            <span>LAT 06°12′S</span>
+            <span>LONG 106°49′E</span>
+            <span>STATUS / UNRESOLVED</span>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>

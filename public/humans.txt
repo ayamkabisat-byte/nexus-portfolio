@@ -1,0 +1,4 @@
+Author: Michael Dinko
+Location: Jakarta, Indonesia
+Site concept: The Multiverse Archive
+Technology: Astro, GSAP, Lenis

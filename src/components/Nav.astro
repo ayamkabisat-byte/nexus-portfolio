@@ -1,0 +1,58 @@
+---
+import { withBase } from '@/lib/urls';
+
+const home = withBase('');
+const links = [
+  { label: 'Works', index: '01', href: `${home}#works` },
+  { label: 'World Index', index: '02', href: `${home}#archive` },
+  { label: 'Author', index: '03', href: `${home}#author` },
+  { label: 'Contact', index: '04', href: `${home}#contact` },
+];
+---
+
+<header class="site-nav" data-nav>
+  <a class="site-nav__brand" href={home} aria-label="Michael Dinko home" data-cursor-label="HOME">
+    <span>M.</span><strong>DINKO</strong>
+  </a>
+
+  <div class="site-nav__status" aria-hidden="true">
+    <span class="site-nav__signal"></span>
+    Jakarta / Online
+  </div>
+
+  <button
+    class="site-nav__toggle"
+    type="button"
+    aria-label="Open navigation"
+    aria-controls="site-menu"
+    aria-expanded="false"
+    data-menu-toggle
+    data-cursor-label="MENU"
+  >
+    <span>INDEX</span>
+    <span class="site-nav__plus" aria-hidden="true">+</span>
+  </button>
+</header>
+
+<div class="menu" id="site-menu" data-menu aria-hidden="true">
+  <div class="menu__noise"></div>
+  <div class="menu__header">
+    <span>NAVIGATION ARCHIVE</span>
+    <span>MICHAEL DINKO / AUTHOR</span>
+  </div>
+
+  <nav class="menu__links" aria-label="Primary navigation">
+    {links.map((link) => (
+      <a href={link.href} data-menu-link data-cursor-label={`GO ${link.index}`}>
+        <span class="menu__index">{link.index}</span>
+        <span class="menu__label">{link.label}</span>
+        <span class="menu__arrow" aria-hidden="true">↗</span>
+      </a>
+    ))}
+  </nav>
+
+  <div class="menu__footer">
+    <span>Speculative fiction · Thrillers · Dark imagined worlds</span>
+    <span>Scroll / Explore / Enter</span>
+  </div>
+</div>

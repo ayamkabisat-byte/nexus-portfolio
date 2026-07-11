@@ -1,0 +1,21 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Cursor from '@/components/Cursor.astro';
+import Nav from '@/components/Nav.astro';
+import { withBase } from '@/lib/urls';
+---
+
+<BaseLayout
+  title="Signal Lost — Michael Dinko"
+  description="The requested world could not be located in the archive."
+  noindex={true}
+>
+  <Cursor />
+  <Nav />
+  <main id="main-content" class="error-page">
+    <span>404 / SIGNAL LOST</span>
+    <h1>This world<br />does not exist.</h1>
+    <p>The archive cannot resolve the coordinates you requested.</p>
+    <a class="button button--primary" href={withBase('')} data-cursor-label="RETURN HOME">Return to the archive ↗</a>
+  </main>
+</BaseLayout>

@@ -1,0 +1,64 @@
+---
+import { withBase } from '@/lib/urls';
+
+const identities = [
+  {
+    number: '01',
+    title: 'The Auditor',
+    label: 'SYSTEMS / EVIDENCE',
+    text: 'By day, he moves through the labyrinth of public institutions. Reports, procedures, power structures, and quiet contradictions become raw material for tension.',
+  },
+  {
+    number: '02',
+    title: 'The Collector',
+    label: 'SCENT / MEMORY',
+    text: 'A perfume collector who sees scent as an invisible archive. This sensory obsession shapes the atmosphere, clues, and emotional residue inside his fiction.',
+  },
+  {
+    number: '03',
+    title: 'The Author',
+    label: 'FICTION / POSSIBILITY',
+    text: 'At night, bureaucracy, sensory memory, speculative science, and Indonesian experience are transformed into thrillers about identity, justice, and impossible choices.',
+  },
+];
+---
+
+<section class="about" id="author" data-author>
+  <header class="section-heading about__heading" data-reveal>
+    <div>
+      <span class="eyebrow">THE PERSON BEHIND THE WORLDS</span>
+      <h2>Michael Dinko</h2>
+    </div>
+    <span class="section-heading__count">JAKARTA, INDONESIA</span>
+  </header>
+
+  <div class="about__layout">
+    <div class="about__portrait-wrap" data-reveal>
+      <figure class="about__portrait" data-author-portrait>
+        <img src={withBase('author.jpeg')} alt="Portrait of Michael Dinko" width="750" height="1000" loading="lazy" decoding="async" />
+        <div class="about__portrait-grid" aria-hidden="true"></div>
+        <figcaption>
+          <span>MICHAEL DINKO</span>
+          <span>AUTHOR / AUDITOR / COLLECTOR</span>
+        </figcaption>
+      </figure>
+      <p class="about__signature">
+        “An identity fractured across three worlds, brought back together by a string of words.”
+      </p>
+    </div>
+
+    <div class="about__identities">
+      {identities.map((identity) => (
+        <article class="identity" data-identity data-reveal>
+          <div class="identity__top">
+            <span>{identity.number}</span>
+            <small>{identity.label}</small>
+          </div>
+          <h3>{identity.title}</h3>
+          <p>{identity.text}</p>
+          <span class="identity__line" aria-hidden="true"></span>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>

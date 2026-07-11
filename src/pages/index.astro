@@ -1,0 +1,68 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Intro from '@/components/Intro.astro';
+import Cursor from '@/components/Cursor.astro';
+import Nav from '@/components/Nav.astro';
+import Hero from '@/components/Hero.astro';
+import Works from '@/components/Works.astro';
+import Manifesto from '@/components/Manifesto.astro';
+import Archive from '@/components/Archive.astro';
+import QuoteBand from '@/components/QuoteBand.astro';
+import About from '@/components/About.astro';
+import Contact from '@/components/Contact.astro';
+import Footer from '@/components/Footer.astro';
+import { SITE } from '@/config/site';
+
+const siteUrl = Astro.site?.toString() || Astro.url.origin;
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Person',
+      '@id': `${siteUrl}#author`,
+      name: SITE.name,
+      url: siteUrl,
+      image: `${siteUrl.replace(/\/$/, '')}/og/michael-dinko-author.png`,
+      jobTitle: 'Author',
+      description: SITE.description,
+      homeLocation: {
+        '@type': 'Place',
+        name: SITE.location,
+      },
+      sameAs: [SITE.instagram, SITE.royalRoad],
+      knowsAbout: [
+        'Speculative fiction',
+        'Science-fiction thrillers',
+        'Mystery fiction',
+        'Worldbuilding',
+        'Perfume and olfaction',
+      ],
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${siteUrl}#website`,
+      url: siteUrl,
+      name: SITE.title,
+      description: SITE.description,
+      inLanguage: SITE.language,
+      publisher: { '@id': `${siteUrl}#author` },
+    },
+  ],
+};
+---
+
+<BaseLayout jsonLd={jsonLd}>
+  <Intro />
+  <Cursor />
+  <Nav />
+  <main id="main-content">
+    <Hero />
+    <Works />
+    <Manifesto />
+    <Archive />
+    <QuoteBand />
+    <About />
+    <Contact />
+  </main>
+  <Footer />
+</BaseLayout>

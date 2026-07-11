@@ -1,0 +1,14 @@
+---
+import { SITE } from '@/config/site';
+import { withBase } from '@/lib/urls';
+
+const topHref = Astro.url.pathname === withBase('') ? '#home' : withBase('');
+---
+
+<footer class="footer">
+  <a href={withBase('')} class="footer__mark" data-cursor-label="TOP">
+    M.<strong>DINKO</strong>
+  </a>
+  <p>© {new Date().getFullYear()} {SITE.name}. All worlds reserved.</p>
+  <a href={topHref} class="footer__top" data-cursor-label="BACK TO TOP">TOP ↑</a>
+</footer>

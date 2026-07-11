@@ -1,0 +1,32 @@
+---
+import { SITE } from '@/config/site';
+---
+
+<section class="contact" id="contact">
+  <div class="contact__meta" data-reveal>
+    <span>OPEN CHANNEL</span>
+    <span>JAKARTA / GMT+7</span>
+  </div>
+
+  <h2 data-reveal>
+    Have a story,<br />conversation,<br /><em>or impossible idea?</em>
+  </h2>
+
+  <a
+    class="contact__email"
+    href={`mailto:${SITE.email}`}
+    data-reveal
+    data-cursor-label="WRITE EMAIL"
+  >
+    {SITE.email}<span aria-hidden="true">↗</span>
+  </a>
+
+  <div class="contact__links" data-reveal>
+    <a href={SITE.instagram} target="_blank" rel="noreferrer" data-cursor-label="INSTAGRAM">
+      Instagram <span>↗</span>
+    </a>
+    <a href={SITE.royalRoad} target="_blank" rel="noreferrer" data-cursor-label="ROYAL ROAD">
+      Royal Road <span>↗</span>
+    </a>
+  </div>
+</section>

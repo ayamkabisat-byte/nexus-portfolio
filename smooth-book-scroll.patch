@@ -1,0 +1,231 @@
+--- a/src/components/Works.astro
++++ b/src/components/Works.astro
+@@ -33,7 +33,7 @@
+         >
+           <span class="work-card__frame">
+             <span class="work-card__number">{book.number}</span>
+-            <img src={withBase(book.cover)} alt={`${book.title} book cover`} width="600" height="900" loading="lazy" decoding="async" />
++            <img src={withBase(book.cover)} alt={`${book.title} book cover`} width="600" height="900" loading="eager" decoding="async" />
+             <span class="work-card__glare"></span>
+             <span class="work-card__shade"></span>
+           </span>
+--- a/src/scripts/site.ts
++++ b/src/scripts/site.ts
+@@ -298,6 +298,25 @@
+   const assembled = section.querySelector<HTMLElement>('[data-works-assembled]');
+   const progress = section.querySelector<HTMLElement>('[data-works-progress]');
+ 
++  // Decode the six covers before ScrollTrigger measures and animates them.
++  // This prevents late image decoding from producing a visible hitch mid-scroll.
++  const images = Array.from(deck.querySelectorAll<HTMLImageElement>('img'));
++  Promise.all(
++    images.map(async (image) => {
++      if (!image.complete) {
++        await new Promise<void>((resolve) => {
++          image.addEventListener('load', () => resolve(), { once: true });
++          image.addEventListener('error', () => resolve(), { once: true });
++        });
++      }
++      try {
++        await image.decode();
++      } catch {
++        // A failed decode should not block the rest of the collection.
++      }
++    }),
++  ).finally(() => ScrollTrigger.refresh());
++
+   const media = gsap.matchMedia();
+ 
+   media.add('(min-width: 861px) and (prefers-reduced-motion: no-preference)', () => {
+@@ -335,50 +354,60 @@
+       return (row - 0.5) * (dim.cardHeight + gapY) + dim.height * 0.045;
+     };
+ 
++    gsap.set(cards, {
++      force3D: true,
++      transformOrigin: '50% 50%',
++      backfaceVisibility: 'hidden',
++    });
++
+     const timeline = gsap.timeline({
+       defaults: { ease: 'none' },
+       scrollTrigger: {
+         trigger: section,
+         start: 'top top',
+-        end: '+=225%',
+-        scrub: 0.9,
++        end: '+=260%',
++        scrub: 1.25,
+         pin: stage,
++        pinSpacing: true,
+         anticipatePin: 1,
+         invalidateOnRefresh: true,
++        onUpdate: (self) => {
++          stage.classList.toggle('is-assembled', self.progress > 0.78);
++        },
+       },
+     });
+ 
++    // Reveal the full arc first. The previous version staggered opacity for too
++    // long inside a scrubbed timeline, which made some covers feel stuck.
+     timeline.fromTo(
+       cards,
+       {
+         x: (index) => arcPose(index, 'x'),
++        y: (index) => Number(arcPose(index, 'y')) + dimensions().height * 0.025,
++        z: (index) => arcPose(index, 'z'),
++        rotateY: (index) => arcPose(index, 'rotateY'),
++        rotateZ: (index) => arcPose(index, 'rotateZ'),
++        scale: (index) => Number(arcPose(index, 'scale')) * 0.94,
++        autoAlpha: 0,
++      },
++      {
++        x: (index) => arcPose(index, 'x'),
+         y: (index) => arcPose(index, 'y'),
+         z: (index) => arcPose(index, 'z'),
+         rotateY: (index) => arcPose(index, 'rotateY'),
+         rotateZ: (index) => arcPose(index, 'rotateZ'),
+         scale: (index) => arcPose(index, 'scale'),
+-        opacity: 0,
++        autoAlpha: 1,
++        duration: 0.3,
++        stagger: { each: 0.015, from: 'center' },
++        ease: 'power2.out',
+       },
+-      { opacity: 1, duration: 0.18, stagger: 0.024 },
+       0,
+     );
+ 
+     timeline.to(
+       cards,
+       {
+-        x: (index) => Number(arcPose(index, 'x')) - dimensions().width * 0.05,
+-        y: (index) => Number(arcPose(index, 'y')) - dimensions().height * 0.025,
+-        rotateY: (index) => Number(arcPose(index, 'rotateY')) * 0.72,
+-        rotateZ: (index) => Number(arcPose(index, 'rotateZ')) * 0.7,
+-        duration: 0.32,
+-        stagger: 0.018,
+-      },
+-      0.12,
+-    );
+-
+-    timeline.to(
+-      cards,
+-      {
+         x: (index) => gridPose(index, 'x'),
+         y: (index) => gridPose(index, 'y'),
+         z: 0,
+@@ -386,22 +415,26 @@
+         rotateY: 0,
+         rotateZ: 0,
+         scale: 1,
+-        duration: 0.82,
+-        stagger: 0.035,
+-        ease: 'power3.inOut',
++        duration: 1.18,
++        stagger: { each: 0.022, from: 'center' },
++        ease: 'power2.inOut',
+       },
+-      0.38,
++      0.22,
+     );
+ 
+-    timeline.to(intro, { opacity: 0, y: -18, duration: 0.24 }, 0.38);
+-    timeline.to(assembled, { opacity: 1, y: 0, duration: 0.28 }, 0.84);
+-    timeline.to(title, { scale: 1.055, opacity: 0.035, duration: 0.7 }, 0.3);
+-    timeline.to(progress, { scaleX: 1, duration: 1.02 }, 0.05);
+-
+-    return () => timeline.kill();
++    timeline.to(intro, { opacity: 0, y: -18, duration: 0.25 }, 0.34);
++    timeline.to(assembled, { opacity: 1, y: 0, duration: 0.3 }, 1.02);
++    timeline.to(title, { scale: 1.04, opacity: 0.03, duration: 1.05 }, 0.22);
++    timeline.to(progress, { scaleX: 1, duration: 1.38 }, 0.03);
++
++    return () => {
++      stage.classList.remove('is-assembled');
++      timeline.kill();
++    };
+   });
+ 
+   media.add('(max-width: 860px)', () => {
++    stage.classList.add('is-assembled');
+     gsap.set(cards, { clearProps: 'all' });
+     const reveal = gsap.fromTo(
+       cards,
+@@ -419,7 +452,10 @@
+         },
+       },
+     );
+-    return () => reveal.kill();
++    return () => {
++      stage.classList.remove('is-assembled');
++      reveal.kill();
++    };
+   });
+ }
+ 
+--- a/src/styles/global.css
++++ b/src/styles/global.css
+@@ -801,6 +801,11 @@
+   inset: 0;
+   perspective: 1600px;
+   transform-style: preserve-3d;
++  pointer-events: none;
++}
++
++.works__stage.is-assembled .works__deck {
++  pointer-events: auto;
+ }
+ 
+ .work-card {
+@@ -810,8 +815,9 @@
+   width: clamp(105px, min(10.7vw, 16vh), 168px);
+   color: #fff;
+   text-decoration: none;
+-  transform: translate(-50%, -50%);
++  transform: translate3d(-50%, -50%, 0);
+   transform-style: preserve-3d;
++  backface-visibility: hidden;
+   transform-origin: center;
+   will-change: transform, opacity;
+ }
+@@ -893,7 +899,7 @@
+   letter-spacing: 0.025em;
+ }
+ 
+-.work-card:hover .work-card__frame,
++.works__stage.is-assembled .work-card:hover .work-card__frame,
+ .work-card:focus-visible .work-card__frame {
+   border-color: color-mix(in srgb, var(--book-accent) 65%, white 10%);
+   box-shadow:
+@@ -902,19 +908,19 @@
+   transform: translateY(-8px) scale(1.035);
+ }
+ 
+-.work-card:hover .work-card__frame img,
++.works__stage.is-assembled .work-card:hover .work-card__frame img,
+ .work-card:focus-visible .work-card__frame img {
+   transform: scale(1.045);
+   filter: saturate(1.08) contrast(1.03);
+ }
+ 
+-.work-card:hover .work-card__glare,
++.works__stage.is-assembled .work-card:hover .work-card__glare,
+ .work-card:focus-visible .work-card__glare {
+   opacity: 0.58;
+   transform: translateX(56%);
+ }
+ 
+-.work-card:hover .work-card__meta,
++.works__stage.is-assembled .work-card:hover .work-card__meta,
+ .work-card:focus-visible .work-card__meta {
+   transform: translateY(-3px);
+ }
+@@ -1767,6 +1773,7 @@
+     grid-template-columns: repeat(2, minmax(0, 1fr));
+     gap: 38px 18px;
+     perspective: none;
++    pointer-events: auto;
+   }
+ 
+   .work-card {

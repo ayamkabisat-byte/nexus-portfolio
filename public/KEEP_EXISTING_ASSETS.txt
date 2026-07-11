@@ -1,0 +1,11 @@
+Keep or restore these original files from the existing repository:
+
+Cover_Nexus.webp
+Cover_Sillage.webp
+Cover_Manifesto.webp
+Cover_Hydra.webp
+Cover_Lucidreamer.webp
+Cover_Capture.webp
+author.jpeg
+
+They are intentionally not bundled in the rebuild ZIP so the original artwork is not replaced.

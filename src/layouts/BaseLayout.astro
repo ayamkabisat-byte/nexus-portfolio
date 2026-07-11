@@ -1,0 +1,96 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import { SITE } from '@/config/site';
+import { withBase } from '@/lib/urls';
+import '@/styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  imageAlt?: string;
+  type?: 'website' | 'article' | 'book';
+  canonicalPath?: string;
+  noindex?: boolean;
+  accent?: string;
+  jsonLd?: Record<string, unknown> | Array<Record<string, unknown>>;
+}
+
+const {
+  title = SITE.title,
+  description = SITE.description,
+  image = SITE.defaultOgImage,
+  imageAlt = 'Michael Dinko — speculative fiction author portfolio',
+  type = 'website',
+  canonicalPath = Astro.url.pathname,
+  noindex = false,
+  accent = '#55f4a0',
+  jsonLd,
+} = Astro.props;
+
+const canonical = Astro.site
+  ? new URL(canonicalPath, Astro.site).toString()
+  : Astro.url.toString();
+
+const imagePath = image.startsWith('http') ? image : withBase(image);
+const imageUrl = Astro.site ? new URL(imagePath, Astro.site).toString() : new URL(imagePath, Astro.url).toString();
+const robots = noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large';
+const googleVerification = import.meta.env.GOOGLE_SITE_VERIFICATION;
+---
+
+<!doctype html>
+<html lang={SITE.language} style={`--accent:${accent}`}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <script is:inline>document.documentElement.classList.add('js');</script>
+    <meta name="theme-color" content="#05070d" />
+    <meta name="robots" content={robots} />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content={SITE.name} />
+    {googleVerification && <meta name="google-site-verification" content={googleVerification} />}
+    <link rel="canonical" href={canonical} />
+
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:locale" content={SITE.locale} />
+    <meta property="og:type" content={type === 'book' ? 'book' : type} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={imageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={imageAlt} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={imageUrl} />
+    <meta name="twitter:image:alt" content={imageAlt} />
+
+    <link rel="icon" href={withBase('favicon.svg')} type="image/svg+xml" />
+    <link rel="apple-touch-icon" href={withBase('apple-touch-icon.png')} />
+    <link rel="manifest" href={withBase('site.webmanifest')} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap"
+      rel="stylesheet"
+    />
+
+    {jsonLd && <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+    <ClientRouter />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <slot />
+
+    <script>
+      import '@/scripts/site';
+    </script>
+  </body>
+</html>

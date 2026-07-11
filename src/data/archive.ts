@@ -1,0 +1,38 @@
+export const ARCHIVE_ENTRIES = [
+  {
+    id: 'nexus-device',
+    index: '001',
+    code: 'ARTEFACT / NEXUS',
+    title: 'Nexus Device',
+    subtitle: 'Quantum inter-dimensional key',
+    text: 'A dull silver pendant with geometric markings and an obsidian-black core. It allows its bearer to borrow abilities from alternate selves while broadcasting a signal across realities.',
+    accent: '#55f4a0',
+  },
+  {
+    id: 'olfactory-trace',
+    index: '002',
+    code: 'EVIDENCE / SILLAGE',
+    title: 'Olfactory Trace',
+    subtitle: 'The evidence people forget to erase',
+    text: 'Perfume, damp paper, heated electronics, cheap disinfectant, fear. In Raka’s world, scent is a record of contact, movement, concealment, and intent.',
+    accent: '#d9a45d',
+  },
+  {
+    id: 'dream-insurgency',
+    index: '003',
+    code: 'PHENOMENON / MANIFESTO',
+    title: 'Dream Insurgency',
+    subtitle: 'An idea given a hunting body',
+    text: 'A masked presence forms from accumulated rage and enters the dreams of the powerful. The more people believe in it, the less it appears to belong to its creator.',
+    accent: '#ff6f61',
+  },
+  {
+    id: 'residual-light',
+    index: '004',
+    code: 'EVIDENCE / CAPTURE',
+    title: 'Residual Light',
+    subtitle: 'Trauma retained by space',
+    text: 'Violent events leave unstable optical residues. A particular eye and a reflex mirror can project them into photographs—but the evidence begins decaying the moment it is captured.',
+    accent: '#8ecbff',
+  },
+] as const;
