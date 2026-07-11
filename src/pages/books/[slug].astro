@@ -3,6 +3,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import Cursor from '@/components/Cursor.astro';
 import Nav from '@/components/Nav.astro';
 import Footer from '@/components/Footer.astro';
+import BookAtmosphere from '@/components/BookAtmosphere.astro';
 import { BOOKS, type Book } from '@/data/books';
 import { SITE } from '@/config/site';
 import { withBase } from '@/lib/urls';
@@ -57,10 +58,11 @@ const jsonLd = {
   <Cursor />
   <Nav />
 
-  <main id="main-content" class="book-page" style={`--book-accent:${book.accent}; --book-rgb:${book.accentRgb};`}>
+  <main id="main-content" class="book-page" data-book-theme={book.slug} style={`--book-accent:${book.accent}; --book-rgb:${book.accentRgb};`}>
     <section class="book-hero" id="home" data-book-hero>
       <div class="book-hero__grid" aria-hidden="true"></div>
       <div class="book-hero__glow" aria-hidden="true"></div>
+      <BookAtmosphere slug={book.slug} />
       <div class="book-hero__title-bg" aria-hidden="true">{book.title}</div>
 
       <a class="book-hero__back" href={`${withBase('')}#works`} data-cursor-label="BACK TO WORKS">

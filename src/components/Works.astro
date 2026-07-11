@@ -1,6 +1,8 @@
 ---
 import { BOOKS } from '@/data/books';
 import { withBase } from '@/lib/urls';
+
+const RIBBON_BOOKS = [...BOOKS, ...BOOKS];
 ---
 
 <section class="works" id="works" data-works>
@@ -21,6 +23,22 @@ import { withBase } from '@/lib/urls';
       FICTION<br />ARCHIVE
     </div>
 
+    <div class="works__ribbon" data-works-ribbon aria-hidden="true">
+      {RIBBON_BOOKS.map((book, index) => (
+        <span
+          class="work-ribbon-card"
+          style={`--book-accent:${book.accent}; --book-rgb:${book.accentRgb};`}
+          data-ribbon-card
+          data-ribbon-index={index}
+        >
+          <span class="work-ribbon-card__frame">
+            <img src={withBase(book.cover)} alt="" width="600" height="900" loading="eager" decoding="async" />
+            <span class="work-ribbon-card__shade"></span>
+          </span>
+        </span>
+      ))}
+    </div>
+
     <div class="works__deck" data-works-deck>
       {BOOKS.map((book) => (
         <a
@@ -33,7 +51,7 @@ import { withBase } from '@/lib/urls';
         >
           <span class="work-card__frame">
             <span class="work-card__number">{book.number}</span>
-            <img src={withBase(book.cover)} alt={`${book.title} book cover`} width="600" height="900" loading="lazy" decoding="async" />
+            <img src={withBase(book.cover)} alt={`${book.title} book cover`} width="600" height="900" loading="eager" decoding="async" />
             <span class="work-card__glare"></span>
             <span class="work-card__shade"></span>
           </span>
@@ -46,7 +64,7 @@ import { withBase } from '@/lib/urls';
     </div>
 
     <div class="works__intro-copy" data-works-intro aria-hidden="true">
-      <p>Six stories passing through fractured realities, buried evidence, scent, memory, rage, and power.</p>
+      <p>Twelve moving covers. Six worlds dock into a single fiction archive.</p>
       <span>Scroll to assemble the collection</span>
     </div>
 

@@ -1,0 +1,1007 @@
+diff --git a/src/components/Atmosphere.astro b/src/components/Atmosphere.astro
+new file mode 100644
+index 0000000..d57c5c4
+--- /dev/null
++++ b/src/components/Atmosphere.astro
+@@ -0,0 +1 @@
++<canvas class="site-atmosphere" data-atmosphere aria-hidden="true"></canvas>
+diff --git a/src/components/BookAtmosphere.astro b/src/components/BookAtmosphere.astro
+new file mode 100644
+index 0000000..2fe7844
+--- /dev/null
++++ b/src/components/BookAtmosphere.astro
+@@ -0,0 +1,76 @@
++---
++interface Props {
++  slug: string;
++}
++
++const { slug } = Astro.props;
++---
++
++<div class={`book-world book-world--${slug}`} aria-hidden="true">
++  {slug === 'nexus' && (
++    <>
++      <div class="book-world__portal book-world__portal--one"></div>
++      <div class="book-world__portal book-world__portal--two"></div>
++      <div class="book-world__portal book-world__portal--three"></div>
++      <div class="book-world__nodes">
++        {Array.from({ length: 8 }, (_, index) => <i style={`--i:${index}`}></i>)}
++      </div>
++    </>
++  )}
++
++  {slug === 'sillage' && (
++    <>
++      <svg class="book-world__bottle" viewBox="0 0 180 320" fill="none">
++        <path d="M70 16h40v42l20 25v28c18 9 29 28 29 49v111c0 21-17 38-38 38H59c-21 0-38-17-38-38V160c0-21 11-40 29-49V83l20-25V16Z" />
++        <path d="M50 111h80M48 255h84" />
++      </svg>
++      <svg class="book-world__molecule" viewBox="0 0 280 210" fill="none">
++        <path d="m48 50 38-22 38 22v44l-38 22-38-22V50Zm76 44 38 22v44l-38 22-38-22v-44m76 0 38-22 38 22v44l-38 22-38-22" />
++        <circle cx="48" cy="50" r="5" /><circle cx="124" cy="94" r="5" /><circle cx="200" cy="116" r="5" />
++      </svg>
++      <div class="book-world__sillage-lines"><i></i><i></i><i></i></div>
++    </>
++  )}
++
++  {slug === 'manifesto' && (
++    <>
++      <div class="book-world__redactions"><i></i><i></i><i></i><i></i></div>
++      <div class="book-world__poster-shard book-world__poster-shard--one">TRUTH</div>
++      <div class="book-world__poster-shard book-world__poster-shard--two">REDACTED</div>
++      <div class="book-world__mask"></div>
++    </>
++  )}
++
++  {slug === 'hydra' && (
++    <>
++      <div class="book-world__hydra-ring">
++        {Array.from({ length: 9 }, (_, index) => <i style={`--i:${index}`}></i>)}
++      </div>
++      <svg class="book-world__hydra-lines" viewBox="0 0 360 320" fill="none">
++        <path d="M180 300C176 229 91 236 88 167 85 99 149 106 128 34" />
++        <path d="M180 300c4-71 89-64 92-133 3-68-61-61-40-133" />
++        <path d="M180 300c-2-75 0-133 0-263" />
++      </svg>
++    </>
++  )}
++
++  {slug === 'lucidreamer' && (
++    <>
++      <div class="book-world__clock"><i></i><i></i></div>
++      <div class="book-world__monas"><i></i></div>
++      <div class="book-world__dream-orbit book-world__dream-orbit--one"></div>
++      <div class="book-world__dream-orbit book-world__dream-orbit--two"></div>
++    </>
++  )}
++
++  {slug === 'capture' && (
++    <>
++      <svg class="book-world__aperture" viewBox="0 0 300 300" fill="none">
++        <circle cx="150" cy="150" r="118" />
++        <path d="M150 32 205 126 150 150 87 77M268 150l-108 7-10-7-3-72M150 268l-55-94 55-24 63 73M32 150l108-7 10 7 3 72" />
++      </svg>
++      <div class="book-world__focus-frame"><i></i><i></i><i></i><i></i></div>
++      <div class="book-world__timestamp">REC 00:03:17:42</div>
++    </>
++  )}
++</div>
+diff --git a/src/components/Works.astro b/src/components/Works.astro
+index fbecc1f..7a6866c 100644
+--- a/src/components/Works.astro
++++ b/src/components/Works.astro
+@@ -1,6 +1,8 @@
+ ---
+ import { BOOKS } from '@/data/books';
+ import { withBase } from '@/lib/urls';
++
++const RIBBON_BOOKS = [...BOOKS, ...BOOKS];
+ ---
+ 
+ <section class="works" id="works" data-works>
+@@ -21,6 +23,22 @@ import { withBase } from '@/lib/urls';
+       FICTION<br />ARCHIVE
+     </div>
+ 
++    <div class="works__ribbon" data-works-ribbon aria-hidden="true">
++      {RIBBON_BOOKS.map((book, index) => (
++        <span
++          class="work-ribbon-card"
++          style={`--book-accent:${book.accent}; --book-rgb:${book.accentRgb};`}
++          data-ribbon-card
++          data-ribbon-index={index}
++        >
++          <span class="work-ribbon-card__frame">
++            <img src={withBase(book.cover)} alt="" width="600" height="900" loading="eager" decoding="async" />
++            <span class="work-ribbon-card__shade"></span>
++          </span>
++        </span>
++      ))}
++    </div>
++
+     <div class="works__deck" data-works-deck>
+       {BOOKS.map((book) => (
+         <a
+@@ -46,7 +64,7 @@ import { withBase } from '@/lib/urls';
+     </div>
+ 
+     <div class="works__intro-copy" data-works-intro aria-hidden="true">
+-      <p>Six stories passing through fractured realities, buried evidence, scent, memory, rage, and power.</p>
++      <p>Twelve moving covers. Six worlds dock into a single fiction archive.</p>
+       <span>Scroll to assemble the collection</span>
+     </div>
+ 
+diff --git a/src/layouts/BaseLayout.astro b/src/layouts/BaseLayout.astro
+index fea83f3..94a4468 100644
+--- a/src/layouts/BaseLayout.astro
++++ b/src/layouts/BaseLayout.astro
+@@ -3,6 +3,7 @@ import { ClientRouter } from 'astro:transitions';
+ import { SITE } from '@/config/site';
+ import { withBase } from '@/lib/urls';
+ import '@/styles/global.css';
++import Atmosphere from '@/components/Atmosphere.astro';
+ 
+ interface Props {
+   title?: string;
+@@ -87,6 +88,7 @@ const googleVerification = import.meta.env.GOOGLE_SITE_VERIFICATION;
+   </head>
+   <body>
+     <a class="skip-link" href="#main-content">Skip to content</a>
++    <Atmosphere />
+     <slot />
+ 
+     <script>
+diff --git a/src/pages/books/[slug].astro b/src/pages/books/[slug].astro
+index fbda826..3281acf 100644
+--- a/src/pages/books/[slug].astro
++++ b/src/pages/books/[slug].astro
+@@ -3,6 +3,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
+ import Cursor from '@/components/Cursor.astro';
+ import Nav from '@/components/Nav.astro';
+ import Footer from '@/components/Footer.astro';
++import BookAtmosphere from '@/components/BookAtmosphere.astro';
+ import { BOOKS, type Book } from '@/data/books';
+ import { SITE } from '@/config/site';
+ import { withBase } from '@/lib/urls';
+@@ -57,10 +58,11 @@ const jsonLd = {
+   <Cursor />
+   <Nav />
+ 
+-  <main id="main-content" class="book-page" style={`--book-accent:${book.accent}; --book-rgb:${book.accentRgb};`}>
++  <main id="main-content" class="book-page" data-book-theme={book.slug} style={`--book-accent:${book.accent}; --book-rgb:${book.accentRgb};`}>
+     <section class="book-hero" id="home" data-book-hero>
+       <div class="book-hero__grid" aria-hidden="true"></div>
+       <div class="book-hero__glow" aria-hidden="true"></div>
++      <BookAtmosphere slug={book.slug} />
+       <div class="book-hero__title-bg" aria-hidden="true">{book.title}</div>
+ 
+       <a class="book-hero__back" href={`${withBase('')}#works`} data-cursor-label="BACK TO WORKS">
+diff --git a/src/scripts/site.ts b/src/scripts/site.ts
+index 53ac482..1820ac0 100644
+--- a/src/scripts/site.ts
++++ b/src/scripts/site.ts
+@@ -62,6 +62,114 @@ function initSmoothScroll(signal: AbortSignal) {
+   });
+ }
+ 
++function initAtmosphere(signal: AbortSignal) {
++  const canvas = document.querySelector<HTMLCanvasElement>('[data-atmosphere]');
++  if (!canvas || reduceMotion()) return;
++
++  const context2d = canvas.getContext('2d');
++  if (!context2d) return;
++
++  const theme = document.querySelector<HTMLElement>('[data-book-theme]')?.dataset.bookTheme || 'home';
++  const palette: Record<string, string> = {
++    home: '85,244,160',
++    nexus: '85,244,160',
++    sillage: '217,164,93',
++    manifesto: '255,111,97',
++    hydra: '212,175,87',
++    lucidreamer: '139,140,255',
++    capture: '142,203,255',
++  };
++  const rgb = palette[theme] || palette.home;
++  const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
++  let width = 0;
++  let height = 0;
++  let frame = 0;
++
++  type Particle = { x: number; y: number; speed: number; length: number; alpha: number; drift: number; size: number };
++  let particles: Particle[] = [];
++
++  const particleCount = () => Math.max(34, Math.min(78, Math.floor(window.innerWidth / 22)));
++  const createParticle = (randomY = true): Particle => ({
++    x: Math.random() * width,
++    y: randomY ? Math.random() * height : -40,
++    speed: theme === 'home' ? 4 + Math.random() * 5 : 0.25 + Math.random() * 0.85,
++    length: 16 + Math.random() * 42,
++    alpha: 0.05 + Math.random() * 0.16,
++    drift: -0.35 + Math.random() * 0.7,
++    size: 0.7 + Math.random() * 1.8,
++  });
++
++  const resize = () => {
++    width = window.innerWidth;
++    height = window.innerHeight;
++    canvas.width = Math.floor(width * dpr);
++    canvas.height = Math.floor(height * dpr);
++    canvas.style.width = `${width}px`;
++    canvas.style.height = `${height}px`;
++    context2d.setTransform(dpr, 0, 0, dpr, 0, 0);
++    particles = Array.from({ length: particleCount() }, () => createParticle(true));
++  };
++
++  const drawHomeRain = (particle: Particle) => {
++    context2d.beginPath();
++    context2d.moveTo(particle.x, particle.y);
++    context2d.lineTo(particle.x - particle.length * 0.18, particle.y + particle.length);
++    context2d.strokeStyle = `rgba(${rgb},${particle.alpha})`;
++    context2d.lineWidth = 0.65;
++    context2d.stroke();
++    particle.x += particle.drift - 0.25;
++    particle.y += particle.speed;
++  };
++
++  const drawWorldParticle = (particle: Particle, time: number) => {
++    particle.x += particle.drift * 0.12 + Math.sin(time * 0.00035 + particle.y) * 0.05;
++    particle.y -= particle.speed;
++
++    if (theme === 'capture') {
++      context2d.fillStyle = `rgba(${rgb},${particle.alpha * 0.75})`;
++      context2d.fillRect(particle.x, particle.y, particle.length * 0.45, 0.65);
++      return;
++    }
++
++    if (theme === 'manifesto') {
++      context2d.save();
++      context2d.translate(particle.x, particle.y);
++      context2d.rotate(time * 0.00015 + particle.x);
++      context2d.fillStyle = `rgba(${rgb},${particle.alpha})`;
++      context2d.fillRect(-particle.size, -particle.size, particle.size * 2.2, particle.size * 0.8);
++      context2d.restore();
++      return;
++    }
++
++    context2d.beginPath();
++    context2d.arc(particle.x, particle.y, theme === 'sillage' ? particle.size * 1.8 : particle.size, 0, Math.PI * 2);
++    context2d.fillStyle = `rgba(${rgb},${particle.alpha * (theme === 'sillage' ? 0.45 : 0.8)})`;
++    context2d.fill();
++  };
++
++  const animate = (time: number) => {
++    context2d.clearRect(0, 0, width, height);
++
++    particles.forEach((particle, index) => {
++      if (theme === 'home') drawHomeRain(particle);
++      else drawWorldParticle(particle, time);
++
++      const escaped = theme === 'home'
++        ? particle.y > height + 70 || particle.x < -80
++        : particle.y < -70 || particle.x < -80 || particle.x > width + 80;
++      if (escaped) particles[index] = createParticle(false);
++      if (theme !== 'home' && escaped) particles[index].y = height + 30;
++    });
++
++    frame = window.requestAnimationFrame(animate);
++  };
++
++  resize();
++  window.addEventListener('resize', resize, { signal });
++  frame = window.requestAnimationFrame(animate);
++  signal.addEventListener('abort', () => window.cancelAnimationFrame(frame), { once: true });
++}
++
+ function initIntro() {
+   const intro = document.querySelector<HTMLElement>('[data-intro]');
+   if (!intro) return;
+@@ -289,18 +397,18 @@ function initHero(signal: AbortSignal) {
+ function initWorks() {
+   const section = document.querySelector<HTMLElement>('[data-works]');
+   const stage = document.querySelector<HTMLElement>('[data-works-stage]');
++  const ribbon = document.querySelector<HTMLElement>('[data-works-ribbon]');
+   const deck = document.querySelector<HTMLElement>('[data-works-deck]');
+-  if (!section || !stage || !deck) return;
++  if (!section || !stage || !ribbon || !deck) return;
+ 
++  const ribbonCards = gsap.utils.toArray<HTMLElement>('[data-ribbon-card]', ribbon);
+   const cards = gsap.utils.toArray<HTMLElement>('[data-work-card]', deck);
+   const title = section.querySelector<HTMLElement>('[data-works-title]');
+   const intro = section.querySelector<HTMLElement>('[data-works-intro]');
+   const assembled = section.querySelector<HTMLElement>('[data-works-assembled]');
+   const progress = section.querySelector<HTMLElement>('[data-works-progress]');
+ 
+-  // Decode the six covers before ScrollTrigger measures and animates them.
+-  // This prevents late image decoding from producing a visible hitch mid-scroll.
+-  const images = Array.from(deck.querySelectorAll<HTMLImageElement>('img'));
++  const images = Array.from(section.querySelectorAll<HTMLImageElement>('img'));
+   Promise.all(
+     images.map(async (image) => {
+       if (!image.complete) {
+@@ -312,7 +420,7 @@ function initWorks() {
+       try {
+         await image.decode();
+       } catch {
+-        // A failed decode should not block the rest of the collection.
++        // Failed decoding should not hold the rest of the scene.
+       }
+     }),
+   ).finally(() => ScrollTrigger.refresh());
+@@ -320,28 +428,51 @@ function initWorks() {
+   const media = gsap.matchMedia();
+ 
+   media.add('(min-width: 861px) and (prefers-reduced-motion: no-preference)', () => {
+-    const arc = [
+-      { x: -0.44, y: 0.1, rotateY: 57, rotateZ: -10, scale: 0.58, z: -210 },
+-      { x: -0.28, y: -0.04, rotateY: 39, rotateZ: -6, scale: 0.74, z: -100 },
+-      { x: -0.11, y: -0.15, rotateY: 16, rotateZ: -2, scale: 0.92, z: 5 },
+-      { x: 0.11, y: -0.14, rotateY: -16, rotateZ: 2, scale: 0.98, z: 28 },
+-      { x: 0.29, y: -0.04, rotateY: -40, rotateZ: 6, scale: 0.75, z: -105 },
+-      { x: 0.44, y: 0.1, rotateY: -57, rotateZ: 10, scale: 0.58, z: -210 },
+-    ];
++    type Point = { x: number; y: number };
++    const clamp = gsap.utils.clamp;
++    const lerp = (a: number, b: number, amount: number) => a + (b - a) * amount;
++    const easeOut = (value: number) => 1 - Math.pow(1 - value, 3);
++    const smooth = (value: number) => value * value * (3 - 2 * value);
+ 
+     const dimensions = () => ({
+       width: stage.clientWidth,
+       height: stage.clientHeight,
+       cardWidth: cards[0]?.offsetWidth || 150,
+-      cardHeight: cards[0]?.offsetHeight || 285,
++      cardHeight: cards[0]?.offsetHeight || 255,
++      ribbonWidth: ribbonCards[0]?.offsetWidth || 142,
++      ribbonHeight: ribbonCards[0]?.offsetHeight || 213,
+     });
+ 
+-    const arcPose = (index: number, key: keyof (typeof arc)[number]) => {
+-      const pose = arc[index % arc.length];
++    const points = () => {
+       const dim = dimensions();
+-      if (key === 'x') return dim.width * pose.x;
+-      if (key === 'y') return dim.height * pose.y;
+-      return pose[key];
++      return {
++        p0: { x: -dim.width * 0.16, y: dim.height * 0.8 },
++        p1: { x: dim.width * 0.18, y: dim.height * 0.74 },
++        p2: { x: dim.width * 0.63, y: dim.height * 0.12 },
++        p3: { x: dim.width * 1.16, y: dim.height * 0.02 },
++      };
++    };
++
++    const bezier = (t: number, p0: Point, p1: Point, p2: Point, p3: Point): Point => {
++      const mt = 1 - t;
++      return {
++        x: mt * mt * mt * p0.x + 3 * mt * mt * t * p1.x + 3 * mt * t * t * p2.x + t * t * t * p3.x,
++        y: mt * mt * mt * p0.y + 3 * mt * mt * t * p1.y + 3 * mt * t * t * p2.y + t * t * t * p3.y,
++      };
++    };
++
++    const ribbonT = (progressValue: number, index: number) => clamp(0, 1, progressValue * 1.38 + index * 0.045 - 0.43);
++
++    const pathPose = (progressValue: number, index: number) => {
++      const path = points();
++      const t = ribbonT(progressValue, index);
++      const position = bezier(t, path.p0, path.p1, path.p2, path.p3);
++      const ahead = bezier(Math.min(1, t + 0.012), path.p0, path.p1, path.p2, path.p3);
++      const angle = Math.atan2(ahead.y - position.y, ahead.x - position.x) * (180 / Math.PI);
++      const scale = 0.48 + Math.sin(t * Math.PI) * 0.62;
++      const fadeIn = smooth(clamp(0, 1, t / 0.1));
++      const fadeOut = 1 - smooth(clamp(0, 1, (t - 0.86) / 0.14));
++      return { t, position, angle, scale, opacity: fadeIn * fadeOut };
+     };
+ 
+     const gridPose = (index: number, axis: 'x' | 'y') => {
+@@ -354,87 +485,95 @@ function initWorks() {
+       return (row - 0.5) * (dim.cardHeight + gapY) + dim.height * 0.045;
+     };
+ 
+-    gsap.set(cards, {
++    gsap.set([...ribbonCards, ...cards], {
+       force3D: true,
+       transformOrigin: '50% 50%',
+       backfaceVisibility: 'hidden',
+     });
++    gsap.set(cards, { autoAlpha: 0 });
++    cards.forEach((card) => gsap.set(card.querySelector('.work-card__meta'), { opacity: 0, y: 12 }));
+ 
+-    const timeline = gsap.timeline({
+-      defaults: { ease: 'none' },
+-      scrollTrigger: {
+-        trigger: section,
+-        start: 'top top',
+-        end: '+=260%',
+-        scrub: 1.25,
+-        pin: stage,
+-        pinSpacing: true,
+-        anticipatePin: 1,
+-        invalidateOnRefresh: true,
+-        onUpdate: (self) => {
+-          stage.classList.toggle('is-assembled', self.progress > 0.78);
+-        },
+-      },
+-    });
++    const trigger = ScrollTrigger.create({
++      trigger: section,
++      start: 'top top',
++      end: '+=340%',
++      scrub: 1.05,
++      pin: stage,
++      pinSpacing: true,
++      anticipatePin: 1,
++      invalidateOnRefresh: true,
++      onUpdate: (self) => {
++        const p = self.progress;
++        const dim = dimensions();
++
++        ribbonCards.forEach((card, index) => {
++          const pose = pathPose(p, index);
++          const dockingIndex = index >= 6 ? index - 6 : -1;
++          const dockStart = dockingIndex >= 0 ? 0.5 + dockingIndex * 0.055 : 2;
++          const dock = dockingIndex >= 0 ? smooth(clamp(0, 1, (p - dockStart) / 0.18)) : 0;
++          const depthTilt = lerp(38, -32, clamp(0, 1, pose.position.x / dim.width));
++
++          gsap.set(card, {
++            x: pose.position.x - dim.ribbonWidth / 2,
++            y: pose.position.y - dim.ribbonHeight / 2,
++            z: (pose.scale - 0.5) * 150,
++            rotateZ: pose.angle * 0.16,
++            rotateY: depthTilt,
++            scale: pose.scale,
++            opacity: pose.opacity * (1 - dock),
++          });
++        });
+ 
+-    // Reveal the full arc first. The previous version staggered opacity for too
+-    // long inside a scrubbed timeline, which made some covers feel stuck.
+-    timeline.fromTo(
+-      cards,
+-      {
+-        x: (index) => arcPose(index, 'x'),
+-        y: (index) => Number(arcPose(index, 'y')) + dimensions().height * 0.025,
+-        z: (index) => arcPose(index, 'z'),
+-        rotateY: (index) => arcPose(index, 'rotateY'),
+-        rotateZ: (index) => arcPose(index, 'rotateZ'),
+-        scale: (index) => Number(arcPose(index, 'scale')) * 0.94,
+-        autoAlpha: 0,
+-      },
+-      {
+-        x: (index) => arcPose(index, 'x'),
+-        y: (index) => arcPose(index, 'y'),
+-        z: (index) => arcPose(index, 'z'),
+-        rotateY: (index) => arcPose(index, 'rotateY'),
+-        rotateZ: (index) => arcPose(index, 'rotateZ'),
+-        scale: (index) => arcPose(index, 'scale'),
+-        autoAlpha: 1,
+-        duration: 0.3,
+-        stagger: { each: 0.015, from: 'center' },
+-        ease: 'power2.out',
+-      },
+-      0,
+-    );
++        cards.forEach((card, index) => {
++          const ribbonIndex = index + 6;
++          const pose = pathPose(p, ribbonIndex);
++          const dockStart = 0.5 + index * 0.055;
++          const rawDock = clamp(0, 1, (p - dockStart) / 0.18);
++          const dock = easeOut(rawDock);
++          const sourceX = pose.position.x - dim.width / 2;
++          const sourceY = pose.position.y - dim.height / 2;
++          const targetX = gridPose(index, 'x');
++          const targetY = gridPose(index, 'y');
++          const depthTilt = lerp(30, -25, clamp(0, 1, pose.position.x / dim.width));
++
++          gsap.set(card, {
++            x: lerp(sourceX, targetX, dock),
++            y: lerp(sourceY, targetY, dock),
++            z: lerp((pose.scale - 0.5) * 140, 0, dock),
++            rotateY: lerp(depthTilt, 0, dock),
++            rotateZ: lerp(pose.angle * 0.16, 0, dock),
++            scale: lerp(pose.scale, 1, dock),
++            autoAlpha: smooth(clamp(0, 1, rawDock * 1.75)),
++          });
++
++          gsap.set(card.querySelector('.work-card__meta'), {
++            opacity: smooth(clamp(0, 1, (rawDock - 0.42) / 0.58)),
++            y: lerp(12, 0, dock),
++          });
++        });
+ 
+-    timeline.to(
+-      cards,
+-      {
+-        x: (index) => gridPose(index, 'x'),
+-        y: (index) => gridPose(index, 'y'),
+-        z: 0,
+-        rotateX: 0,
+-        rotateY: 0,
+-        rotateZ: 0,
+-        scale: 1,
+-        duration: 1.18,
+-        stagger: { each: 0.022, from: 'center' },
+-        ease: 'power2.inOut',
++        const assembledProgress = smooth(clamp(0, 1, (p - 0.78) / 0.14));
++        const introProgress = smooth(clamp(0, 1, (p - 0.3) / 0.18));
++        stage.classList.toggle('is-assembled', p > 0.95);
++        gsap.set(intro, { opacity: 1 - introProgress, y: -18 * introProgress });
++        gsap.set(assembled, { opacity: assembledProgress, y: 16 * (1 - assembledProgress) });
++        gsap.set(title, { scale: 1 + p * 0.045, opacity: lerp(0.04, 0.022, p) });
++        gsap.set(progress, { scaleX: p });
+       },
+-      0.22,
+-    );
+-
+-    timeline.to(intro, { opacity: 0, y: -18, duration: 0.25 }, 0.34);
+-    timeline.to(assembled, { opacity: 1, y: 0, duration: 0.3 }, 1.02);
+-    timeline.to(title, { scale: 1.04, opacity: 0.03, duration: 1.05 }, 0.22);
+-    timeline.to(progress, { scaleX: 1, duration: 1.38 }, 0.03);
++    });
+ 
+     return () => {
+       stage.classList.remove('is-assembled');
+-      timeline.kill();
++      trigger.kill();
++      gsap.set([...ribbonCards, ...cards], { clearProps: 'all' });
++      cards.forEach((card) => gsap.set(card.querySelector('.work-card__meta'), { clearProps: 'all' }));
++      gsap.set([intro, assembled, title, progress].filter(Boolean), { clearProps: 'all' });
+     };
+   });
+ 
+-  media.add('(max-width: 860px)', () => {
++  media.add('(max-width: 860px), (prefers-reduced-motion: reduce)', () => {
+     stage.classList.add('is-assembled');
++    gsap.set(ribbon, { display: 'none' });
+     gsap.set(cards, { clearProps: 'all' });
+     const reveal = gsap.fromTo(
+       cards,
+@@ -455,6 +594,7 @@ function initWorks() {
+     return () => {
+       stage.classList.remove('is-assembled');
+       reveal.kill();
++      gsap.set(ribbon, { clearProps: 'all' });
+     };
+   });
+ }
+@@ -580,6 +720,7 @@ function initSite() {
+   context = gsap.context(() => {
+     initIntro();
+     initSmoothScroll(signal);
++    initAtmosphere(signal);
+     initCursor(signal);
+     initNavigation(signal);
+     initReveals();
+diff --git a/src/styles/book.css b/src/styles/book.css
+index bdb99fa..77cd088 100644
+--- a/src/styles/book.css
++++ b/src/styles/book.css
+@@ -427,3 +427,304 @@
+     font-size: 43px;
+   }
+ }
++
++/* Per-world atmosphere */
++.book-world {
++  position: absolute;
++  inset: 0;
++  z-index: -1;
++  overflow: hidden;
++  color: var(--book-accent);
++  pointer-events: none;
++}
++
++.book-world svg,
++.book-world div {
++  position: absolute;
++}
++
++.book-world svg {
++  stroke: currentColor;
++  stroke-width: 1.25;
++  opacity: 0.2;
++  filter: drop-shadow(0 0 26px rgba(var(--book-rgb), 0.14));
++}
++
++/* NEXUS */
++.book-world__portal {
++  top: 49%;
++  right: 5%;
++  width: clamp(250px, 35vw, 590px);
++  aspect-ratio: 1;
++  border: 1px solid rgba(var(--book-rgb), 0.13);
++  border-radius: 50%;
++  transform: translateY(-50%) rotateX(66deg) rotateZ(-12deg);
++  box-shadow: inset 0 0 70px rgba(var(--book-rgb), 0.035), 0 0 80px rgba(var(--book-rgb), 0.035);
++}
++
++.book-world__portal--two {
++  scale: 0.72;
++  rotate: 19deg;
++  opacity: 0.7;
++}
++
++.book-world__portal--three {
++  scale: 0.43;
++  rotate: -21deg;
++  opacity: 0.48;
++}
++
++.book-world__nodes {
++  top: 49%;
++  right: 5%;
++  width: clamp(250px, 35vw, 590px);
++  aspect-ratio: 1;
++  transform: translateY(-50%);
++}
++
++.book-world__nodes i {
++  --angle: calc(var(--i) * 45deg);
++  position: absolute;
++  top: 50%;
++  left: 50%;
++  width: 5px;
++  height: 5px;
++  border-radius: 50%;
++  background: var(--book-accent);
++  box-shadow: 0 0 20px var(--book-accent);
++  transform: rotate(var(--angle)) translateX(clamp(105px, 15vw, 245px));
++  opacity: 0.46;
++}
++
++/* SILLAGE */
++.book-world__bottle {
++  top: 14%;
++  right: 4%;
++  width: clamp(150px, 19vw, 310px);
++  opacity: 0.16 !important;
++}
++
++.book-world__molecule {
++  right: 18%;
++  bottom: 6%;
++  width: clamp(210px, 28vw, 480px);
++  opacity: 0.22 !important;
++}
++
++.book-world__sillage-lines {
++  inset: 0;
++}
++
++.book-world__sillage-lines i {
++  position: absolute;
++  right: -10%;
++  width: 62%;
++  height: 18%;
++  border-top: 1px solid rgba(var(--book-rgb), 0.12);
++  border-radius: 50%;
++  filter: blur(0.2px);
++}
++
++.book-world__sillage-lines i:nth-child(1) { top: 24%; transform: rotate(-9deg); }
++.book-world__sillage-lines i:nth-child(2) { top: 42%; transform: rotate(5deg); opacity: 0.65; }
++.book-world__sillage-lines i:nth-child(3) { top: 62%; transform: rotate(-4deg); opacity: 0.42; }
++
++/* MANIFESTO */
++.book-world__redactions {
++  inset: 0;
++  opacity: 0.22;
++}
++
++.book-world__redactions i {
++  position: absolute;
++  height: 13px;
++  background: rgba(var(--book-rgb), 0.23);
++  transform: rotate(-7deg);
++}
++
++.book-world__redactions i:nth-child(1) { top: 21%; right: 4%; width: 31%; }
++.book-world__redactions i:nth-child(2) { top: 29%; right: 11%; width: 20%; }
++.book-world__redactions i:nth-child(3) { bottom: 28%; left: 8%; width: 28%; }
++.book-world__redactions i:nth-child(4) { bottom: 21%; left: 15%; width: 17%; }
++
++.book-world__poster-shard {
++  padding: 14px 20px;
++  border: 1px solid rgba(var(--book-rgb), 0.16);
++  color: rgba(var(--book-rgb), 0.26);
++  font: 700 clamp(23px, 4vw, 62px)/0.8 var(--sans);
++  letter-spacing: -0.07em;
++  transform: rotate(-10deg);
++}
++
++.book-world__poster-shard--one { top: 18%; right: 7%; }
++.book-world__poster-shard--two { right: 15%; bottom: 13%; transform: rotate(7deg); }
++
++.book-world__mask {
++  top: 42%;
++  right: 15%;
++  width: 150px;
++  height: 190px;
++  border: 1px solid rgba(var(--book-rgb), 0.12);
++  border-radius: 45% 45% 55% 55%;
++  transform: rotate(12deg);
++  opacity: 0.38;
++}
++
++/* HYDRA */
++.book-world__hydra-ring {
++  top: 49%;
++  right: 8%;
++  width: clamp(250px, 35vw, 540px);
++  aspect-ratio: 1;
++  transform: translateY(-50%);
++  border: 1px solid rgba(var(--book-rgb), 0.11);
++  border-radius: 50%;
++}
++
++.book-world__hydra-ring i {
++  --angle: calc(var(--i) * 40deg);
++  position: absolute;
++  top: 50%;
++  left: 50%;
++  width: 10px;
++  height: 10px;
++  border: 1px solid rgba(var(--book-rgb), 0.45);
++  border-radius: 50%;
++  transform: rotate(var(--angle)) translateX(clamp(110px, 16vw, 255px));
++  box-shadow: 0 0 24px rgba(var(--book-rgb), 0.2);
++}
++
++.book-world__hydra-lines {
++  right: 8%;
++  bottom: 3%;
++  width: clamp(220px, 31vw, 480px);
++  opacity: 0.17 !important;
++}
++
++/* LUCIDREAMER */
++.book-world__clock {
++  top: 13%;
++  right: 5%;
++  width: clamp(240px, 34vw, 530px);
++  aspect-ratio: 1;
++  border: 1px solid rgba(var(--book-rgb), 0.12);
++  border-radius: 50%;
++}
++
++.book-world__clock::before,
++.book-world__clock::after {
++  content: '';
++  position: absolute;
++  top: 50%;
++  left: 50%;
++  width: 34%;
++  height: 1px;
++  transform-origin: left center;
++  background: rgba(var(--book-rgb), 0.28);
++}
++
++.book-world__clock::before { transform: rotate(-37deg); }
++.book-world__clock::after { width: 25%; transform: rotate(88deg); }
++
++.book-world__monas {
++  right: 17%;
++  bottom: 0;
++  width: 75px;
++  height: 330px;
++  opacity: 0.22;
++}
++
++.book-world__monas::before {
++  content: '';
++  position: absolute;
++  right: 23px;
++  bottom: 0;
++  left: 23px;
++  height: 270px;
++  background: linear-gradient(to top, rgba(var(--book-rgb), 0.28), rgba(var(--book-rgb), 0.04));
++  clip-path: polygon(38% 0, 62% 0, 100% 100%, 0 100%);
++}
++
++.book-world__monas i {
++  position: absolute;
++  top: 0;
++  left: 50%;
++  width: 24px;
++  height: 45px;
++  transform: translateX(-50%);
++  border-radius: 50% 50% 45% 45%;
++  background: rgba(var(--book-rgb), 0.36);
++  filter: blur(0.3px);
++}
++
++.book-world__dream-orbit {
++  top: 40%;
++  right: -4%;
++  width: 47vw;
++  height: 22vh;
++  border-top: 1px solid rgba(var(--book-rgb), 0.1);
++  border-radius: 50%;
++  transform: rotate(-13deg);
++}
++
++.book-world__dream-orbit--two { top: 56%; transform: rotate(8deg); opacity: 0.55; }
++
++/* CAPTURE */
++.book-world__aperture {
++  top: 16%;
++  right: 5%;
++  width: clamp(240px, 36vw, 560px);
++  opacity: 0.16 !important;
++}
++
++.book-world__focus-frame {
++  top: 17%;
++  right: 5%;
++  width: clamp(240px, 36vw, 560px);
++  aspect-ratio: 1;
++}
++
++.book-world__focus-frame i {
++  position: absolute;
++  width: 52px;
++  height: 52px;
++  border-color: rgba(var(--book-rgb), 0.24);
++  border-style: solid;
++}
++
++.book-world__focus-frame i:nth-child(1) { top: 0; left: 0; border-width: 1px 0 0 1px; }
++.book-world__focus-frame i:nth-child(2) { top: 0; right: 0; border-width: 1px 1px 0 0; }
++.book-world__focus-frame i:nth-child(3) { right: 0; bottom: 0; border-width: 0 1px 1px 0; }
++.book-world__focus-frame i:nth-child(4) { bottom: 0; left: 0; border-width: 0 0 1px 1px; }
++
++.book-world__timestamp {
++  right: 7%;
++  bottom: 8%;
++  color: rgba(var(--book-rgb), 0.3);
++  font: 500 9px/1 var(--mono);
++  letter-spacing: 0.18em;
++}
++
++@media (max-width: 760px) {
++  .book-world {
++    opacity: 0.62;
++  }
++
++  .book-world__bottle,
++  .book-world__molecule,
++  .book-world__portal,
++  .book-world__nodes,
++  .book-world__hydra-ring,
++  .book-world__hydra-lines,
++  .book-world__clock,
++  .book-world__aperture,
++  .book-world__focus-frame {
++    right: -18%;
++  }
++}
++
++@media (prefers-reduced-motion: reduce) {
++  .book-world {
++    opacity: 0.45;
++  }
++}
+diff --git a/src/styles/global.css b/src/styles/global.css
+index c1f7f75..a404244 100644
+--- a/src/styles/global.css
++++ b/src/styles/global.css
+@@ -44,6 +44,24 @@ body[data-menu-open='true'] {
+   overflow: hidden;
+ }
+ 
++
++.site-atmosphere {
++  position: fixed;
++  inset: 0;
++  z-index: 1;
++  width: 100%;
++  height: 100%;
++  opacity: 0.72;
++  pointer-events: none;
++  mix-blend-mode: screen;
++}
++
++main,
++footer {
++  position: relative;
++  z-index: 2;
++}
++
+ body::before {
+   content: '';
+   position: fixed;
+@@ -795,12 +813,21 @@ body[data-menu-open='true'] .site-nav__plus {
+   will-change: transform, opacity;
+ }
+ 
++.works__ribbon,
+ .works__deck {
+   position: absolute;
+-  z-index: 3;
+   inset: 0;
+   perspective: 1600px;
+   transform-style: preserve-3d;
++}
++
++.works__ribbon {
++  z-index: 2;
++  pointer-events: none;
++}
++
++.works__deck {
++  z-index: 3;
+   pointer-events: none;
+ }
+ 
+@@ -808,6 +835,45 @@ body[data-menu-open='true'] .site-nav__plus {
+   pointer-events: auto;
+ }
+ 
++
++.work-ribbon-card {
++  position: absolute;
++  top: 0;
++  left: 0;
++  width: clamp(96px, min(9.8vw, 15vh), 154px);
++  transform-style: preserve-3d;
++  backface-visibility: hidden;
++  will-change: transform, opacity;
++}
++
++.work-ribbon-card__frame {
++  position: relative;
++  display: block;
++  aspect-ratio: 2 / 3;
++  overflow: hidden;
++  border: 1px solid rgba(255, 255, 255, 0.12);
++  border-radius: 7px;
++  background: #0a0e18;
++  box-shadow:
++    0 28px 72px rgba(0, 0, 0, 0.58),
++    0 0 55px rgba(var(--book-rgb), 0.05);
++}
++
++.work-ribbon-card__frame img {
++  display: block;
++  width: 100%;
++  height: 100%;
++  object-fit: cover;
++}
++
++.work-ribbon-card__shade {
++  position: absolute;
++  inset: 0;
++  background:
++    linear-gradient(110deg, rgba(255, 255, 255, 0.08), transparent 28%),
++    linear-gradient(to top, rgba(3, 5, 10, 0.52), transparent 45%);
++}
++
+ .work-card {
+   position: absolute;
+   top: 50%;
+@@ -1649,6 +1715,7 @@ html:not(.js) .cursor,
+ html:not(.js) .menu,
+ html:not(.js) .hero__scroll,
+ html:not(.js) .works__background-title,
++html:not(.js) .works__ribbon,
+ html:not(.js) .works__intro-copy,
+ html:not(.js) .works__assembled-copy,
+ html:not(.js) .works__progress,
+@@ -1785,6 +1852,7 @@ html:not(.js) .work-card {
+   }
+ 
+   .works__background-title,
++  .works__ribbon,
+   .works__intro-copy,
+   .works__assembled-copy,
+   .works__progress,
+@@ -2017,3 +2085,9 @@ html:not(.js) .work-card {
+     transform: none !important;
+   }
+ }
++
++@media (prefers-reduced-motion: reduce) {
++  .site-atmosphere {
++    display: none;
++  }
++}

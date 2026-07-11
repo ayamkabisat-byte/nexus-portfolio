@@ -3,6 +3,7 @@ import { ClientRouter } from 'astro:transitions';
 import { SITE } from '@/config/site';
 import { withBase } from '@/lib/urls';
 import '@/styles/global.css';
+import Atmosphere from '@/components/Atmosphere.astro';
 
 interface Props {
   title?: string;
@@ -87,6 +88,7 @@ const googleVerification = import.meta.env.GOOGLE_SITE_VERIFICATION;
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to content</a>
+    <Atmosphere />
     <slot />
 
     <script>

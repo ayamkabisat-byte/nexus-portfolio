@@ -62,6 +62,114 @@ function initSmoothScroll(signal: AbortSignal) {
   });
 }
 
+function initAtmosphere(signal: AbortSignal) {
+  const canvas = document.querySelector<HTMLCanvasElement>('[data-atmosphere]');
+  if (!canvas || reduceMotion()) return;
+
+  const context2d = canvas.getContext('2d');
+  if (!context2d) return;
+
+  const theme = document.querySelector<HTMLElement>('[data-book-theme]')?.dataset.bookTheme || 'home';
+  const palette: Record<string, string> = {
+    home: '85,244,160',
+    nexus: '85,244,160',
+    sillage: '217,164,93',
+    manifesto: '255,111,97',
+    hydra: '212,175,87',
+    lucidreamer: '139,140,255',
+    capture: '142,203,255',
+  };
+  const rgb = palette[theme] || palette.home;
+  const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+  let width = 0;
+  let height = 0;
+  let frame = 0;
+
+  type Particle = { x: number; y: number; speed: number; length: number; alpha: number; drift: number; size: number };
+  let particles: Particle[] = [];
+
+  const particleCount = () => Math.max(34, Math.min(78, Math.floor(window.innerWidth / 22)));
+  const createParticle = (randomY = true): Particle => ({
+    x: Math.random() * width,
+    y: randomY ? Math.random() * height : -40,
+    speed: theme === 'home' ? 4 + Math.random() * 5 : 0.25 + Math.random() * 0.85,
+    length: 16 + Math.random() * 42,
+    alpha: 0.05 + Math.random() * 0.16,
+    drift: -0.35 + Math.random() * 0.7,
+    size: 0.7 + Math.random() * 1.8,
+  });
+
+  const resize = () => {
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = Math.floor(width * dpr);
+    canvas.height = Math.floor(height * dpr);
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+    context2d.setTransform(dpr, 0, 0, dpr, 0, 0);
+    particles = Array.from({ length: particleCount() }, () => createParticle(true));
+  };
+
+  const drawHomeRain = (particle: Particle) => {
+    context2d.beginPath();
+    context2d.moveTo(particle.x, particle.y);
+    context2d.lineTo(particle.x - particle.length * 0.18, particle.y + particle.length);
+    context2d.strokeStyle = `rgba(${rgb},${particle.alpha})`;
+    context2d.lineWidth = 0.65;
+    context2d.stroke();
+    particle.x += particle.drift - 0.25;
+    particle.y += particle.speed;
+  };
+
+  const drawWorldParticle = (particle: Particle, time: number) => {
+    particle.x += particle.drift * 0.12 + Math.sin(time * 0.00035 + particle.y) * 0.05;
+    particle.y -= particle.speed;
+
+    if (theme === 'capture') {
+      context2d.fillStyle = `rgba(${rgb},${particle.alpha * 0.75})`;
+      context2d.fillRect(particle.x, particle.y, particle.length * 0.45, 0.65);
+      return;
+    }
+
+    if (theme === 'manifesto') {
+      context2d.save();
+      context2d.translate(particle.x, particle.y);
+      context2d.rotate(time * 0.00015 + particle.x);
+      context2d.fillStyle = `rgba(${rgb},${particle.alpha})`;
+      context2d.fillRect(-particle.size, -particle.size, particle.size * 2.2, particle.size * 0.8);
+      context2d.restore();
+      return;
+    }
+
+    context2d.beginPath();
+    context2d.arc(particle.x, particle.y, theme === 'sillage' ? particle.size * 1.8 : particle.size, 0, Math.PI * 2);
+    context2d.fillStyle = `rgba(${rgb},${particle.alpha * (theme === 'sillage' ? 0.45 : 0.8)})`;
+    context2d.fill();
+  };
+
+  const animate = (time: number) => {
+    context2d.clearRect(0, 0, width, height);
+
+    particles.forEach((particle, index) => {
+      if (theme === 'home') drawHomeRain(particle);
+      else drawWorldParticle(particle, time);
+
+      const escaped = theme === 'home'
+        ? particle.y > height + 70 || particle.x < -80
+        : particle.y < -70 || particle.x < -80 || particle.x > width + 80;
+      if (escaped) particles[index] = createParticle(false);
+      if (theme !== 'home' && escaped) particles[index].y = height + 30;
+    });
+
+    frame = window.requestAnimationFrame(animate);
+  };
+
+  resize();
+  window.addEventListener('resize', resize, { signal });
+  frame = window.requestAnimationFrame(animate);
+  signal.addEventListener('abort', () => window.cancelAnimationFrame(frame), { once: true });
+}
+
 function initIntro() {
   const intro = document.querySelector<HTMLElement>('[data-intro]');
   if (!intro) return;
@@ -289,40 +397,82 @@ function initHero(signal: AbortSignal) {
 function initWorks() {
   const section = document.querySelector<HTMLElement>('[data-works]');
   const stage = document.querySelector<HTMLElement>('[data-works-stage]');
+  const ribbon = document.querySelector<HTMLElement>('[data-works-ribbon]');
   const deck = document.querySelector<HTMLElement>('[data-works-deck]');
-  if (!section || !stage || !deck) return;
+  if (!section || !stage || !ribbon || !deck) return;
 
+  const ribbonCards = gsap.utils.toArray<HTMLElement>('[data-ribbon-card]', ribbon);
   const cards = gsap.utils.toArray<HTMLElement>('[data-work-card]', deck);
   const title = section.querySelector<HTMLElement>('[data-works-title]');
   const intro = section.querySelector<HTMLElement>('[data-works-intro]');
   const assembled = section.querySelector<HTMLElement>('[data-works-assembled]');
   const progress = section.querySelector<HTMLElement>('[data-works-progress]');
 
+  const images = Array.from(section.querySelectorAll<HTMLImageElement>('img'));
+  Promise.all(
+    images.map(async (image) => {
+      if (!image.complete) {
+        await new Promise<void>((resolve) => {
+          image.addEventListener('load', () => resolve(), { once: true });
+          image.addEventListener('error', () => resolve(), { once: true });
+        });
+      }
+      try {
+        await image.decode();
+      } catch {
+        // Failed decoding should not hold the rest of the scene.
+      }
+    }),
+  ).finally(() => ScrollTrigger.refresh());
+
   const media = gsap.matchMedia();
 
   media.add('(min-width: 861px) and (prefers-reduced-motion: no-preference)', () => {
-    const arc = [
-      { x: -0.44, y: 0.1, rotateY: 57, rotateZ: -10, scale: 0.58, z: -210 },
-      { x: -0.28, y: -0.04, rotateY: 39, rotateZ: -6, scale: 0.74, z: -100 },
-      { x: -0.11, y: -0.15, rotateY: 16, rotateZ: -2, scale: 0.92, z: 5 },
-      { x: 0.11, y: -0.14, rotateY: -16, rotateZ: 2, scale: 0.98, z: 28 },
-      { x: 0.29, y: -0.04, rotateY: -40, rotateZ: 6, scale: 0.75, z: -105 },
-      { x: 0.44, y: 0.1, rotateY: -57, rotateZ: 10, scale: 0.58, z: -210 },
-    ];
+    type Point = { x: number; y: number };
+    const clamp = gsap.utils.clamp;
+    const lerp = (a: number, b: number, amount: number) => a + (b - a) * amount;
+    const easeOut = (value: number) => 1 - Math.pow(1 - value, 3);
+    const smooth = (value: number) => value * value * (3 - 2 * value);
 
     const dimensions = () => ({
       width: stage.clientWidth,
       height: stage.clientHeight,
       cardWidth: cards[0]?.offsetWidth || 150,
-      cardHeight: cards[0]?.offsetHeight || 285,
+      cardHeight: cards[0]?.offsetHeight || 255,
+      ribbonWidth: ribbonCards[0]?.offsetWidth || 142,
+      ribbonHeight: ribbonCards[0]?.offsetHeight || 213,
     });
 
-    const arcPose = (index: number, key: keyof (typeof arc)[number]) => {
-      const pose = arc[index % arc.length];
+    const points = () => {
       const dim = dimensions();
-      if (key === 'x') return dim.width * pose.x;
-      if (key === 'y') return dim.height * pose.y;
-      return pose[key];
+      return {
+        p0: { x: -dim.width * 0.16, y: dim.height * 0.8 },
+        p1: { x: dim.width * 0.18, y: dim.height * 0.74 },
+        p2: { x: dim.width * 0.63, y: dim.height * 0.12 },
+        p3: { x: dim.width * 1.16, y: dim.height * 0.02 },
+      };
+    };
+
+    const bezier = (t: number, p0: Point, p1: Point, p2: Point, p3: Point): Point => {
+      const mt = 1 - t;
+      return {
+        x: mt * mt * mt * p0.x + 3 * mt * mt * t * p1.x + 3 * mt * t * t * p2.x + t * t * t * p3.x,
+        y: mt * mt * mt * p0.y + 3 * mt * mt * t * p1.y + 3 * mt * t * t * p2.y + t * t * t * p3.y,
+      };
+    };
+
+    const ribbonT = (progressValue: number, index: number) => clamp(0, 1, progressValue * 1.38 + index * 0.045 - 0.43);
+
+    const pathPose = (progressValue: number, index: number) => {
+      const path = points();
+      const t = ribbonT(progressValue, index);
+      const position = bezier(t, path.p0, path.p1, path.p2, path.p3);
+      const ahead = bezier(Math.min(1, t + 0.012), path.p0, path.p1, path.p2, path.p3);
+      const angle = Math.atan2(ahead.y - position.y, ahead.x - position.x) * (180 / Math.PI);
+      const scale = 0.48 + Math.sin(t * Math.PI) * 0.62;
+      const fadeIn = smooth(clamp(0, 1, t / 0.1));
+      const fadeOut = 1 - smooth(clamp(0, 1, (t - 0.86) / 0.14));
+      return { t, position, angle, scale, opacity: fadeIn * fadeOut };
     };
 
     const gridPose = (index: number, axis: 'x' | 'y') => {
@@ -335,73 +485,95 @@ function initWorks() {
       return (row - 0.5) * (dim.cardHeight + gapY) + dim.height * 0.045;
     };
 
-    const timeline = gsap.timeline({
-      defaults: { ease: 'none' },
-      scrollTrigger: {
-        trigger: section,
-        start: 'top top',
-        end: '+=225%',
-        scrub: 0.9,
-        pin: stage,
-        anticipatePin: 1,
-        invalidateOnRefresh: true,
+    gsap.set([...ribbonCards, ...cards], {
+      force3D: true,
+      transformOrigin: '50% 50%',
+      backfaceVisibility: 'hidden',
+    });
+    gsap.set(cards, { autoAlpha: 0 });
+    cards.forEach((card) => gsap.set(card.querySelector('.work-card__meta'), { opacity: 0, y: 12 }));
+
+    const trigger = ScrollTrigger.create({
+      trigger: section,
+      start: 'top top',
+      end: '+=340%',
+      scrub: 1.05,
+      pin: stage,
+      pinSpacing: true,
+      anticipatePin: 1,
+      invalidateOnRefresh: true,
+      onUpdate: (self) => {
+        const p = self.progress;
+        const dim = dimensions();
+
+        ribbonCards.forEach((card, index) => {
+          const pose = pathPose(p, index);
+          const dockingIndex = index >= 6 ? index - 6 : -1;
+          const dockStart = dockingIndex >= 0 ? 0.5 + dockingIndex * 0.055 : 2;
+          const dock = dockingIndex >= 0 ? smooth(clamp(0, 1, (p - dockStart) / 0.18)) : 0;
+          const depthTilt = lerp(38, -32, clamp(0, 1, pose.position.x / dim.width));
+
+          gsap.set(card, {
+            x: pose.position.x - dim.ribbonWidth / 2,
+            y: pose.position.y - dim.ribbonHeight / 2,
+            z: (pose.scale - 0.5) * 150,
+            rotateZ: pose.angle * 0.16,
+            rotateY: depthTilt,
+            scale: pose.scale,
+            opacity: pose.opacity * (1 - dock),
+          });
+        });
+
+        cards.forEach((card, index) => {
+          const ribbonIndex = index + 6;
+          const pose = pathPose(p, ribbonIndex);
+          const dockStart = 0.5 + index * 0.055;
+          const rawDock = clamp(0, 1, (p - dockStart) / 0.18);
+          const dock = easeOut(rawDock);
+          const sourceX = pose.position.x - dim.width / 2;
+          const sourceY = pose.position.y - dim.height / 2;
+          const targetX = gridPose(index, 'x');
+          const targetY = gridPose(index, 'y');
+          const depthTilt = lerp(30, -25, clamp(0, 1, pose.position.x / dim.width));
+
+          gsap.set(card, {
+            x: lerp(sourceX, targetX, dock),
+            y: lerp(sourceY, targetY, dock),
+            z: lerp((pose.scale - 0.5) * 140, 0, dock),
+            rotateY: lerp(depthTilt, 0, dock),
+            rotateZ: lerp(pose.angle * 0.16, 0, dock),
+            scale: lerp(pose.scale, 1, dock),
+            autoAlpha: smooth(clamp(0, 1, rawDock * 1.75)),
+          });
+
+          gsap.set(card.querySelector('.work-card__meta'), {
+            opacity: smooth(clamp(0, 1, (rawDock - 0.42) / 0.58)),
+            y: lerp(12, 0, dock),
+          });
+        });
+
+        const assembledProgress = smooth(clamp(0, 1, (p - 0.78) / 0.14));
+        const introProgress = smooth(clamp(0, 1, (p - 0.3) / 0.18));
+        stage.classList.toggle('is-assembled', p > 0.95);
+        gsap.set(intro, { opacity: 1 - introProgress, y: -18 * introProgress });
+        gsap.set(assembled, { opacity: assembledProgress, y: 16 * (1 - assembledProgress) });
+        gsap.set(title, { scale: 1 + p * 0.045, opacity: lerp(0.04, 0.022, p) });
+        gsap.set(progress, { scaleX: p });
       },
     });
 
-    timeline.fromTo(
-      cards,
-      {
-        x: (index) => arcPose(index, 'x'),
-        y: (index) => arcPose(index, 'y'),
-        z: (index) => arcPose(index, 'z'),
-        rotateY: (index) => arcPose(index, 'rotateY'),
-        rotateZ: (index) => arcPose(index, 'rotateZ'),
-        scale: (index) => arcPose(index, 'scale'),
-        opacity: 0,
-      },
-      { opacity: 1, duration: 0.18, stagger: 0.024 },
-      0,
-    );
-
-    timeline.to(
-      cards,
-      {
-        x: (index) => Number(arcPose(index, 'x')) - dimensions().width * 0.05,
-        y: (index) => Number(arcPose(index, 'y')) - dimensions().height * 0.025,
-        rotateY: (index) => Number(arcPose(index, 'rotateY')) * 0.72,
-        rotateZ: (index) => Number(arcPose(index, 'rotateZ')) * 0.7,
-        duration: 0.32,
-        stagger: 0.018,
-      },
-      0.12,
-    );
-
-    timeline.to(
-      cards,
-      {
-        x: (index) => gridPose(index, 'x'),
-        y: (index) => gridPose(index, 'y'),
-        z: 0,
-        rotateX: 0,
-        rotateY: 0,
-        rotateZ: 0,
-        scale: 1,
-        duration: 0.82,
-        stagger: 0.035,
-        ease: 'power3.inOut',
-      },
-      0.38,
-    );
-
-    timeline.to(intro, { opacity: 0, y: -18, duration: 0.24 }, 0.38);
-    timeline.to(assembled, { opacity: 1, y: 0, duration: 0.28 }, 0.84);
-    timeline.to(title, { scale: 1.055, opacity: 0.035, duration: 0.7 }, 0.3);
-    timeline.to(progress, { scaleX: 1, duration: 1.02 }, 0.05);
-
-    return () => timeline.kill();
+    return () => {
+      stage.classList.remove('is-assembled');
+      trigger.kill();
+      gsap.set([...ribbonCards, ...cards], { clearProps: 'all' });
+      cards.forEach((card) => gsap.set(card.querySelector('.work-card__meta'), { clearProps: 'all' }));
+      gsap.set([intro, assembled, title, progress].filter(Boolean), { clearProps: 'all' });
+    };
   });
 
-  media.add('(max-width: 860px)', () => {
+  media.add('(max-width: 860px), (prefers-reduced-motion: reduce)', () => {
+    stage.classList.add('is-assembled');
+    gsap.set(ribbon, { display: 'none' });
     gsap.set(cards, { clearProps: 'all' });
     const reveal = gsap.fromTo(
       cards,
@@ -419,7 +591,11 @@ function initWorks() {
         },
       },
     );
-    return () => reveal.kill();
+    return () => {
+      stage.classList.remove('is-assembled');
+      reveal.kill();
+      gsap.set(ribbon, { clearProps: 'all' });
+    };
   });
 }
 
@@ -544,6 +720,7 @@ function initSite() {
   context = gsap.context(() => {
     initIntro();
     initSmoothScroll(signal);
+    initAtmosphere(signal);
     initCursor(signal);
     initNavigation(signal);
     initReveals();
