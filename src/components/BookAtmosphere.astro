@@ -1,12 +1,24 @@
 ---
+import { withBase } from '@/lib/urls';
+
 interface Props {
   slug: string;
 }
 
 const { slug } = Astro.props;
+const atmosphereImage = withBase(`worlds/${slug}.webp`);
 ---
 
 <div class={`book-world book-world--${slug}`} aria-hidden="true">
+  <img
+    class="book-world__image"
+    src={atmosphereImage}
+    alt=""
+    width="1672"
+    height="941"
+    loading="eager"
+    decoding="async"
+  />
   {slug === 'nexus' && (
     <>
       <div class="book-world__portal book-world__portal--one"></div>
