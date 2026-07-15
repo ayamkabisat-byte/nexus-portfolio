@@ -454,6 +454,26 @@
   mix-blend-mode: screen;
 }
 
+.book-world__overlay {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  right: -3%;
+  width: min(60vw, 1040px);
+  height: auto;
+  max-height: 94vh;
+  object-fit: contain;
+  transform: translateY(-50%);
+  transform-origin: center;
+  opacity: 0.58;
+  filter:
+    saturate(0.95)
+    contrast(1.04)
+    drop-shadow(0 0 50px rgba(var(--book-rgb), 0.18));
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+
 .book-world::after {
   content: '';
   position: absolute;
@@ -466,7 +486,7 @@
 
 .book-world svg,
 .book-world div {
-  z-index: 1;
+  z-index: 2;
 }
 
 .book-world svg,
@@ -745,6 +765,15 @@
     object-position: 68% center;
     opacity: 0.32;
     transform: scale(1.08);
+  }
+
+  .book-world__overlay {
+    top: 43%;
+    right: -38%;
+    width: 118vw;
+    max-width: none;
+    max-height: 75vh;
+    opacity: 0.34;
   }
 
   .book-world__bottle,

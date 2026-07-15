@@ -10,7 +10,7 @@ export const SITE = {
   location: 'Jakarta, Indonesia',
   instagram: 'https://instagram.com/michaeldinko01',
   royalRoad: 'https://www.royalroad.com/fiction/163820/nexus-echoes-of-another-self',
-  defaultOgImage: 'og/michael-dinko-author.png',
+  defaultOgImage: 'og/home.jpg',
   keywords: [
     'Michael Dinko',
     'Indonesian author',

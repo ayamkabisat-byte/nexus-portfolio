@@ -394,21 +394,243 @@ function initHero(signal: AbortSignal) {
   }
 }
 
-function initWorks() {
-  const section = document.querySelector<HTMLElement>('[data-works]');
-  const stage = document.querySelector<HTMLElement>('[data-works-stage]');
-  const ribbon = document.querySelector<HTMLElement>('[data-works-ribbon]');
-  const deck = document.querySelector<HTMLElement>('[data-works-deck]');
-  if (!section || !stage || !ribbon || !deck) return;
+function initWorks(signal: AbortSignal) {
+  const root = document.querySelector<HTMLElement>('[data-book-showcase]');
+  const viewport = root?.querySelector<HTMLElement>('[data-showcase-viewport]');
+  const track = root?.querySelector<HTMLElement>('[data-showcase-track]');
+  if (!root || !viewport || !track) return;
 
-  const ribbonCards = gsap.utils.toArray<HTMLElement>('[data-ribbon-card]', ribbon);
-  const cards = gsap.utils.toArray<HTMLElement>('[data-work-card]', deck);
-  const title = section.querySelector<HTMLElement>('[data-works-title]');
-  const intro = section.querySelector<HTMLElement>('[data-works-intro]');
-  const assembled = section.querySelector<HTMLElement>('[data-works-assembled]');
-  const progress = section.querySelector<HTMLElement>('[data-works-progress]');
+  const cards = Array.from(track.querySelectorAll<HTMLElement>('[data-showcase-card]'));
+  if (!cards.length) return;
 
-  const images = Array.from(section.querySelectorAll<HTMLImageElement>('img'));
+  const originalCount = Math.max(1, cards.length / 2);
+
+  if (reduceMotion()) {
+    cards.slice(originalCount).forEach((card) => card.remove());
+    root.classList.add('is-static');
+    return;
+  }
+
+  let halfWidth = 1;
+  let position = 0;
+  let targetVelocity = window.innerWidth < 760 ? -58 : -84;
+  let velocity = targetVelocity;
+  let frame = 0;
+  let lastTime = performance.now();
+  let paused = false;
+  let dragging = false;
+  let pointerStart = 0;
+  let positionStart = 0;
+  let draggedDistance = 0;
+  let activeIndex = -1;
+
+  const wrap = (value: number) => {
+    if (!halfWidth) return value;
+    return ((value % halfWidth) + halfWidth) % halfWidth - halfWidth;
+  };
+
+  const setActive = (index: number) => {
+    const normalized = ((index % originalCount) + originalCount) % originalCount;
+    if (normalized === activeIndex) return;
+
+    activeIndex = normalized;
+    root.dataset.activeBook = cards[normalized]?.dataset.showcaseSlug || '';
+
+    cards.forEach((card, cardIndex) => {
+      card.classList.toggle('is-active', cardIndex % originalCount === normalized);
+    });
+  };
+
+  const render = () => {
+    gsap.set(track, { x: position, force3D: true });
+
+    const viewportRect = viewport.getBoundingClientRect();
+    const trackRect = track.getBoundingClientRect();
+    const viewportCenter = viewportRect.left + viewportRect.width / 2;
+
+    let nearest = 0;
+    let nearestDistance = Number.POSITIVE_INFINITY;
+
+    cards.forEach((card, index) => {
+      const center = trackRect.left + card.offsetLeft + card.offsetWidth / 2;
+      const normalizedDistance = (center - viewportCenter) / Math.max(1, viewportRect.width * 0.54);
+      const distance = Math.abs(normalizedDistance);
+
+      if (distance < nearestDistance) {
+        nearestDistance = distance;
+        nearest = index;
+      }
+
+      const scale = gsap.utils.clamp(0.78, 1.08, 1.08 - distance * 0.23);
+      const opacity = gsap.utils.clamp(0.36, 1, 1 - distance * 0.52);
+      const rotateY = gsap.utils.clamp(-18, 18, normalizedDistance * -18);
+      const y = Math.min(48, distance * 34);
+
+      gsap.set(card, {
+        scale,
+        opacity,
+        rotateY,
+        y,
+        z: (1 - distance) * 90,
+        force3D: true,
+      });
+    });
+
+    setActive(nearest);
+  };
+
+  const refreshMeasurements = () => {
+    halfWidth = Math.max(1, cards[originalCount].offsetLeft - cards[0].offsetLeft);
+    position = wrap(position);
+    render();
+  };
+
+  const animate = (time: number) => {
+    const delta = Math.min(48, time - lastTime) / 1000;
+    lastTime = time;
+
+    const desiredVelocity = paused || dragging ? 0 : targetVelocity;
+    velocity += (desiredVelocity - velocity) * Math.min(1, delta * 7.5);
+
+    if (!dragging) position = wrap(position + velocity * delta);
+    render();
+
+    frame = window.requestAnimationFrame(animate);
+  };
+
+  viewport.addEventListener('pointerenter', () => {
+    paused = true;
+  }, { signal });
+
+  viewport.addEventListener('pointerleave', () => {
+    if (!dragging) paused = false;
+  }, { signal });
+
+  viewport.addEventListener('pointerdown', (event) => {
+    dragging = true;
+    paused = true;
+    pointerStart = event.clientX;
+    positionStart = position;
+    draggedDistance = 0;
+    viewport.setPointerCapture(event.pointerId);
+    root.classList.add('is-dragging');
+  }, { signal });
+
+  viewport.addEventListener('pointermove', (event) => {
+    if (!dragging) return;
+    draggedDistance = event.clientX - pointerStart;
+    position = wrap(positionStart + draggedDistance);
+    render();
+  }, { signal });
+
+  const finishDrag = (event: PointerEvent) => {
+    if (!dragging) return;
+
+    dragging = false;
+    root.classList.remove('is-dragging');
+
+    if (viewport.hasPointerCapture(event.pointerId)) {
+      viewport.releasePointerCapture(event.pointerId);
+    }
+
+    if (Math.abs(draggedDistance) > 8) {
+      const suppressClick = (clickEvent: MouseEvent) => {
+        clickEvent.preventDefault();
+        clickEvent.stopPropagation();
+      };
+      viewport.addEventListener('click', suppressClick, { capture: true, once: true });
+    }
+
+    velocity = draggedDistance * 2.8;
+    window.setTimeout(() => {
+      paused = false;
+    }, 240);
+  };
+
+  viewport.addEventListener('pointerup', finishDrag, { signal });
+  viewport.addEventListener('pointercancel', finishDrag, { signal });
+
+  root.addEventListener('focusin', () => {
+    paused = true;
+  }, { signal });
+
+  root.addEventListener('focusout', () => {
+    paused = false;
+  }, { signal });
+
+  let lastActivatedCard: HTMLElement | null = null;
+  let lastActivationTime = 0;
+  let activationResetTimer = 0;
+
+  const openBook = (card: HTMLElement) => {
+    const link = card as HTMLAnchorElement;
+    if (!link.href) return;
+    window.location.assign(link.href);
+  };
+
+  const markAwaitingSecondClick = (card: HTMLElement) => {
+    cards.forEach((item) => item.classList.toggle('is-awaiting-enter', item === card));
+    window.clearTimeout(activationResetTimer);
+    activationResetTimer = window.setTimeout(() => {
+      cards.forEach((item) => item.classList.remove('is-awaiting-enter'));
+      lastActivatedCard = null;
+      lastActivationTime = 0;
+    }, 520);
+  };
+
+  cards.forEach((card, index) => {
+    card.addEventListener('click', (event) => {
+      event.preventDefault();
+
+      // Keyboard activation must remain immediate and accessible.
+      if (event.detail === 0) {
+        openBook(card);
+        return;
+      }
+
+      // A completed drag must never be interpreted as one of the two clicks.
+      if (Math.abs(draggedDistance) > 8) {
+        lastActivatedCard = null;
+        lastActivationTime = 0;
+        return;
+      }
+
+      const now = performance.now();
+      const isSecondClick =
+        lastActivatedCard === card &&
+        now - lastActivationTime <= 500;
+
+      setActive(index);
+      paused = true;
+
+      if (isSecondClick) {
+        openBook(card);
+        return;
+      }
+
+      lastActivatedCard = card;
+      lastActivationTime = now;
+      markAwaitingSecondClick(card);
+    }, { signal });
+
+    card.addEventListener('dblclick', (event) => {
+      event.preventDefault();
+      openBook(card);
+    }, { signal });
+
+    card.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter') return;
+      event.preventDefault();
+      openBook(card);
+    }, { signal });
+  });
+
+  window.addEventListener('resize', () => {
+    targetVelocity = window.innerWidth < 760 ? -58 : -84;
+    refreshMeasurements();
+  }, { signal });
+
+  const images = Array.from(root.querySelectorAll<HTMLImageElement>('img'));
   Promise.all(
     images.map(async (image) => {
       if (!image.complete) {
@@ -417,186 +639,24 @@ function initWorks() {
           image.addEventListener('error', () => resolve(), { once: true });
         });
       }
+
       try {
         await image.decode();
       } catch {
-        // Failed decoding should not hold the rest of the scene.
+        // A failed image must not block the reel.
       }
     }),
-  ).finally(() => ScrollTrigger.refresh());
+  ).finally(refreshMeasurements);
 
-  const media = gsap.matchMedia();
+  refreshMeasurements();
+  frame = window.requestAnimationFrame(animate);
 
-  media.add('(min-width: 861px) and (prefers-reduced-motion: no-preference)', () => {
-    type Point = { x: number; y: number };
-    const clamp = gsap.utils.clamp;
-    const lerp = (a: number, b: number, amount: number) => a + (b - a) * amount;
-    const easeOut = (value: number) => 1 - Math.pow(1 - value, 3);
-    const smooth = (value: number) => value * value * (3 - 2 * value);
-
-    const dimensions = () => ({
-      width: stage.clientWidth,
-      height: stage.clientHeight,
-      cardWidth: cards[0]?.offsetWidth || 150,
-      cardHeight: cards[0]?.offsetHeight || 255,
-      ribbonWidth: ribbonCards[0]?.offsetWidth || 142,
-      ribbonHeight: ribbonCards[0]?.offsetHeight || 213,
-    });
-
-    const points = () => {
-      const dim = dimensions();
-      return {
-        p0: { x: -dim.width * 0.16, y: dim.height * 0.8 },
-        p1: { x: dim.width * 0.18, y: dim.height * 0.74 },
-        p2: { x: dim.width * 0.63, y: dim.height * 0.12 },
-        p3: { x: dim.width * 1.16, y: dim.height * 0.02 },
-      };
-    };
-
-    const bezier = (t: number, p0: Point, p1: Point, p2: Point, p3: Point): Point => {
-      const mt = 1 - t;
-      return {
-        x: mt * mt * mt * p0.x + 3 * mt * mt * t * p1.x + 3 * mt * t * t * p2.x + t * t * t * p3.x,
-        y: mt * mt * mt * p0.y + 3 * mt * mt * t * p1.y + 3 * mt * t * t * p2.y + t * t * t * p3.y,
-      };
-    };
-
-    const ribbonT = (progressValue: number, index: number) => clamp(0, 1, progressValue * 1.38 + index * 0.045 - 0.43);
-
-    const pathPose = (progressValue: number, index: number) => {
-      const path = points();
-      const t = ribbonT(progressValue, index);
-      const position = bezier(t, path.p0, path.p1, path.p2, path.p3);
-      const ahead = bezier(Math.min(1, t + 0.012), path.p0, path.p1, path.p2, path.p3);
-      const angle = Math.atan2(ahead.y - position.y, ahead.x - position.x) * (180 / Math.PI);
-      const scale = 0.48 + Math.sin(t * Math.PI) * 0.62;
-      const fadeIn = smooth(clamp(0, 1, t / 0.1));
-      const fadeOut = 1 - smooth(clamp(0, 1, (t - 0.86) / 0.14));
-      return { t, position, angle, scale, opacity: fadeIn * fadeOut };
-    };
-
-    const gridPose = (index: number, axis: 'x' | 'y') => {
-      const dim = dimensions();
-      const column = index % 3;
-      const row = Math.floor(index / 3);
-      const gapX = Math.min(58, dim.width * 0.042);
-      const gapY = Math.min(34, dim.height * 0.04);
-      if (axis === 'x') return (column - 1) * (dim.cardWidth + gapX);
-      return (row - 0.5) * (dim.cardHeight + gapY) + dim.height * 0.045;
-    };
-
-    gsap.set([...ribbonCards, ...cards], {
-      force3D: true,
-      transformOrigin: '50% 50%',
-      backfaceVisibility: 'hidden',
-    });
-    gsap.set(cards, { autoAlpha: 0 });
-    cards.forEach((card) => gsap.set(card.querySelector('.work-card__meta'), { opacity: 0, y: 12 }));
-
-    const trigger = ScrollTrigger.create({
-      trigger: section,
-      start: 'top top',
-      end: '+=340%',
-      scrub: 1.05,
-      pin: stage,
-      pinSpacing: true,
-      anticipatePin: 1,
-      invalidateOnRefresh: true,
-      onUpdate: (self) => {
-        const p = self.progress;
-        const dim = dimensions();
-
-        ribbonCards.forEach((card, index) => {
-          const pose = pathPose(p, index);
-          const dockingIndex = index >= 6 ? index - 6 : -1;
-          const dockStart = dockingIndex >= 0 ? 0.5 + dockingIndex * 0.055 : 2;
-          const dock = dockingIndex >= 0 ? smooth(clamp(0, 1, (p - dockStart) / 0.18)) : 0;
-          const depthTilt = lerp(38, -32, clamp(0, 1, pose.position.x / dim.width));
-
-          gsap.set(card, {
-            x: pose.position.x - dim.ribbonWidth / 2,
-            y: pose.position.y - dim.ribbonHeight / 2,
-            z: (pose.scale - 0.5) * 150,
-            rotateZ: pose.angle * 0.16,
-            rotateY: depthTilt,
-            scale: pose.scale,
-            opacity: pose.opacity * (1 - dock),
-          });
-        });
-
-        cards.forEach((card, index) => {
-          const ribbonIndex = index + 6;
-          const pose = pathPose(p, ribbonIndex);
-          const dockStart = 0.5 + index * 0.055;
-          const rawDock = clamp(0, 1, (p - dockStart) / 0.18);
-          const dock = easeOut(rawDock);
-          const sourceX = pose.position.x - dim.width / 2;
-          const sourceY = pose.position.y - dim.height / 2;
-          const targetX = gridPose(index, 'x');
-          const targetY = gridPose(index, 'y');
-          const depthTilt = lerp(30, -25, clamp(0, 1, pose.position.x / dim.width));
-
-          gsap.set(card, {
-            x: lerp(sourceX, targetX, dock),
-            y: lerp(sourceY, targetY, dock),
-            z: lerp((pose.scale - 0.5) * 140, 0, dock),
-            rotateY: lerp(depthTilt, 0, dock),
-            rotateZ: lerp(pose.angle * 0.16, 0, dock),
-            scale: lerp(pose.scale, 1, dock),
-            autoAlpha: smooth(clamp(0, 1, rawDock * 1.75)),
-          });
-
-          gsap.set(card.querySelector('.work-card__meta'), {
-            opacity: smooth(clamp(0, 1, (rawDock - 0.42) / 0.58)),
-            y: lerp(12, 0, dock),
-          });
-        });
-
-        const assembledProgress = smooth(clamp(0, 1, (p - 0.78) / 0.14));
-        const introProgress = smooth(clamp(0, 1, (p - 0.3) / 0.18));
-        stage.classList.toggle('is-assembled', p > 0.95);
-        gsap.set(intro, { opacity: 1 - introProgress, y: -18 * introProgress });
-        gsap.set(assembled, { opacity: assembledProgress, y: 16 * (1 - assembledProgress) });
-        gsap.set(title, { scale: 1 + p * 0.045, opacity: lerp(0.04, 0.022, p) });
-        gsap.set(progress, { scaleX: p });
-      },
-    });
-
-    return () => {
-      stage.classList.remove('is-assembled');
-      trigger.kill();
-      gsap.set([...ribbonCards, ...cards], { clearProps: 'all' });
-      cards.forEach((card) => gsap.set(card.querySelector('.work-card__meta'), { clearProps: 'all' }));
-      gsap.set([intro, assembled, title, progress].filter(Boolean), { clearProps: 'all' });
-    };
-  });
-
-  media.add('(max-width: 860px), (prefers-reduced-motion: reduce)', () => {
-    stage.classList.add('is-assembled');
-    gsap.set(ribbon, { display: 'none' });
-    gsap.set(cards, { clearProps: 'all' });
-    const reveal = gsap.fromTo(
-      cards,
-      { opacity: 0, y: 35 },
-      {
-        opacity: 1,
-        y: 0,
-        stagger: 0.08,
-        duration: 0.75,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: deck,
-          start: 'top 84%',
-          once: true,
-        },
-      },
-    );
-    return () => {
-      stage.classList.remove('is-assembled');
-      reveal.kill();
-      gsap.set(ribbon, { clearProps: 'all' });
-    };
-  });
+  signal.addEventListener('abort', () => {
+    window.cancelAnimationFrame(frame);
+    window.clearTimeout(activationResetTimer);
+    gsap.killTweensOf(track);
+    cards.forEach((card) => gsap.killTweensOf(card));
+  }, { once: true });
 }
 
 function initArchive(signal: AbortSignal) {
@@ -725,7 +785,7 @@ function initSite() {
     initNavigation(signal);
     initReveals();
     initHero(signal);
-    initWorks();
+    initWorks(signal);
     initArchive(signal);
     initBookHero(signal);
   });

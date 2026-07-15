@@ -1,26 +1,22 @@
-BOOK WORLD ATMOSPHERES — READY TO COPY
+DOUBLE-CLICK BOOK ENTER
 
-Folder structure is already matched to the Astro project.
+Behavior:
+- First click/tap selects and highlights a cover.
+- Second click/tap on the same cover within 500 ms opens its book page.
+- Native mouse double-click is supported.
+- Enter still opens the focused book immediately for keyboard accessibility.
+- Dragging the reel never counts as a click.
+- Hover pauses the reel.
 
-Copy these folders into the repository root:
-- public/worlds/*.webp
-- src/components/BookAtmosphere.astro
-- src/styles/book.css
+Install from the repository root:
 
-Codespaces command:
-
-  cp -a book-world-atmospheres-ready/. ./
+  cp -a double-click-book-enter/. ./
   rm -rf .astro dist
   pnpm run check
   pnpm run build
   pnpm run dev -- --host 0.0.0.0
 
-Generated files:
-- public/worlds/nexus.webp
-- public/worlds/sillage.webp
-- public/worlds/manifesto.webp
-- public/worlds/hydra.webp
-- public/worlds/lucidreamer.webp
-- public/worlds/capture.webp
-
-Image dimensions: 1672 × 941 px, 16:9 WebP.
+Changed files:
+- src/components/Works.astro
+- src/scripts/site.ts
+- src/styles/global.css

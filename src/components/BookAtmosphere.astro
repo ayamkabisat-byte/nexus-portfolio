@@ -7,6 +7,7 @@ interface Props {
 
 const { slug } = Astro.props;
 const atmosphereImage = withBase(`worlds/${slug}.webp`);
+const overlayImage = withBase(`worlds/overlays/${slug}.webp`);
 ---
 
 <div class={`book-world book-world--${slug}`} aria-hidden="true">
@@ -16,6 +17,15 @@ const atmosphereImage = withBase(`worlds/${slug}.webp`);
     alt=""
     width="1672"
     height="941"
+    loading="eager"
+    decoding="async"
+  />
+  <img
+    class="book-world__overlay"
+    src={overlayImage}
+    alt=""
+    width="1600"
+    height="1200"
     loading="eager"
     decoding="async"
   />

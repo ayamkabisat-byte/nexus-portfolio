@@ -2,79 +2,50 @@
 import { BOOKS } from '@/data/books';
 import { withBase } from '@/lib/urls';
 
-const RIBBON_BOOKS = [...BOOKS, ...BOOKS];
+const REEL_BOOKS = [...BOOKS, ...BOOKS];
 ---
 
-<section class="works" id="works" data-works>
-  <div class="works__stage" data-works-stage>
-    <div class="works__ambient" aria-hidden="true"></div>
-    <div class="works__ring works__ring--one" aria-hidden="true"></div>
-    <div class="works__ring works__ring--two" aria-hidden="true"></div>
-
-    <header class="section-heading works__heading">
-      <div>
-        <span class="eyebrow">SELECTED FICTION / 2026</span>
-        <h2>Featured works</h2>
-      </div>
-      <span class="section-heading__count">{String(BOOKS.length).padStart(2, '0')} WORLDS</span>
-    </header>
-
-    <div class="works__background-title" aria-hidden="true" data-works-title>
-      FICTION<br />ARCHIVE
+<section class="cover-reel" id="works" data-book-showcase aria-labelledby="cover-reel-title">
+  <header class="cover-reel__header">
+    <div>
+      <span class="eyebrow">SELECTED FICTION / 2026</span>
+      <h2 id="cover-reel-title">Featured works.</h2>
     </div>
+    <span class="cover-reel__hint" aria-hidden="true">AUTO-MOVING · HOVER TO PAUSE · DOUBLE-CLICK TO ENTER</span>
+  </header>
 
-    <div class="works__ribbon" data-works-ribbon aria-hidden="true">
-      {RIBBON_BOOKS.map((book, index) => (
-        <span
-          class="work-ribbon-card"
-          style={`--book-accent:${book.accent}; --book-rgb:${book.accentRgb};`}
-          data-ribbon-card
-          data-ribbon-index={index}
-        >
-          <span class="work-ribbon-card__frame">
-            <img src={withBase(book.cover)} alt="" width="600" height="900" loading="eager" decoding="async" />
-            <span class="work-ribbon-card__shade"></span>
-          </span>
-        </span>
-      ))}
-    </div>
+  <div class="cover-reel__viewport" data-showcase-viewport>
+    <div class="cover-reel__track" data-showcase-track>
+      {REEL_BOOKS.map((book, index) => {
+        const clone = index >= BOOKS.length;
 
-    <div class="works__deck" data-works-deck>
-      {BOOKS.map((book) => (
-        <a
-          class="work-card"
-          href={withBase(`books/${book.slug}/`)}
-          style={`--book-accent:${book.accent}; --book-rgb:${book.accentRgb};`}
-          data-work-card
-          data-cursor-label={`ENTER ${book.title}`}
-          aria-label={`Explore ${book.title}`}
-        >
-          <span class="work-card__frame">
-            <span class="work-card__number">{book.number}</span>
-            <img src={withBase(book.cover)} alt={`${book.title} book cover`} width="600" height="900" loading="eager" decoding="async" />
-            <span class="work-card__glare"></span>
-            <span class="work-card__shade"></span>
-          </span>
-          <span class="work-card__meta">
-            <small>{book.genre}</small>
-            <strong>{book.title}</strong>
-          </span>
-        </a>
-      ))}
-    </div>
-
-    <div class="works__intro-copy" data-works-intro aria-hidden="true">
-      <p>Twelve moving covers. Six worlds dock into a single fiction archive.</p>
-      <span>Scroll to assemble the collection</span>
-    </div>
-
-    <div class="works__assembled-copy" data-works-assembled aria-hidden="true">
-      <span>COLLECTION ASSEMBLED</span>
-      <span>Choose a cover to enter its world</span>
-    </div>
-
-    <div class="works__progress" aria-hidden="true">
-      <span data-works-progress></span>
+        return (
+          <a
+            class="cover-reel__item"
+            href={withBase(`books/${book.slug}/`)}
+            style={`--book-accent:${book.accent}; --book-rgb:${book.accentRgb};`}
+            data-showcase-card
+            data-showcase-link
+            data-showcase-slug={book.slug}
+            data-cursor-label={`DOUBLE-CLICK ${book.title}`}
+            aria-label={clone ? undefined : `Select ${book.title}; double-click to open`}
+            aria-hidden={clone ? 'true' : undefined}
+            tabindex={clone ? '-1' : undefined}
+          >
+            <span class="cover-reel__cover">
+              <img
+                src={withBase(book.cover)}
+                alt={clone ? '' : `${book.title} book cover`}
+                width="800"
+                height="1200"
+                loading="eager"
+                decoding="async"
+              />
+              <span class="cover-reel__shine" aria-hidden="true"></span>
+            </span>
+          </a>
+        );
+      })}
     </div>
   </div>
 </section>
