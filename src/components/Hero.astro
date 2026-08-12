@@ -1,11 +1,17 @@
 ---
 import { BOOKS } from '@/data/books';
 import { SITE } from '@/config/site';
-import { withBase } from '@/lib/urls';
-
+import CinematicVideo from '@/components/CinematicVideo.astro';
 ---
 
 <section class="hero" id="home" data-hero>
+  <CinematicVideo
+    src="video/hero.mp4"
+    poster="og/home.jpg"
+    className="hero__cinematic"
+    priority
+  />
+
   <div class="hero__grid" aria-hidden="true"></div>
   <div class="hero__orb hero__orb--one" aria-hidden="true"></div>
   <div class="hero__orb hero__orb--two" aria-hidden="true"></div>
@@ -33,19 +39,6 @@ import { withBase } from '@/lib/urls';
     <a class="button button--ghost" href={SITE.royalRoad} target="_blank" rel="noreferrer" data-cursor-label="READ NEXUS">
       Read NEXUS <span aria-hidden="true">↗</span>
     </a>
-  </div>
-
-  <div class="hero__object" data-hero-object aria-hidden="true">
-    <div class="hero__orbit"></div>
-    {BOOKS.slice(0, 4).map((book, index) => (
-      <div
-        class={`hero__book hero__book--${index + 1}`}
-        style={`--book-accent:${book.accent}; --book-rgb:${book.accentRgb};`}
-      >
-        <img src={withBase(book.cover)} alt="" width="600" height="900" loading={index === 0 ? 'eager' : 'lazy'} decoding="async" />
-      </div>
-    ))}
-    <span class="hero__object-code">ARCHIVE / 06 WORLDS</span>
   </div>
 
   <div class="hero__ticker" aria-hidden="true">

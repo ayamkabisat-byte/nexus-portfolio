@@ -1,0 +1,154 @@
+---
+import { withBase } from '@/lib/urls';
+import '@/styles/cinematic-video.css';
+
+interface Props {
+  src: string;
+  poster: string;
+  className?: string;
+  priority?: boolean;
+}
+
+const {
+  src,
+  poster,
+  className = '',
+  priority = false,
+} = Astro.props;
+
+const srcUrl = withBase(src);
+const posterUrl = withBase(poster);
+---
+
+<div
+  class:list={['cinematic-video', className]}
+  data-cinematic-shell
+  aria-hidden="true"
+>
+  <img
+    class="cinematic-video__fallback"
+    src={posterUrl}
+    alt=""
+    loading={priority ? 'eager' : 'lazy'}
+    decoding="async"
+    fetchpriority={priority ? 'high' : 'auto'}
+  />
+
+  <video
+    class="cinematic-video__media"
+    data-cinematic-video
+    autoplay
+    muted
+    loop
+    playsinline
+    preload={priority ? 'auto' : 'metadata'}
+    poster={posterUrl}
+    disablepictureinpicture
+  >
+    <source src={srcUrl} type="video/mp4" />
+  </video>
+</div>
+
+<script>
+  let cleanupVideoRuntime = () => {};
+
+  const initCinematicVideos = () => {
+    cleanupVideoRuntime();
+
+    const videos = Array.from(
+      document.querySelectorAll<HTMLVideoElement>('[data-cinematic-video]'),
+    );
+
+    if (!videos.length) return;
+
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const cleanupCallbacks: Array<() => void> = [];
+
+    videos.forEach((video) => {
+      const shell = video.closest<HTMLElement>('[data-cinematic-shell]');
+      if (!shell) return;
+
+      const markReady = () => shell.classList.add('is-ready');
+      const markFallback = () => {
+        shell.classList.remove('is-ready');
+        shell.classList.add('is-fallback');
+      };
+
+      video.addEventListener('loadeddata', markReady);
+      video.addEventListener('canplay', markReady);
+      video.addEventListener('error', markFallback);
+
+      cleanupCallbacks.push(() => {
+        video.removeEventListener('loadeddata', markReady);
+        video.removeEventListener('canplay', markReady);
+        video.removeEventListener('error', markFallback);
+      });
+
+      if (reducedMotion) {
+        video.pause();
+        shell.classList.add('is-reduced-motion');
+        return;
+      }
+
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry?.isIntersecting && document.visibilityState === 'visible') {
+            void video.play().catch(() => {
+              shell.classList.add('is-play-blocked');
+            });
+          } else {
+            video.pause();
+          }
+        },
+        {
+          rootMargin: '18% 0px 18% 0px',
+          threshold: 0.05,
+        },
+      );
+
+      observer.observe(video);
+
+      const onVisibility = () => {
+        if (document.visibilityState === 'hidden') {
+          video.pause();
+          return;
+        }
+
+        const rect = video.getBoundingClientRect();
+        const visible = rect.bottom > 0 && rect.top < window.innerHeight;
+
+        if (visible) {
+          void video.play().catch(() => {
+            shell.classList.add('is-play-blocked');
+          });
+        }
+      };
+
+      document.addEventListener('visibilitychange', onVisibility);
+
+      cleanupCallbacks.push(() => {
+        observer.disconnect();
+        document.removeEventListener('visibilitychange', onVisibility);
+        video.pause();
+      });
+
+      if (video.readyState >= 2) markReady();
+
+      void video.play().catch(() => {
+        shell.classList.add('is-play-blocked');
+      });
+    });
+
+    cleanupVideoRuntime = () => {
+      cleanupCallbacks.forEach((callback) => callback());
+      cleanupCallbacks.length = 0;
+    };
+  };
+
+  document.addEventListener('astro:page-load', initCinematicVideos);
+  document.addEventListener('astro:before-preparation', () => cleanupVideoRuntime());
+
+  if (document.readyState !== 'loading') {
+    queueMicrotask(initCinematicVideos);
+  }
+</script>

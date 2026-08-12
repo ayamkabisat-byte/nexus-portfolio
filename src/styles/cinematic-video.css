@@ -1,0 +1,202 @@
+/* Cinematic MP4 integration.
+   The WebP fallback remains underneath every video. */
+
+.cinematic-video {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: #05070d;
+}
+
+.cinematic-video__fallback,
+.cinematic-video__media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cinematic-video__fallback {
+  z-index: 0;
+  opacity: 1;
+  transform: scale(1.015);
+  transition: opacity 0.9s ease;
+}
+
+.cinematic-video__media {
+  z-index: 1;
+  opacity: 0;
+  transform: scale(1.015);
+  filter: saturate(0.86) contrast(1.08) brightness(0.82);
+  transition: opacity 1s ease;
+  will-change: opacity, transform;
+}
+
+.cinematic-video.is-ready .cinematic-video__media {
+  opacity: 1;
+}
+
+.cinematic-video.is-ready .cinematic-video__fallback {
+  opacity: 0;
+}
+
+.cinematic-video.is-fallback .cinematic-video__media,
+.cinematic-video.is-play-blocked .cinematic-video__media {
+  opacity: 0;
+}
+
+/* Homepage hero ---------------------------------------------------------- */
+
+.hero {
+  isolation: isolate;
+}
+
+.hero__cinematic {
+  z-index: 0;
+}
+
+.hero__cinematic::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(5, 7, 13, 0.92) 0%,
+      rgba(5, 7, 13, 0.72) 24%,
+      rgba(5, 7, 13, 0.32) 51%,
+      rgba(5, 7, 13, 0.16) 75%,
+      rgba(5, 7, 13, 0.34) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(5, 7, 13, 0.52) 0%,
+      rgba(5, 7, 13, 0.05) 36%,
+      rgba(5, 7, 13, 0.22) 72%,
+      rgba(5, 7, 13, 0.84) 100%
+    );
+}
+
+.hero__cinematic .cinematic-video__media {
+  animation: cinematicHeroDrift 16s ease-in-out infinite alternate;
+}
+
+.hero__grid,
+.hero__orb {
+  z-index: 1;
+}
+
+.hero__meta,
+.hero__headline,
+.hero__intro,
+.hero__actions,
+.hero__ticker,
+.hero__scroll {
+  z-index: 3;
+}
+
+@keyframes cinematicHeroDrift {
+  from {
+    transform: scale(1.015) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.065) translate3d(-0.7%, -0.35%, 0);
+  }
+}
+
+/* Individual book worlds ------------------------------------------------ */
+
+.book-world__cinematic {
+  z-index: 0;
+  background: transparent;
+}
+
+.book-world__cinematic::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background:
+    radial-gradient(
+      circle at 72% 46%,
+      rgba(var(--book-rgb), 0.08),
+      transparent 34%
+    ),
+    linear-gradient(
+      90deg,
+      rgba(5, 7, 13, 0.64) 0%,
+      rgba(5, 7, 13, 0.24) 44%,
+      rgba(5, 7, 13, 0.12) 72%,
+      rgba(5, 7, 13, 0.34) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(5, 7, 13, 0.18),
+      rgba(5, 7, 13, 0.5)
+    );
+}
+
+.book-world__cinematic .cinematic-video__media {
+  filter:
+    saturate(0.82)
+    contrast(1.08)
+    brightness(0.74);
+}
+
+.book-world__overlay {
+  position: relative;
+  z-index: 2;
+}
+
+.book-world > svg,
+.book-world > div:not(.book-world__cinematic) {
+  z-index: 2;
+}
+
+/* Mobile: keep the video, but make it quieter so copy remains readable. */
+@media (max-width: 760px) {
+  .hero__cinematic .cinematic-video__media,
+  .book-world__cinematic .cinematic-video__media {
+    filter: saturate(0.74) contrast(1.06) brightness(0.66);
+  }
+
+  .hero__cinematic::after {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(5, 7, 13, 0.56) 0%,
+        rgba(5, 7, 13, 0.3) 42%,
+        rgba(5, 7, 13, 0.8) 100%
+      ),
+      linear-gradient(
+        90deg,
+        rgba(5, 7, 13, 0.7),
+        rgba(5, 7, 13, 0.22)
+      );
+  }
+
+  .book-world__cinematic::after {
+    background:
+      linear-gradient(180deg, rgba(5, 7, 13, 0.24), rgba(5, 7, 13, 0.66)),
+      linear-gradient(90deg, rgba(5, 7, 13, 0.52), rgba(5, 7, 13, 0.18));
+  }
+}
+
+/* Respect operating-system motion preferences. */
+@media (prefers-reduced-motion: reduce) {
+  .cinematic-video__media {
+    display: none;
+  }
+
+  .cinematic-video__fallback {
+    opacity: 1 !important;
+    transform: none;
+  }
+
+  .hero__cinematic .cinematic-video__media {
+    animation: none;
+  }
+}

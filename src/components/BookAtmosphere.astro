@@ -1,98 +1,18 @@
 ---
-import { withBase } from '@/lib/urls';
+import CinematicVideo from '@/components/CinematicVideo.astro';
 
 interface Props {
   slug: string;
 }
 
 const { slug } = Astro.props;
-const atmosphereImage = withBase(`worlds/${slug}.webp`);
-const overlayImage = withBase(`worlds/overlays/${slug}.webp`);
 ---
 
 <div class={`book-world book-world--${slug}`} aria-hidden="true">
-  <img
-    class="book-world__image"
-    src={atmosphereImage}
-    alt=""
-    width="1672"
-    height="941"
-    loading="eager"
-    decoding="async"
+  <CinematicVideo
+    src={`video/${slug}.mp4`}
+    poster={`worlds/${slug}.webp`}
+    className="book-world__cinematic"
+    priority
   />
-  <img
-    class="book-world__overlay"
-    src={overlayImage}
-    alt=""
-    width="1600"
-    height="1200"
-    loading="eager"
-    decoding="async"
-  />
-  {slug === 'nexus' && (
-    <>
-      <div class="book-world__portal book-world__portal--one"></div>
-      <div class="book-world__portal book-world__portal--two"></div>
-      <div class="book-world__portal book-world__portal--three"></div>
-      <div class="book-world__nodes">
-        {Array.from({ length: 8 }, (_, index) => <i style={`--i:${index}`}></i>)}
-      </div>
-    </>
-  )}
-
-  {slug === 'sillage' && (
-    <>
-      <svg class="book-world__bottle" viewBox="0 0 180 320" fill="none">
-        <path d="M70 16h40v42l20 25v28c18 9 29 28 29 49v111c0 21-17 38-38 38H59c-21 0-38-17-38-38V160c0-21 11-40 29-49V83l20-25V16Z" />
-        <path d="M50 111h80M48 255h84" />
-      </svg>
-      <svg class="book-world__molecule" viewBox="0 0 280 210" fill="none">
-        <path d="m48 50 38-22 38 22v44l-38 22-38-22V50Zm76 44 38 22v44l-38 22-38-22v-44m76 0 38-22 38 22v44l-38 22-38-22" />
-        <circle cx="48" cy="50" r="5" /><circle cx="124" cy="94" r="5" /><circle cx="200" cy="116" r="5" />
-      </svg>
-      <div class="book-world__sillage-lines"><i></i><i></i><i></i></div>
-    </>
-  )}
-
-  {slug === 'manifesto' && (
-    <>
-      <div class="book-world__redactions"><i></i><i></i><i></i><i></i></div>
-      <div class="book-world__poster-shard book-world__poster-shard--one">TRUTH</div>
-      <div class="book-world__poster-shard book-world__poster-shard--two">REDACTED</div>
-      <div class="book-world__mask"></div>
-    </>
-  )}
-
-  {slug === 'hydra' && (
-    <>
-      <div class="book-world__hydra-ring">
-        {Array.from({ length: 9 }, (_, index) => <i style={`--i:${index}`}></i>)}
-      </div>
-      <svg class="book-world__hydra-lines" viewBox="0 0 360 320" fill="none">
-        <path d="M180 300C176 229 91 236 88 167 85 99 149 106 128 34" />
-        <path d="M180 300c4-71 89-64 92-133 3-68-61-61-40-133" />
-        <path d="M180 300c-2-75 0-133 0-263" />
-      </svg>
-    </>
-  )}
-
-  {slug === 'lucidreamer' && (
-    <>
-      <div class="book-world__clock"><i></i><i></i></div>
-      <div class="book-world__monas"><i></i></div>
-      <div class="book-world__dream-orbit book-world__dream-orbit--one"></div>
-      <div class="book-world__dream-orbit book-world__dream-orbit--two"></div>
-    </>
-  )}
-
-  {slug === 'capture' && (
-    <>
-      <svg class="book-world__aperture" viewBox="0 0 300 300" fill="none">
-        <circle cx="150" cy="150" r="118" />
-        <path d="M150 32 205 126 150 150 87 77M268 150l-108 7-10-7-3-72M150 268l-55-94 55-24 63 73M32 150l108-7 10 7 3 72" />
-      </svg>
-      <div class="book-world__focus-frame"><i></i><i></i><i></i><i></i></div>
-      <div class="book-world__timestamp">REC 00:03:17:42</div>
-    </>
-  )}
 </div>
