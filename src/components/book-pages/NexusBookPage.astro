@@ -1,0 +1,125 @@
+---
+import BookWorldRenderer from '@/components/book-worlds/BookWorldRenderer.astro';
+import type { Book } from '@/data/books';
+import { withBase } from '@/lib/urls';
+
+interface Props {
+  book: Book;
+  previous: Book;
+  next: Book;
+  themeStyle: string;
+}
+
+const { book, previous, next, themeStyle } = Astro.props;
+---
+
+<main
+  id="main-content"
+  class="book-page phase3-page phase3-nexus"
+  data-book-theme="nexus"
+  data-book-layout="dimensional"
+  data-book-theme-engine="v3"
+  style={themeStyle}
+>
+  <section class="nexus-gateway" id="home">
+    <BookWorldRenderer slug={book.slug} />
+    <div class="nexus-gateway__grid" aria-hidden="true"></div>
+    <div class="nexus-gateway__coordinates" aria-hidden="true">
+      <span>ANCHOR REALITY / 00</span>
+      <span>NX-LINK / STABLE</span>
+      <span>LAT 00.000 / LON ∞</span>
+    </div>
+
+    <a class="phase3-back" href={`${withBase('')}#works`} data-cursor-label="BACK TO ARCHIVE">← Archive</a>
+
+    <div class="nexus-gateway__title" aria-hidden="true">
+      <span>N</span><span>E</span><span>X</span><span>U</span><span>S</span>
+    </div>
+
+    <div class="nexus-anchor" data-book-cover>
+      <div class="nexus-anchor__rings" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
+      <div class="nexus-anchor__cover">
+        <span class="nexus-anchor__code">{book.archiveCode}</span>
+        <img
+          src={withBase(book.cover)}
+          alt={`${book.title} book cover`}
+          width="600"
+          height="900"
+          loading="eager"
+          decoding="async"
+          fetchpriority="high"
+        />
+      </div>
+    </div>
+
+    <div class="nexus-gateway__copy">
+      <span class="phase3-kicker">01 / SCI-FI THRILLER / MULTIVERSE FILE</span>
+      <h1>NEXUS</h1>
+      <p>{book.tagline}</p>
+      <div class="phase3-actions">
+        <a class="button button--primary" href="#reality-nodes" data-cursor-label="ENTER NEXUS">Enter the Nexus ↓</a>
+        {book.externalUrl && (
+          <a class="button button--ghost" href={book.externalUrl} target="_blank" rel="noreferrer" data-cursor-label="READ ONLINE">
+            {book.externalLabel} ↗
+          </a>
+        )}
+      </div>
+    </div>
+
+    <div class="nexus-gateway__signal" aria-hidden="true"><span></span> WORLD SIGNAL DETECTED</div>
+  </section>
+
+  <section class="nexus-nodes" id="reality-nodes">
+    <header class="nexus-section-head" data-reveal>
+      <span class="phase3-kicker">REALITY NODES / STORY PREMISE</span>
+      <h2>One life.<br />Infinite versions.</h2>
+      <p>Three signals define the first breach.</p>
+    </header>
+
+    <div class="nexus-node-list">
+      {book.synopsis.map((paragraph, index) => (
+        <article class="nexus-node-card" data-reveal>
+          <div class="nexus-node-card__index">0{index + 1}</div>
+          <div class="nexus-node-card__axis" aria-hidden="true"></div>
+          <div>
+            <span>REALITY NODE / {index === 0 ? 'DISCOVERY' : index === 1 ? 'PURSUIT' : 'CONTINUITY'}</span>
+            <p>{paragraph}</p>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="nexus-protocols">
+    <div class="nexus-protocols__intro" data-reveal>
+      <span class="phase3-kicker">BORROWED PROTOCOLS</span>
+      <h2>The device does not create power.<br />It opens access.</h2>
+    </div>
+    <div class="nexus-protocols__grid">
+      {book.motifs.map((motif, index) => (
+        <div class="nexus-protocol" data-reveal>
+          <span>PR-{String(index + 1).padStart(2, '0')}</span>
+          <strong>{motif}</strong>
+          <small>{index === 0 ? 'BRANCHING REALITY' : index === 1 ? 'SELF / OTHER SELF' : index === 2 ? 'SKILL TRANSFER' : 'INTERDIMENSIONAL THREAT'}</small>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="nexus-fracture" aria-label="Book tagline">
+    <div class="nexus-fracture__echo" aria-hidden="true">NEXUS NEXUS NEXUS</div>
+    <blockquote data-reveal>{book.tagline}</blockquote>
+    <div class="nexus-fracture__line" aria-hidden="true"></div>
+  </section>
+
+  <nav class="phase3-navigation" aria-label="Other books">
+    <a href={withBase(`books/${previous.slug}/`)} data-cursor-label={`PREVIOUS ${previous.title}`}>
+      <small>PREVIOUS WORLD</small><strong>← {previous.title}</strong>
+    </a>
+    <a href={withBase(`books/${next.slug}/`)} data-cursor-label={`NEXT ${next.title}`}>
+      <small>NEXT WORLD</small><strong>{next.title} →</strong>
+    </a>
+  </nav>
+</main>
