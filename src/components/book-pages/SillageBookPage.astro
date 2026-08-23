@@ -1,0 +1,127 @@
+---
+import BookWorldRenderer from '@/components/book-worlds/BookWorldRenderer.astro';
+import type { Book } from '@/data/books';
+import { withBase } from '@/lib/urls';
+
+interface Props {
+  book: Book;
+  previous: Book;
+  next: Book;
+  themeStyle: string;
+}
+
+const { book, previous, next, themeStyle } = Astro.props;
+---
+
+<main
+  id="main-content"
+  class="book-page phase3-page phase3-sillage"
+  data-book-theme="sillage"
+  data-book-layout="editorial"
+  data-book-theme-engine="v3"
+  style={themeStyle}
+>
+  <section class="sillage-case" id="home">
+    <BookWorldRenderer slug={book.slug} />
+    <a class="phase3-back" href={`${withBase('')}#works`} data-cursor-label="BACK TO ARCHIVE">← Fiction archive</a>
+
+    <aside class="sillage-case__rail" aria-hidden="true">
+      <span>CASE SG-02</span>
+      <span>OLFACTORY RECORD</span>
+      <span>STATUS / ACTIVE</span>
+      <span>ARCHIVE / M.DINKO</span>
+    </aside>
+
+    <div class="sillage-case__masthead">
+      <span class="phase3-kicker">MYSTERY / CRIME / CASE FILE 02</span>
+      <h1>SILLAGE</h1>
+      <p class="sillage-case__definition">/siːˈjɑːʒ/ — the trail left by a scent after its source has passed.</p>
+    </div>
+
+    <div class="sillage-evidence-cover" data-book-cover>
+      <div class="sillage-evidence-cover__label">
+        <span>EXHIBIT A</span>
+        <small>{book.archiveCode}</small>
+      </div>
+      <img
+        src={withBase(book.cover)}
+        alt={`${book.title} book cover`}
+        width="600"
+        height="900"
+        loading="eager"
+        decoding="async"
+        fetchpriority="high"
+      />
+      <span class="sillage-evidence-cover__pin" aria-hidden="true"></span>
+    </div>
+
+    <div class="sillage-case__summary">
+      <blockquote>{book.tagline}</blockquote>
+      <p>Some evidence disappears. Some evidence evaporates. Raka can still smell what remains.</p>
+      <a class="sillage-case__enter" href="#evidence-log" data-cursor-label="OPEN CASE FILE">Open case file ↓</a>
+    </div>
+
+    <div class="sillage-case__trace" aria-hidden="true">
+      <span></span><span></span><span></span>
+    </div>
+  </section>
+
+  <section class="sillage-log" id="evidence-log">
+    <header class="sillage-log__header" data-reveal>
+      <div>
+        <span class="phase3-kicker">EVIDENCE LOG / OLFACTORY NOTES</span>
+        <h2>What people hide,<br /><em>the air remembers.</em></h2>
+      </div>
+      <p>Three entries. One widening trail. Every trace points deeper into the system.</p>
+    </header>
+
+    <div class="sillage-evidence-list">
+      {book.synopsis.map((paragraph, index) => (
+        <article class="sillage-evidence" data-reveal>
+          <div class="sillage-evidence__meta">
+            <span>NOTE {String(index + 1).padStart(2, '0')}</span>
+            <small>{index === 0 ? 'SUBJECT / RAKA' : index === 1 ? 'TRACE / INSTITUTIONAL' : 'ASSESSMENT / MORAL'}</small>
+          </div>
+          <p>{paragraph}</p>
+          <div class="sillage-evidence__rule" aria-hidden="true"></div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="sillage-profile">
+    <div class="sillage-profile__title" data-reveal>
+      <span class="phase3-kicker">TRACE PROFILE</span>
+      <h2>Four notes in the composition.</h2>
+      <p>Not perfume notes. Narrative residues.</p>
+    </div>
+
+    <div class="sillage-profile__notes">
+      {book.motifs.map((motif, index) => (
+        <article class="sillage-note" data-reveal>
+          <span class="sillage-note__number">0{index + 1}</span>
+          <div>
+            <small>{index === 0 ? 'TOP NOTE' : index === 1 ? 'HEART NOTE' : index === 2 ? 'BASE NOTE' : 'DRYDOWN'}</small>
+            <strong>{motif}</strong>
+          </div>
+          <span class="sillage-note__formula" aria-hidden="true">C{8 + index}H{10 + index * 2}O{index + 1}</span>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="sillage-statement" aria-label="Book tagline">
+    <span class="sillage-statement__case" aria-hidden="true">SG / 02 / TRACE</span>
+    <blockquote data-reveal>“{book.tagline}”</blockquote>
+    <p data-reveal>Every room keeps a record. Every person leaves one behind.</p>
+  </section>
+
+  <nav class="phase3-navigation phase3-navigation--sillage" aria-label="Other books">
+    <a href={withBase(`books/${previous.slug}/`)} data-cursor-label={`PREVIOUS ${previous.title}`}>
+      <small>PREVIOUS FILE</small><strong>← {previous.title}</strong>
+    </a>
+    <a href={withBase(`books/${next.slug}/`)} data-cursor-label={`NEXT ${next.title}`}>
+      <small>NEXT FILE</small><strong>{next.title} →</strong>
+    </a>
+  </nav>
+</main>
