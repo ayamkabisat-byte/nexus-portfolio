@@ -30,7 +30,7 @@ const REEL_BOOKS = [...BOOKS, ...BOOKS];
             data-showcase-link
             data-showcase-slug={book.slug}
             data-cursor-label={`DOUBLE-CLICK ${book.title}`}
-            aria-label={clone ? undefined : `Select ${book.title}; double-click to open`}
+            aria-label={clone ? undefined : `Open ${book.title}`}
             aria-hidden={clone ? 'true' : undefined}
             tabindex={clone ? '-1' : undefined}
           >
