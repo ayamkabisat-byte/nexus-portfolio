@@ -11,13 +11,15 @@ const REEL_BOOKS = [...BOOKS, ...BOOKS];
       <span class="eyebrow">SELECTED FICTION / 2026</span>
       <h2 id="cover-reel-title">Featured works.</h2>
     </div>
-    <span class="cover-reel__hint" aria-hidden="true">AUTO-MOVING · HOVER TO PAUSE · DOUBLE-CLICK TO ENTER</span>
+    <span class="cover-reel__hint cover-reel__hint--desktop" aria-hidden="true">AUTO-MOVING · HOVER TO PAUSE · DOUBLE-CLICK TO ENTER</span>
+    <span class="cover-reel__hint cover-reel__hint--touch" aria-hidden="true">SWIPE TO EXPLORE · TAP TO ENTER</span>
   </header>
 
   <div class="cover-reel__viewport" data-showcase-viewport>
     <div class="cover-reel__track" data-showcase-track>
       {REEL_BOOKS.map((book, index) => {
         const clone = index >= BOOKS.length;
+        const priorityCover = !clone && index < 2;
 
         return (
           <a
@@ -28,7 +30,7 @@ const REEL_BOOKS = [...BOOKS, ...BOOKS];
             data-showcase-link
             data-showcase-slug={book.slug}
             data-cursor-label={`DOUBLE-CLICK ${book.title}`}
-            aria-label={clone ? undefined : `Select ${book.title}; double-click to open`}
+            aria-label={clone ? undefined : `Open ${book.title}`}
             aria-hidden={clone ? 'true' : undefined}
             tabindex={clone ? '-1' : undefined}
           >
@@ -38,7 +40,8 @@ const REEL_BOOKS = [...BOOKS, ...BOOKS];
                 alt={clone ? '' : `${book.title} book cover`}
                 width="800"
                 height="1200"
-                loading="eager"
+                loading={priorityCover ? 'eager' : 'lazy'}
+                fetchpriority={index === 0 ? 'high' : 'auto'}
                 decoding="async"
               />
               <span class="cover-reel__shine" aria-hidden="true"></span>
@@ -49,3 +52,77 @@ const REEL_BOOKS = [...BOOKS, ...BOOKS];
     </div>
   </div>
 </section>
+
+<style>
+  .cover-reel__hint--touch {
+    display: none;
+  }
+
+  @media (pointer: coarse) {
+    .cover-reel__hint--desktop {
+      display: none;
+    }
+
+    .cover-reel__hint--touch {
+      display: block;
+    }
+  }
+</style>
+
+<script>
+  let cleanupTouchEnter = () => {};
+
+  const initTouchEnter = () => {
+    cleanupTouchEnter();
+
+    if (!window.matchMedia('(pointer: coarse)').matches) return;
+
+    const viewport = document.querySelector<HTMLElement>('[data-showcase-viewport]');
+    if (!viewport) return;
+
+    const controller = new AbortController();
+    const { signal } = controller;
+    let startX = 0;
+    let startY = 0;
+    let moved = 0;
+
+    viewport.addEventListener('pointerdown', (event) => {
+      startX = event.clientX;
+      startY = event.clientY;
+      moved = 0;
+    }, { signal });
+
+    viewport.addEventListener('pointermove', (event) => {
+      const dx = event.clientX - startX;
+      const dy = event.clientY - startY;
+      moved = Math.max(moved, Math.hypot(dx, dy));
+    }, { signal });
+
+    viewport.addEventListener('click', (event) => {
+      const target = event.target instanceof Element ? event.target : null;
+      const card = target?.closest<HTMLAnchorElement>('[data-showcase-card]');
+      if (!card) return;
+
+      // Preserve dragging without accidentally entering a book.
+      if (moved > 10) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        return;
+      }
+
+      // Touch devices should behave like a normal gallery: one tap enters.
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      window.location.assign(card.href);
+    }, { capture: true, signal });
+
+    cleanupTouchEnter = () => controller.abort();
+  };
+
+  document.addEventListener('astro:page-load', initTouchEnter);
+  document.addEventListener('astro:before-preparation', () => cleanupTouchEnter());
+
+  if (document.readyState !== 'loading') {
+    queueMicrotask(initTouchEnter);
+  }
+</script>

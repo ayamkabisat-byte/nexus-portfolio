@@ -12,6 +12,9 @@ import CinematicVideo from '@/components/CinematicVideo.astro';
     priority
   />
 
+  <!-- Compatibility target for the pre-video GSAP hero motion. Phase 2 will remove the legacy object motion entirely. -->
+  <span data-hero-object hidden aria-hidden="true"></span>
+
   <div class="hero__grid" aria-hidden="true"></div>
   <div class="hero__orb hero__orb--one" aria-hidden="true"></div>
   <div class="hero__orb hero__orb--two" aria-hidden="true"></div>
