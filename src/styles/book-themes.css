@@ -1,0 +1,375 @@
+/* Phase 2 — per-book theme engine */
+.book-page {
+  --book-surface: #05070d;
+  --book-surface-rgb: 5, 7, 13;
+  background:
+    radial-gradient(circle at 70% 10%, rgba(var(--book-rgb), 0.08), transparent 28rem),
+    var(--book-surface);
+}
+
+.world-motif {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* NEXUS / dimensional */
+.world-motif--nexus {
+  opacity: 0.52;
+}
+
+.nexus-ring {
+  position: absolute;
+  top: 50%;
+  left: 72%;
+  border: 1px solid rgba(var(--book-rgb), 0.24);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 50px rgba(var(--book-rgb), 0.08);
+}
+
+.nexus-ring--one { width: 28vw; aspect-ratio: 1; }
+.nexus-ring--two { width: 39vw; aspect-ratio: 1; opacity: 0.56; }
+.nexus-ring--three { width: 52vw; aspect-ratio: 1; opacity: 0.28; }
+
+.nexus-axis {
+  position: absolute;
+  top: 50%;
+  left: 72%;
+  background: linear-gradient(90deg, transparent, rgba(var(--book-rgb), 0.26), transparent);
+  transform: translate(-50%, -50%);
+}
+
+.nexus-axis--x { width: 62vw; height: 1px; }
+.nexus-axis--y { width: 1px; height: 68vh; }
+
+.book-page[data-book-layout='dimensional'] .book-hero__copy h1 {
+  text-shadow: 0 0 80px rgba(var(--book-rgb), 0.12);
+}
+
+/* SILLAGE / editorial evidence */
+.book-page[data-book-layout='editorial'] .book-hero {
+  grid-template-columns: minmax(210px, 0.58fr) 1.35fr;
+}
+
+.book-page[data-book-layout='editorial'] .book-hero__copy h1,
+.book-page[data-book-layout='editorial'] .book-fragment blockquote {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: -0.055em;
+}
+
+.book-page[data-book-layout='editorial'] .book-hero__cover img,
+.book-page[data-book-layout='editorial'] .book-premise__motifs {
+  border-radius: 2px;
+}
+
+.world-motif--sillage {
+  opacity: 0.48;
+}
+
+.scent-line {
+  position: absolute;
+  right: 4%;
+  width: 58vw;
+  height: 32vh;
+  border-top: 1px solid rgba(var(--book-rgb), 0.22);
+  border-radius: 50%;
+  filter: blur(0.2px);
+  transform: rotate(-12deg);
+}
+
+.scent-line--one { top: 22%; }
+.scent-line--two { top: 38%; right: -6%; opacity: 0.62; transform: rotate(7deg); }
+.scent-line--three { top: 58%; right: 8%; opacity: 0.35; transform: rotate(-4deg); }
+
+.sillage-label {
+  position: absolute;
+  right: 4%;
+  bottom: 11%;
+  color: rgba(var(--book-rgb), 0.55);
+  font: 500 8px/1 var(--mono);
+  letter-spacing: 0.18em;
+}
+
+/* MANIFESTO / brutalist redaction */
+.book-page[data-book-layout='brutalist'] .book-hero {
+  grid-template-columns: 0.9fr 1.1fr;
+}
+
+.book-page[data-book-layout='brutalist'] .book-hero__copy h1 {
+  font-weight: 700;
+  letter-spacing: -0.075em;
+  text-transform: uppercase;
+}
+
+.book-page[data-book-layout='brutalist'] .book-hero__cover img,
+.book-page[data-book-layout='brutalist'] .book-premise__motifs {
+  border-radius: 0;
+}
+
+.book-page[data-book-layout='brutalist'] .book-premise > header,
+.book-page[data-book-layout='brutalist'] .book-premise__motifs,
+.book-page[data-book-layout='brutalist'] .book-navigation a {
+  border-color: rgba(var(--book-rgb), 0.2);
+}
+
+.world-motif--manifesto {
+  opacity: 0.52;
+}
+
+.manifesto-stamp {
+  position: absolute;
+  top: 20%;
+  right: 4%;
+  padding: 10px 14px;
+  border: 1px solid rgba(var(--book-rgb), 0.46);
+  color: rgba(var(--book-rgb), 0.6);
+  font: 700 clamp(20px, 3vw, 44px)/1 var(--mono);
+  letter-spacing: 0.08em;
+  transform: rotate(-8deg);
+}
+
+.redaction {
+  position: absolute;
+  right: 0;
+  height: 12px;
+  background: rgba(var(--book-rgb), 0.32);
+  transform: rotate(-3deg);
+}
+
+.redaction--one { top: 40%; width: 34vw; }
+.redaction--two { top: 45%; width: 24vw; opacity: 0.58; }
+.redaction--three { top: 72%; width: 43vw; opacity: 0.32; }
+
+.manifesto-index {
+  position: absolute;
+  right: 4%;
+  bottom: 9%;
+  color: rgba(var(--book-rgb), 0.58);
+  font: 500 8px/1 var(--mono);
+  letter-spacing: 0.18em;
+}
+
+/* HYDRA / ninefold radial identity */
+.book-page[data-book-layout='radial'] .book-hero__copy h1 {
+  font-family: var(--serif);
+  font-weight: 600;
+}
+
+.world-motif--hydra {
+  top: 10%;
+  right: 2%;
+  bottom: 10%;
+  left: auto;
+  width: min(54vw, 760px);
+  opacity: 0.58;
+}
+
+.hydra-core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 18%;
+  aspect-ratio: 1;
+  border: 1px solid rgba(var(--book-rgb), 0.42);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 55px rgba(var(--book-rgb), 0.16);
+}
+
+.hydra-node {
+  --angle: calc(var(--node) * 40deg);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(var(--book-rgb), 0.34);
+  border-radius: 50%;
+  color: rgba(var(--book-rgb), 0.75);
+  font: 500 7px/1 var(--mono);
+  transform: translate(-50%, -50%) rotate(var(--angle)) translateX(16vw) rotate(calc(var(--angle) * -1));
+}
+
+/* LUCIDREAMER / oneiric */
+.book-page[data-book-layout='dream'] .book-hero__copy h1,
+.book-page[data-book-layout='dream'] .book-fragment blockquote {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 500;
+}
+
+.book-page[data-book-layout='dream'] .book-hero__cover img {
+  border-radius: 18px;
+  box-shadow:
+    0 55px 120px rgba(0, 0, 0, 0.62),
+    0 0 130px rgba(var(--book-rgb), 0.2);
+}
+
+.world-motif--lucidreamer {
+  opacity: 0.58;
+}
+
+.dream-moon {
+  position: absolute;
+  top: 15%;
+  right: 9%;
+  width: min(22vw, 300px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 36% 34%, rgba(255,255,255,.22), rgba(var(--book-rgb), .18) 34%, transparent 68%);
+  box-shadow: 0 0 90px rgba(var(--book-rgb), 0.13);
+}
+
+.dream-ring {
+  position: absolute;
+  top: 46%;
+  right: 5%;
+  width: 42vw;
+  height: 18vh;
+  border: 1px solid rgba(var(--book-rgb), 0.22);
+  border-radius: 50%;
+  transform: rotate(-12deg);
+}
+
+.dream-ring--two {
+  right: -4%;
+  width: 58vw;
+  opacity: 0.4;
+  transform: rotate(9deg);
+}
+
+.dream-tower,
+.dream-clock {
+  position: absolute;
+  color: rgba(var(--book-rgb), 0.6);
+  font: 500 8px/1 var(--mono);
+  letter-spacing: 0.18em;
+}
+
+.dream-tower { right: 7%; bottom: 14%; }
+.dream-clock { right: 7%; bottom: 10%; opacity: 0.7; }
+
+/* CAPTURE / camera viewfinder */
+.book-page[data-book-layout='viewfinder'] .book-hero__copy h1 {
+  font-family: var(--mono);
+  font-weight: 500;
+  letter-spacing: -0.065em;
+}
+
+.book-page[data-book-layout='viewfinder'] .book-hero__cover img,
+.book-page[data-book-layout='viewfinder'] .book-premise__motifs {
+  border-radius: 0;
+}
+
+.book-page[data-book-layout='viewfinder'] .book-premise__text p::before,
+.book-page[data-book-layout='viewfinder'] .book-premise__motifs li span {
+  font-family: var(--mono);
+}
+
+.world-motif--capture {
+  inset: 8% 4%;
+  opacity: 0.62;
+}
+
+.viewfinder-corner {
+  position: absolute;
+  width: 72px;
+  height: 72px;
+  border-color: rgba(var(--book-rgb), 0.52);
+}
+
+.viewfinder-corner--tl { top: 0; left: 0; border-top: 1px solid; border-left: 1px solid; }
+.viewfinder-corner--tr { top: 0; right: 0; border-top: 1px solid; border-right: 1px solid; }
+.viewfinder-corner--bl { bottom: 0; left: 0; border-bottom: 1px solid; border-left: 1px solid; }
+.viewfinder-corner--br { right: 0; bottom: 0; border-right: 1px solid; border-bottom: 1px solid; }
+
+.capture-reticle {
+  position: absolute;
+  top: 50%;
+  right: 24%;
+  width: 108px;
+  aspect-ratio: 1;
+  border: 1px solid rgba(var(--book-rgb), 0.34);
+  border-radius: 50%;
+  transform: translate(50%, -50%);
+}
+
+.capture-reticle::before,
+.capture-reticle::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  background: rgba(var(--book-rgb), 0.34);
+  transform: translate(-50%, -50%);
+}
+
+.capture-reticle::before { width: 150%; height: 1px; }
+.capture-reticle::after { width: 1px; height: 150%; }
+
+.capture-readout {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  color: rgba(var(--book-rgb), 0.72);
+  font: 500 8px/1 var(--mono);
+  letter-spacing: 0.18em;
+}
+
+/* Fragment modes */
+.book-fragment[data-fragment-mode='poster'] {
+  background:
+    linear-gradient(118deg, rgba(var(--book-rgb), 0.07), transparent 34%),
+    var(--book-surface);
+}
+
+.book-fragment[data-fragment-mode='scent'] blockquote,
+.book-fragment[data-fragment-mode='oneiric'] blockquote {
+  font-family: var(--serif);
+}
+
+.book-fragment[data-fragment-mode='evidence'] blockquote {
+  font-family: var(--mono);
+  font-style: normal;
+  letter-spacing: -0.055em;
+}
+
+@media (max-width: 760px) {
+  .book-page[data-book-layout='editorial'] .book-hero,
+  .book-page[data-book-layout='brutalist'] .book-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .world-motif--hydra {
+    width: 100%;
+    opacity: 0.32;
+  }
+
+  .hydra-node {
+    transform: translate(-50%, -50%) rotate(var(--angle)) translateX(31vw) rotate(calc(var(--angle) * -1));
+  }
+
+  .nexus-ring { left: 68%; }
+  .nexus-axis { left: 68%; }
+
+  .manifesto-stamp,
+  .sillage-label,
+  .dream-tower,
+  .dream-clock,
+  .capture-readout {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .world-motif {
+    opacity: 0.32;
+  }
+}

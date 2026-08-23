@@ -3,11 +3,13 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import Cursor from '@/components/Cursor.astro';
 import Nav from '@/components/Nav.astro';
 import Footer from '@/components/Footer.astro';
-import BookAtmosphere from '@/components/BookAtmosphere.astro';
+import BookWorldRenderer from '@/components/book-worlds/BookWorldRenderer.astro';
 import { BOOKS, type Book } from '@/data/books';
 import { SITE } from '@/config/site';
+import { getBookTheme } from '@/config/bookThemes';
 import { withBase } from '@/lib/urls';
 import '@/styles/book.css';
+import '@/styles/book-themes.css';
 
 export function getStaticPaths() {
   return BOOKS.map((book) => ({
@@ -21,6 +23,7 @@ interface Props {
 }
 
 const { book } = Astro.props;
+const theme = getBookTheme(book.slug);
 const index = BOOKS.findIndex((item) => item.slug === book.slug);
 const previous = BOOKS[(index - 1 + BOOKS.length) % BOOKS.length];
 const next = BOOKS[(index + 1) % BOOKS.length];
@@ -28,6 +31,12 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString(
 const coverUrl = Astro.site
   ? new URL(withBase(book.cover), Astro.site).toString()
   : new URL(withBase(book.cover), Astro.url).toString();
+const themeStyle = [
+  `--book-accent:${book.accent}`,
+  `--book-rgb:${book.accentRgb}`,
+  `--book-surface:${theme.surface}`,
+  `--book-surface-rgb:${theme.surfaceRgb}`,
+].join(';');
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -58,11 +67,18 @@ const jsonLd = {
   <Cursor />
   <Nav />
 
-  <main id="main-content" class="book-page" data-book-theme={book.slug} style={`--book-accent:${book.accent}; --book-rgb:${book.accentRgb};`}>
+  <main
+    id="main-content"
+    class="book-page"
+    data-book-theme={theme.id}
+    data-book-layout={theme.layout}
+    data-book-theme-engine="v2"
+    style={themeStyle}
+  >
     <section class="book-hero" id="home" data-book-hero>
       <div class="book-hero__grid" aria-hidden="true"></div>
       <div class="book-hero__glow" aria-hidden="true"></div>
-      <BookAtmosphere slug={book.slug} />
+      <BookWorldRenderer slug={book.slug} />
       <div class="book-hero__title-bg" aria-hidden="true">{book.title}</div>
 
       <a class="book-hero__back" href={`${withBase('')}#works`} data-cursor-label="BACK TO WORKS">
@@ -99,21 +115,21 @@ const jsonLd = {
 
       <div class="book-hero__signal" aria-hidden="true">
         <span></span>
-        WORLD SIGNAL DETECTED
+        {theme.signalLabel}
       </div>
     </section>
 
     <section class="book-premise" id="premise">
       <header data-reveal>
-        <span class="eyebrow">STORY FILE / PREMISE</span>
-        <h2>The world begins here.</h2>
+        <span class="eyebrow">{theme.premiseKicker}</span>
+        <h2>{theme.premiseTitle}</h2>
       </header>
       <div class="book-premise__body">
         <div class="book-premise__text">
           {book.synopsis.map((paragraph) => <p data-reveal>{paragraph}</p>)}
         </div>
         <aside class="book-premise__motifs" data-reveal>
-          <span class="eyebrow">CORE MOTIFS</span>
+          <span class="eyebrow">{theme.motifLabel}</span>
           <ul>
             {book.motifs.map((motif, motifIndex) => (
               <li><span>{String(motifIndex + 1).padStart(2, '0')}</span>{motif}</li>
@@ -123,7 +139,7 @@ const jsonLd = {
       </div>
     </section>
 
-    <section class="book-fragment" aria-label="Book tagline">
+    <section class="book-fragment" data-fragment-mode={theme.fragmentMode} aria-label="Book tagline">
       <span aria-hidden="true">{book.title}</span>
       <blockquote data-reveal>{book.tagline}</blockquote>
     </section>
