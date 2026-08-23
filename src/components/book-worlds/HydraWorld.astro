@@ -1,0 +1,13 @@
+---
+import CinematicVideo from '@/components/CinematicVideo.astro';
+---
+
+<div class="book-world book-world--hydra" aria-hidden="true">
+  <CinematicVideo src="video/hydra.mp4" poster="worlds/hydra.webp" className="book-world__cinematic" priority />
+  <div class="world-motif world-motif--hydra">
+    <span class="hydra-core"></span>
+    {Array.from({ length: 9 }).map((_, index) => (
+      <span class="hydra-node" style={`--node:${index}`}>{String(index + 1).padStart(2, '0')}</span>
+    ))}
+  </div>
+</div>
