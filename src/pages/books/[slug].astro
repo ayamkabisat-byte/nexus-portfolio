@@ -6,6 +6,8 @@ import Footer from '@/components/Footer.astro';
 import BookWorldRenderer from '@/components/book-worlds/BookWorldRenderer.astro';
 import NexusBookPage from '@/components/book-pages/NexusBookPage.astro';
 import SillageBookPage from '@/components/book-pages/SillageBookPage.astro';
+import ManifestoBookPage from '@/components/book-pages/ManifestoBookPage.astro';
+import HydraBookPage from '@/components/book-pages/HydraBookPage.astro';
 import { BOOKS, type Book } from '@/data/books';
 import { SITE } from '@/config/site';
 import { getBookTheme } from '@/config/bookThemes';
@@ -14,6 +16,7 @@ import '@/styles/book.css';
 import '@/styles/book-themes.css';
 import '@/styles/book-cover-fit.css';
 import '@/styles/book-phase3.css';
+import '@/styles/book-phase3-manifesto-hydra.css';
 
 export function getStaticPaths() {
   return BOOKS.map((book) => ({
@@ -70,12 +73,16 @@ const jsonLd = {
 >
   <Cursor />
   <Nav />
-  <!-- Phase 3 bespoke rollout: NEXUS + SILLAGE -->
+  <!-- Phase 3 bespoke rollout: NEXUS + SILLAGE + MANIFESTO + HYDRA -->
 
   {book.slug === 'nexus' ? (
     <NexusBookPage book={book} previous={previous} next={next} themeStyle={themeStyle} />
   ) : book.slug === 'sillage' ? (
     <SillageBookPage book={book} previous={previous} next={next} themeStyle={themeStyle} />
+  ) : book.slug === 'manifesto' ? (
+    <ManifestoBookPage book={book} previous={previous} next={next} themeStyle={themeStyle} />
+  ) : book.slug === 'hydra' ? (
+    <HydraBookPage book={book} previous={previous} next={next} themeStyle={themeStyle} />
   ) : (
     <main
       id="main-content"
