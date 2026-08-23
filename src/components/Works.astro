@@ -11,7 +11,8 @@ const REEL_BOOKS = [...BOOKS, ...BOOKS];
       <span class="eyebrow">SELECTED FICTION / 2026</span>
       <h2 id="cover-reel-title">Featured works.</h2>
     </div>
-    <span class="cover-reel__hint" aria-hidden="true">AUTO-MOVING · HOVER TO PAUSE · DOUBLE-CLICK TO ENTER</span>
+    <span class="cover-reel__hint cover-reel__hint--desktop" aria-hidden="true">AUTO-MOVING · HOVER TO PAUSE · DOUBLE-CLICK TO ENTER</span>
+    <span class="cover-reel__hint cover-reel__hint--touch" aria-hidden="true">SWIPE TO EXPLORE · TAP TO ENTER</span>
   </header>
 
   <div class="cover-reel__viewport" data-showcase-viewport>
@@ -51,6 +52,22 @@ const REEL_BOOKS = [...BOOKS, ...BOOKS];
     </div>
   </div>
 </section>
+
+<style>
+  .cover-reel__hint--touch {
+    display: none;
+  }
+
+  @media (pointer: coarse) {
+    .cover-reel__hint--desktop {
+      display: none;
+    }
+
+    .cover-reel__hint--touch {
+      display: block;
+    }
+  }
+</style>
 
 <script>
   let cleanupTouchEnter = () => {};
