@@ -1,0 +1,28 @@
+---
+import NexusWorld from './NexusWorld.astro';
+import SillageWorld from './SillageWorld.astro';
+import ManifestoWorld from './ManifestoWorld.astro';
+import HydraWorld from './HydraWorld.astro';
+import LucidreamerWorld from './LucidreamerWorld.astro';
+import CaptureWorld from './CaptureWorld.astro';
+
+interface Props {
+  slug: string;
+}
+
+const { slug } = Astro.props;
+---
+
+{slug === 'sillage' ? (
+  <SillageWorld />
+) : slug === 'manifesto' ? (
+  <ManifestoWorld />
+) : slug === 'hydra' ? (
+  <HydraWorld />
+) : slug === 'lucidreamer' ? (
+  <LucidreamerWorld />
+) : slug === 'capture' ? (
+  <CaptureWorld />
+) : (
+  <NexusWorld />
+)}
