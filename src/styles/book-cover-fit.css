@@ -1,0 +1,46 @@
+/* Keep every book cover fully visible inside the hero. */
+.book-hero__cover {
+  width: min(100%, 345px);
+}
+
+.book-hero__cover img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: min(66svh, 620px);
+  aspect-ratio: auto;
+  object-fit: contain;
+  margin-left: auto;
+}
+
+@media (max-width: 930px) {
+  .book-hero__cover {
+    width: min(100%, 315px);
+  }
+
+  .book-hero__cover img {
+    max-height: min(62svh, 560px);
+  }
+}
+
+@media (max-width: 760px) {
+  .book-hero__cover {
+    width: min(68vw, 285px);
+  }
+
+  .book-hero__cover img {
+    max-height: 52svh;
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 520px) {
+  .book-hero__cover {
+    width: min(72vw, 250px);
+  }
+
+  .book-hero__cover img {
+    max-height: 46svh;
+  }
+}
