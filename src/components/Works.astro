@@ -18,6 +18,7 @@ const REEL_BOOKS = [...BOOKS, ...BOOKS];
     <div class="cover-reel__track" data-showcase-track>
       {REEL_BOOKS.map((book, index) => {
         const clone = index >= BOOKS.length;
+        const priorityCover = !clone && index < 2;
 
         return (
           <a
@@ -38,7 +39,8 @@ const REEL_BOOKS = [...BOOKS, ...BOOKS];
                 alt={clone ? '' : `${book.title} book cover`}
                 width="800"
                 height="1200"
-                loading="eager"
+                loading={priorityCover ? 'eager' : 'lazy'}
+                fetchpriority={index === 0 ? 'high' : 'auto'}
                 decoding="async"
               />
               <span class="cover-reel__shine" aria-hidden="true"></span>
@@ -49,3 +51,61 @@ const REEL_BOOKS = [...BOOKS, ...BOOKS];
     </div>
   </div>
 </section>
+
+<script>
+  let cleanupTouchEnter = () => {};
+
+  const initTouchEnter = () => {
+    cleanupTouchEnter();
+
+    if (!window.matchMedia('(pointer: coarse)').matches) return;
+
+    const viewport = document.querySelector<HTMLElement>('[data-showcase-viewport]');
+    if (!viewport) return;
+
+    const controller = new AbortController();
+    const { signal } = controller;
+    let startX = 0;
+    let startY = 0;
+    let moved = 0;
+
+    viewport.addEventListener('pointerdown', (event) => {
+      startX = event.clientX;
+      startY = event.clientY;
+      moved = 0;
+    }, { signal });
+
+    viewport.addEventListener('pointermove', (event) => {
+      const dx = event.clientX - startX;
+      const dy = event.clientY - startY;
+      moved = Math.max(moved, Math.hypot(dx, dy));
+    }, { signal });
+
+    viewport.addEventListener('click', (event) => {
+      const target = event.target instanceof Element ? event.target : null;
+      const card = target?.closest<HTMLAnchorElement>('[data-showcase-card]');
+      if (!card) return;
+
+      // Preserve dragging without accidentally entering a book.
+      if (moved > 10) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        return;
+      }
+
+      // Touch devices should behave like a normal gallery: one tap enters.
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      window.location.assign(card.href);
+    }, { capture: true, signal });
+
+    cleanupTouchEnter = () => controller.abort();
+  };
+
+  document.addEventListener('astro:page-load', initTouchEnter);
+  document.addEventListener('astro:before-preparation', () => cleanupTouchEnter());
+
+  if (document.readyState !== 'loading') {
+    queueMicrotask(initTouchEnter);
+  }
+</script>
