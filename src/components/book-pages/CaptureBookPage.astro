@@ -1,0 +1,138 @@
+---
+import BookWorldRenderer from '@/components/book-worlds/BookWorldRenderer.astro';
+import type { Book } from '@/data/books';
+import { withBase } from '@/lib/urls';
+
+interface Props {
+  book: Book;
+  previous: Book;
+  next: Book;
+  themeStyle: string;
+}
+
+const { book, previous, next, themeStyle } = Astro.props;
+---
+
+<main
+  id="main-content"
+  class="book-page phase3-page phase3-capture"
+  data-book-theme="capture"
+  data-book-layout="forensic-viewfinder"
+  data-book-theme-engine="v3"
+  style={themeStyle}
+>
+  <section class="capture-viewfinder" id="home">
+    <BookWorldRenderer slug={book.slug} />
+    <div class="capture-viewfinder__scan" aria-hidden="true"></div>
+    <div class="capture-viewfinder__corners" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+
+    <a class="phase3-back" href={`${withBase('')}#works`} data-cursor-label="BACK TO ARCHIVE">← Evidence archive</a>
+
+    <aside class="capture-viewfinder__telemetry" aria-hidden="true">
+      <span>CP-06 / RESIDUAL LIGHT</span>
+      <span>FRAME 001 / ACQUIRED</span>
+      <span>DECAY WINDOW / 72H</span>
+      <span>OCULAR LOAD / RISING</span>
+    </aside>
+
+    <div class="capture-viewfinder__cover" data-book-cover>
+      <div class="capture-viewfinder__focus" aria-hidden="true"><span></span><span></span></div>
+      <span class="capture-viewfinder__code">{book.archiveCode}</span>
+      <img
+        src={withBase(book.cover)}
+        alt={`${book.title} book cover`}
+        width="600"
+        height="900"
+        loading="eager"
+        decoding="async"
+        fetchpriority="high"
+      />
+      <div class="capture-viewfinder__timestamp" aria-hidden="true">REC ● 00:72:00</div>
+    </div>
+
+    <div class="capture-viewfinder__copy">
+      <span class="phase3-kicker">06 / SCI-FI CRIME THRILLER / FORENSIC OPTICS</span>
+      <h1>CAP<br />TURE</h1>
+      <blockquote>{book.tagline}</blockquote>
+      <p>Nicolas does not photograph what happened. He photographs what the light has not finished forgetting.</p>
+      <div class="phase3-actions">
+        <a class="button button--primary" href="#contact-sheet" data-cursor-label="OPEN CONTACT SHEET">Develop the evidence ↓</a>
+      </div>
+    </div>
+
+    <div class="capture-viewfinder__reticle" aria-hidden="true"><span></span><span></span></div>
+  </section>
+
+  <section class="capture-contact" id="contact-sheet">
+    <header class="capture-contact__header" data-reveal>
+      <div>
+        <span class="phase3-kicker">CONTACT SHEET / RESIDUAL EXPOSURES</span>
+        <h2>The scene is gone.<br /><em>The photons remember.</em></h2>
+      </div>
+      <p>Three exposures reconstruct a crime technology designed to erase every ordinary trail.</p>
+    </header>
+
+    <div class="capture-contact__strip">
+      {book.synopsis.map((paragraph, index) => (
+        <article class="capture-frame" data-reveal>
+          <div class="capture-frame__image" aria-hidden="true">
+            <span class="capture-frame__number">0{index + 1}</span>
+            <div class="capture-frame__ghost"></div>
+            <small>{index === 0 ? 'ISO 1600 / TRACE FOUND' : index === 1 ? 'T−72H / IMAGE DECAY' : 'EVIDENCE WIPE / SUBJECT TARGETED'}</small>
+          </div>
+          <div class="capture-frame__copy">
+            <span>{index === 0 ? 'ACQUISITION' : index === 1 ? 'DEGRADATION' : 'COUNTERMEASURE'}</span>
+            <p>{paragraph}</p>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="capture-darkroom">
+    <div class="capture-darkroom__projection" aria-hidden="true">
+      <span class="capture-darkroom__aperture"></span>
+      <span class="capture-darkroom__beam"></span>
+      <div class="capture-darkroom__negative">72H</div>
+      <small>FORENSIC OPTICAL CHAIN / CP-06</small>
+    </div>
+
+    <div class="capture-darkroom__content">
+      <header data-reveal>
+        <span class="phase3-kicker">DARKROOM INDEX / EVIDENCE PARAMETERS</span>
+        <h2>Every image costs<br />a little more sight.</h2>
+        <p>The camera is only one part of the system. Nicolas himself is the fragile sensor.</p>
+      </header>
+
+      <div class="capture-data-list">
+        {book.motifs.map((motif, index) => (
+          <article class="capture-data" data-reveal>
+            <span>0{index + 1}</span>
+            <div>
+              <small>{index === 0 ? 'MEDIUM' : index === 1 ? 'SUBSTRATE' : index === 2 ? 'SIGNAL' : 'CASE TYPE'}</small>
+              <strong>{motif}</strong>
+            </div>
+            <i aria-hidden="true">{index === 0 ? '◉' : index === 1 ? '⌁' : index === 2 ? 'λ' : '⌕'}</i>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="capture-decay" aria-label="Book tagline">
+    <div class="capture-decay__timer" aria-hidden="true">
+      <span>72:00</span><span>48:00</span><span>24:00</span><span>00:00</span>
+    </div>
+    <blockquote data-reveal>{book.tagline}</blockquote>
+    <p data-reveal>Evidence is temporary. Consequences are not.</p>
+  </section>
+
+  <nav class="phase3-navigation phase3-navigation--capture" aria-label="Other books">
+    <a href={withBase(`books/${previous.slug}/`)} data-cursor-label={`PREVIOUS ${previous.title}`}>
+      <small>PREVIOUS FRAME</small><strong>← {previous.title}</strong>
+    </a>
+    <a href={withBase(`books/${next.slug}/`)} data-cursor-label={`NEXT ${next.title}`}>
+      <small>NEXT FRAME</small><strong>{next.title} →</strong>
+    </a>
+  </nav>
+</main>
