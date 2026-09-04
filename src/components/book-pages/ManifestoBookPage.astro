@@ -1,0 +1,119 @@
+---
+import BookWorldRenderer from '@/components/book-worlds/BookWorldRenderer.astro';
+import type { Book } from '@/data/books';
+import { withBase } from '@/lib/urls';
+
+interface Props {
+  book: Book;
+  previous: Book;
+  next: Book;
+  themeStyle: string;
+}
+
+const { book, previous, next, themeStyle } = Astro.props;
+---
+
+<main
+  id="main-content"
+  class="book-page phase3-page phase3-manifesto"
+  data-book-theme="manifesto"
+  data-book-layout="brutalist"
+  data-book-theme-engine="v3"
+  style={themeStyle}
+>
+  <section class="manifesto-breach" id="home">
+    <BookWorldRenderer slug={book.slug} />
+    <div class="manifesto-breach__grid" aria-hidden="true"></div>
+
+    <a class="phase3-back" href={`${withBase('')}#works`} data-cursor-label="BACK TO ARCHIVE">← Archive</a>
+
+    <aside class="manifesto-breach__rail" aria-hidden="true">
+      <span>RESTRICTED / MF-03</span>
+      <span>DREAM INSURGENCY</span>
+      <span>DO NOT CIRCULATE</span>
+    </aside>
+
+    <div class="manifesto-poster" data-book-cover>
+      <div class="manifesto-poster__tape manifesto-poster__tape--top" aria-hidden="true"></div>
+      <img
+        src={withBase(book.cover)}
+        alt={`${book.title} book cover`}
+        width="600"
+        height="900"
+        loading="eager"
+        decoding="async"
+        fetchpriority="high"
+      />
+      <div class="manifesto-poster__stamp" aria-hidden="true">RESTRICTED</div>
+      <span class="manifesto-poster__code">{book.archiveCode}</span>
+    </div>
+
+    <div class="manifesto-breach__copy">
+      <span class="phase3-kicker">03 / DYSTOPIAN THRILLER / CONTROLLED DOCUMENT</span>
+      <h1>MANI<br />FESTO</h1>
+      <blockquote>{book.tagline}</blockquote>
+      <p>Anger becomes doctrine. Doctrine becomes a weapon. The battlefield begins where power feels safest: inside the dream.</p>
+      <div class="phase3-actions">
+        <a class="button button--primary" href="#articles" data-cursor-label="OPEN MANIFESTO">Open the file ↓</a>
+      </div>
+    </div>
+
+    <div class="manifesto-breach__redactions" aria-hidden="true">
+      <span></span><span></span><span></span><span></span>
+    </div>
+  </section>
+
+  <section class="manifesto-articles" id="articles">
+    <header class="manifesto-articles__header" data-reveal>
+      <span class="phase3-kicker">THREE ARTICLES / INCIDENT SUMMARY</span>
+      <h2>A system writes its own opposition.</h2>
+      <p>Read as testimony, threat assessment, or confession.</p>
+    </header>
+
+    <div class="manifesto-article-list">
+      {book.synopsis.map((paragraph, index) => (
+        <article class="manifesto-article" data-reveal>
+          <div class="manifesto-article__number">ARTICLE / 0{index + 1}</div>
+          <div class="manifesto-article__body">
+            <span>{index === 0 ? 'COMPLIANCE' : index === 1 ? 'MANIFESTATION' : 'ESCALATION'}</span>
+            <p>{paragraph}</p>
+          </div>
+          <div class="manifesto-article__mark" aria-hidden="true">{String(index + 1).padStart(2, '0')}</div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="manifesto-faultlines">
+    <div class="manifesto-faultlines__statement" data-reveal>
+      <span class="phase3-kicker">FAULT LINES / THEMATIC INDEX</span>
+      <h2>The nightmare is only the symptom.</h2>
+      <p>The file keeps returning to four pressure points.</p>
+    </div>
+
+    <div class="manifesto-faultlines__grid">
+      {book.motifs.map((motif, index) => (
+        <article class="manifesto-fault" data-reveal>
+          <span>0{index + 1}</span>
+          <strong>{motif}</strong>
+          <small>{index === 0 ? 'SYSTEM STATE' : index === 1 ? 'BATTLEFIELD' : index === 2 ? 'IGNITION SOURCE' : 'ORIGIN CRIME'}</small>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="manifesto-axiom" aria-label="Book tagline">
+    <div class="manifesto-axiom__stamp" aria-hidden="true">IDEAS SURVIVE AUTHORS</div>
+    <blockquote data-reveal>{book.tagline}</blockquote>
+    <div class="manifesto-axiom__bars" aria-hidden="true"><span></span><span></span><span></span></div>
+  </section>
+
+  <nav class="phase3-navigation phase3-navigation--manifesto" aria-label="Other books">
+    <a href={withBase(`books/${previous.slug}/`)} data-cursor-label={`PREVIOUS ${previous.title}`}>
+      <small>PREVIOUS FILE</small><strong>← {previous.title}</strong>
+    </a>
+    <a href={withBase(`books/${next.slug}/`)} data-cursor-label={`NEXT ${next.title}`}>
+      <small>NEXT FILE</small><strong>{next.title} →</strong>
+    </a>
+  </nav>
+</main>

@@ -1,0 +1,144 @@
+---
+import BookWorldRenderer from '@/components/book-worlds/BookWorldRenderer.astro';
+import type { Book } from '@/data/books';
+import { withBase } from '@/lib/urls';
+
+interface Props {
+  book: Book;
+  previous: Book;
+  next: Book;
+  themeStyle: string;
+}
+
+const { book, previous, next, themeStyle } = Astro.props;
+---
+
+<main
+  id="main-content"
+  class="book-page phase3-page phase3-lucidreamer"
+  data-book-theme="lucidreamer"
+  data-book-layout="dream-expedition"
+  data-book-theme-engine="v3"
+  style={themeStyle}
+>
+  <section class="lucid-gateway" id="home">
+    <BookWorldRenderer slug={book.slug} />
+    <div class="lucid-gateway__veil" aria-hidden="true"></div>
+    <div class="lucid-gateway__stars" aria-hidden="true"></div>
+
+    <a class="phase3-back" href={`${withBase('')}#works`} data-cursor-label="BACK TO ARCHIVE">← Wake / Archive</a>
+
+    <aside class="lucid-gateway__clock" aria-label="Dream time conversion">
+      <span>REAL TIME</span>
+      <strong>01 HOUR</strong>
+      <i aria-hidden="true">⇄</i>
+      <span>DREAM TIME</span>
+      <strong>30 DAYS</strong>
+    </aside>
+
+    <div class="lucid-gateway__cover" data-book-cover>
+      <div class="lucid-gateway__halo" aria-hidden="true"><span></span><span></span><span></span></div>
+      <span class="lucid-gateway__code">{book.archiveCode}</span>
+      <img
+        src={withBase(book.cover)}
+        alt={`${book.title} book cover`}
+        width="600"
+        height="900"
+        loading="eager"
+        decoding="async"
+        fetchpriority="high"
+      />
+      <div class="lucid-gateway__reflection" aria-hidden="true"></div>
+    </div>
+
+    <div class="lucid-gateway__copy">
+      <span class="phase3-kicker">05 / LITRPG FANTASY / DREAM-TIME EXPEDITION</span>
+      <h1>LUCID<br /><em>REAMER</em></h1>
+      <blockquote>{book.tagline}</blockquote>
+      <p>Sleep becomes training ground, sanctuary, and trap. Every hour lost to the pillow buys Bahrizal a month to become someone reality can no longer discard.</p>
+      <div class="phase3-actions">
+        <a class="button button--primary" href="#dream-log" data-cursor-label="ENTER DREAM LOG">Cross the threshold ↓</a>
+      </div>
+    </div>
+
+    <div class="lucid-gateway__tower" aria-hidden="true">
+      <span>TOWER / MONAS</span>
+      <i></i><i></i><i></i><i></i><i></i>
+    </div>
+  </section>
+
+  <section class="lucid-log" id="dream-log">
+    <header class="lucid-log__header" data-reveal>
+      <div>
+        <span class="phase3-kicker">DREAM LOG / TIME DILATION RECORD</span>
+        <h2>Thirty days to change.<br /><em>One hour to return.</em></h2>
+      </div>
+      <p>Three thresholds chart Bahrizal’s movement from disposable Porter to a traveller whose dream body begins rewriting the waking one.</p>
+    </header>
+
+    <div class="lucid-log__entries">
+      {book.synopsis.map((paragraph, index) => (
+        <article class="lucid-entry" data-reveal>
+          <div class="lucid-entry__time">
+            <span>DAY</span>
+            <strong>{index === 0 ? '00' : index === 1 ? '30' : '∞'}</strong>
+          </div>
+          <div class="lucid-entry__body">
+            <small>{index === 0 ? 'AWAKENING / DUNGEON BREAK' : index === 1 ? 'TRANSFER / BODY REWRITE' : 'ASCENT / TOWER OF MONAS'}</small>
+            <p>{paragraph}</p>
+          </div>
+          <div class="lucid-entry__phase" aria-hidden="true"><span></span></div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="lucid-ascent">
+    <div class="lucid-ascent__map" aria-hidden="true">
+      <div class="lucid-ascent__moon"></div>
+      <div class="lucid-ascent__monas">
+        <span></span><span></span><span></span><span></span>
+      </div>
+      <div class="lucid-ascent__path"></div>
+      <small>ONEIRIC COORDINATE / BD-05</small>
+    </div>
+
+    <div class="lucid-ascent__content">
+      <header data-reveal>
+        <span class="phase3-kicker">ASCENT PARAMETERS / SURVIVAL SYSTEM</span>
+        <h2>The dream rewards<br />what reality ignored.</h2>
+        <p>Four forces govern the journey through Bumi Dwipa.</p>
+      </header>
+
+      <div class="lucid-parameter-list">
+        {book.motifs.map((motif, index) => (
+          <article class="lucid-parameter" data-reveal>
+            <span>0{index + 1}</span>
+            <div>
+              <small>{index === 0 ? 'DOMAIN' : index === 1 ? 'VECTOR' : index === 2 ? 'DISCIPLINE' : 'PRESSURE'}</small>
+              <strong>{motif}</strong>
+            </div>
+            <i aria-hidden="true">{index === 0 ? '夢' : index === 1 ? '↑' : index === 2 ? '拳' : '!'}</i>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="lucid-awakening" aria-label="Book tagline">
+    <div class="lucid-awakening__counter" aria-hidden="true">
+      <span>00:59:59</span><span>30D</span><span>00:00:01</span>
+    </div>
+    <blockquote data-reveal>{book.tagline}</blockquote>
+    <p data-reveal>Every awakening is proof that the dream has already changed him.</p>
+  </section>
+
+  <nav class="phase3-navigation phase3-navigation--lucidreamer" aria-label="Other books">
+    <a href={withBase(`books/${previous.slug}/`)} data-cursor-label={`PREVIOUS ${previous.title}`}>
+      <small>PREVIOUS WORLD</small><strong>← {previous.title}</strong>
+    </a>
+    <a href={withBase(`books/${next.slug}/`)} data-cursor-label={`NEXT ${next.title}`}>
+      <small>NEXT WORLD</small><strong>{next.title} →</strong>
+    </a>
+  </nav>
+</main>
