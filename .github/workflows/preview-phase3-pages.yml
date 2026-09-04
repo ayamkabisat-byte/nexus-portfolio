@@ -1,4 +1,4 @@
-name: Preview Phase 3.5 on GitHub Pages
+name: Validate Phase 3.5 Book Worlds
 
 on:
   push:
@@ -8,21 +8,16 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: phase3-5-pages-preview
+  group: phase3-5-validation
   cancel-in-progress: true
 
 jobs:
-  build:
+  validate:
     runs-on: ubuntu-latest
-    env:
-      SITE_URL: https://ayamkabisat-byte.github.io/nexus-portfolio
-      BASE_PATH: /nexus-portfolio
     steps:
-      - name: Checkout Phase 3.5 preview branch
+      - name: Checkout Phase 3.5 branch
         uses: actions/checkout@v4
 
       - name: Setup pnpm
@@ -41,21 +36,5 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Validate and build Astro site
+      - name: Astro check and static build
         run: pnpm run build
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist/
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy preview to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
