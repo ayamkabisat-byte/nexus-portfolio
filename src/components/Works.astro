@@ -1,128 +1,282 @@
 ---
 import { BOOKS } from '@/data/books';
 import { withBase } from '@/lib/urls';
-
-const REEL_BOOKS = [...BOOKS, ...BOOKS];
+import '@/styles/home-book-showcase.css';
 ---
 
-<section class="cover-reel" id="works" data-book-showcase aria-labelledby="cover-reel-title">
-  <header class="cover-reel__header">
+<section class="world-library" id="works" data-world-library aria-labelledby="world-library-title" style={`--world-accent:${BOOKS[0].accent}; --world-rgb:${BOOKS[0].accentRgb};`}>
+  <div class="world-library__aura" aria-hidden="true"></div>
+
+  <header class="world-library__header">
     <div>
-      <span class="eyebrow">SELECTED FICTION / 2026</span>
-      <h2 id="cover-reel-title">Featured works.</h2>
+      <span class="eyebrow">SELECTED FICTION / WORLD LIBRARY</span>
+      <h2 id="world-library-title">Enter the worlds.</h2>
     </div>
-    <span class="cover-reel__hint cover-reel__hint--desktop" aria-hidden="true">AUTO-MOVING · HOVER TO PAUSE · DOUBLE-CLICK TO ENTER</span>
-    <span class="cover-reel__hint cover-reel__hint--touch" aria-hidden="true">SWIPE TO EXPLORE · TAP TO ENTER</span>
+    <div class="world-library__status" aria-live="polite">
+      <span data-world-counter>01 / 06</span>
+      <span class="world-library__status-line" aria-hidden="true"></span>
+      <span data-world-status>SELECT · OPEN · ENTER</span>
+    </div>
   </header>
 
-  <div class="cover-reel__viewport" data-showcase-viewport>
-    <div class="cover-reel__track" data-showcase-track>
-      {REEL_BOOKS.map((book, index) => {
-        const clone = index >= BOOKS.length;
-        const priorityCover = !clone && index < 2;
+  <div class="world-library__stage" data-world-stage>
+    <button class="world-library__arrow world-library__arrow--prev" type="button" data-world-prev aria-label="Previous book" data-cursor-label="PREVIOUS WORLD">←</button>
 
-        return (
-          <a
-            class="cover-reel__item"
-            href={withBase(`books/${book.slug}/`)}
-            style={`--book-accent:${book.accent}; --book-rgb:${book.accentRgb};`}
-            data-showcase-card
-            data-showcase-link
-            data-showcase-slug={book.slug}
-            data-cursor-label={`DOUBLE-CLICK ${book.title}`}
-            aria-label={clone ? undefined : `Open ${book.title}`}
-            aria-hidden={clone ? 'true' : undefined}
-            tabindex={clone ? '-1' : undefined}
-          >
-            <span class="cover-reel__cover">
-              <img
-                src={withBase(book.cover)}
-                alt={clone ? '' : `${book.title} book cover`}
-                width="800"
-                height="1200"
-                loading={priorityCover ? 'eager' : 'lazy'}
-                fetchpriority={index === 0 ? 'high' : 'auto'}
-                decoding="async"
-              />
-              <span class="cover-reel__shine" aria-hidden="true"></span>
-            </span>
-          </a>
-        );
-      })}
+    <div class="world-library__experiences">
+      {BOOKS.map((book, index) => (
+        <article
+          class="world-library__experience"
+          id={`book-panel-${book.slug}`}
+          data-world-panel
+          data-book-index={index}
+          data-book-slug={book.slug}
+          data-book-accent={book.accent}
+          data-book-rgb={book.accentRgb}
+          hidden={index !== 0}
+        >
+          <div class="world-library__identity" data-world-copy>
+            <span class="world-library__code">{book.archiveCode}</span>
+            <div class="world-library__title-row">
+              <span>{book.number}</span>
+              <h3>{book.title}</h3>
+            </div>
+            <p class="world-library__genre">{book.genre}</p>
+            <p class="world-library__tagline">{book.tagline}</p>
+            <span class="world-library__instruction">CLICK THE BOOK TO OPEN</span>
+          </div>
+
+          <div class="world-library__book-zone">
+            <div class="world-library__book-object" data-book-object>
+              <div class="world-library__page-stack" aria-hidden="true"><span></span><span></span><span></span></div>
+
+              <div class="world-library__inside-page">
+                <div class="world-library__page-head">
+                  <span>{book.number} / {book.title}</span>
+                  <button type="button" data-book-close aria-label={`Close ${book.title}`} data-cursor-label="CLOSE BOOK">×</button>
+                </div>
+                <div class="world-library__page-copy">
+                  <span class="world-library__page-label">WORLD BRIEF</span>
+                  <blockquote>{book.tagline}</blockquote>
+                  <p>{book.synopsis[0]}</p>
+                  <div class="world-library__motifs" aria-label="Story motifs">
+                    {book.motifs.slice(0, 3).map((motif) => <span>{motif}</span>)}
+                  </div>
+                </div>
+                <a class="world-library__enter" href={withBase(`books/${book.slug}/`)} data-cursor-label={`ENTER ${book.title}`}>
+                  <span>ENTER WORLD</span><strong>↗</strong>
+                </a>
+              </div>
+
+              <button
+                class="world-library__book-cover"
+                type="button"
+                data-book-toggle
+                aria-expanded="false"
+                aria-label={`Open ${book.title} synopsis`}
+                data-cursor-label={`OPEN ${book.title}`}
+              >
+                <span class="world-library__cover-front">
+                  <img
+                    src={withBase(book.cover)}
+                    alt={`${book.title} book cover`}
+                    width="800"
+                    height="1200"
+                    loading={index < 2 ? 'eager' : 'lazy'}
+                    fetchpriority={index === 0 ? 'high' : 'auto'}
+                    decoding="async"
+                  />
+                  <span class="world-library__cover-gloss" aria-hidden="true"></span>
+                </span>
+                <span class="world-library__cover-back" aria-hidden="true">
+                  <small>{book.archiveCode}</small>
+                  <strong>{book.title}</strong>
+                  <i>MICHAEL DINKO</i>
+                </span>
+              </button>
+            </div>
+            <span class="world-library__book-shadow" aria-hidden="true"></span>
+          </div>
+        </article>
+      ))}
     </div>
+
+    <button class="world-library__arrow world-library__arrow--next" type="button" data-world-next aria-label="Next book" data-cursor-label="NEXT WORLD">→</button>
+  </div>
+
+  <div class="world-library__rail-wrap">
+    <span class="world-library__rail-label">WORLD INDEX</span>
+    <div class="world-library__rail" role="tablist" aria-label="Choose a book world" data-world-tabs>
+      {BOOKS.map((book, index) => (
+        <button
+          class:list={['world-library__tab', { 'is-active': index === 0 }]}
+          type="button"
+          role="tab"
+          aria-selected={index === 0 ? 'true' : 'false'}
+          aria-controls={`book-panel-${book.slug}`}
+          tabindex={index === 0 ? '0' : '-1'}
+          data-world-tab
+          data-book-index={index}
+          style={`--book-accent:${book.accent}; --book-rgb:${book.accentRgb};`}
+          data-cursor-label={index === 0 ? `OPEN ${book.title}` : `SELECT ${book.title}`}
+        >
+          <span class="world-library__tab-cover">
+            <img src={withBase(book.cover)} alt="" width="240" height="360" loading="lazy" decoding="async" />
+          </span>
+          <span class="world-library__tab-meta"><small>{book.number}</small><strong>{book.title}</strong></span>
+        </button>
+      ))}
+    </div>
+    <span class="world-library__gesture" aria-hidden="true">← DRAG / SWIPE →</span>
   </div>
 </section>
 
-<style>
-  .cover-reel__hint--touch {
-    display: none;
-  }
-
-  @media (pointer: coarse) {
-    .cover-reel__hint--desktop {
-      display: none;
-    }
-
-    .cover-reel__hint--touch {
-      display: block;
-    }
-  }
-</style>
-
 <script>
-  let cleanupTouchEnter = () => {};
+  let cleanupWorldLibrary = () => {};
 
-  const initTouchEnter = () => {
-    cleanupTouchEnter();
+  const initWorldLibrary = () => {
+    cleanupWorldLibrary();
 
-    if (!window.matchMedia('(pointer: coarse)').matches) return;
+    const root = document.querySelector<HTMLElement>('[data-world-library]');
+    if (!root) return;
 
-    const viewport = document.querySelector<HTMLElement>('[data-showcase-viewport]');
-    if (!viewport) return;
+    const panels = Array.from(root.querySelectorAll<HTMLElement>('[data-world-panel]'));
+    const tabs = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-world-tab]'));
+    const prev = root.querySelector<HTMLButtonElement>('[data-world-prev]');
+    const next = root.querySelector<HTMLButtonElement>('[data-world-next]');
+    const counter = root.querySelector<HTMLElement>('[data-world-counter]');
+    const status = root.querySelector<HTMLElement>('[data-world-status]');
+    const stage = root.querySelector<HTMLElement>('[data-world-stage]');
+    const tabRail = root.querySelector<HTMLElement>('[data-world-tabs]');
+    if (!panels.length || panels.length !== tabs.length) return;
 
     const controller = new AbortController();
     const { signal } = controller;
-    let startX = 0;
-    let startY = 0;
-    let moved = 0;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let active = 0;
+    let open = false;
+    let pointerX = 0;
+    let pointerY = 0;
+    let pointerMoved = 0;
 
-    viewport.addEventListener('pointerdown', (event) => {
-      startX = event.clientX;
-      startY = event.clientY;
-      moved = 0;
-    }, { signal });
+    const activePanel = () => panels[active];
 
-    viewport.addEventListener('pointermove', (event) => {
-      const dx = event.clientX - startX;
-      const dy = event.clientY - startY;
-      moved = Math.max(moved, Math.hypot(dx, dy));
-    }, { signal });
+    const setOpen = (nextOpen: boolean) => {
+      open = nextOpen;
+      root.classList.toggle('is-book-open', open);
+      const panel = activePanel();
+      panel.classList.toggle('is-open', open);
+      panel.querySelector<HTMLButtonElement>('[data-book-toggle]')?.setAttribute('aria-expanded', String(open));
+      if (status) status.textContent = open ? 'BOOK OPEN / ENTER THE WORLD' : 'SELECT · OPEN · ENTER';
+    };
 
-    viewport.addEventListener('click', (event) => {
-      const target = event.target instanceof Element ? event.target : null;
-      const card = target?.closest<HTMLAnchorElement>('[data-showcase-card]');
-      if (!card) return;
-
-      // Preserve dragging without accidentally entering a book.
-      if (moved > 10) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
+    const setActive = (nextIndex: number, focusTab = false) => {
+      const normalized = (nextIndex + panels.length) % panels.length;
+      if (normalized === active) {
+        if (!open) setOpen(true);
         return;
       }
 
-      // Touch devices should behave like a normal gallery: one tap enters.
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      window.location.assign(card.href);
-    }, { capture: true, signal });
+      setOpen(false);
+      panels[active].classList.remove('is-active', 'is-open');
+      panels[active].hidden = true;
 
-    cleanupTouchEnter = () => controller.abort();
+      active = normalized;
+      const panel = panels[active];
+      panel.hidden = false;
+      panel.classList.add('is-active');
+
+      tabs.forEach((tab, index) => {
+        const selected = index === active;
+        tab.classList.toggle('is-active', selected);
+        tab.setAttribute('aria-selected', String(selected));
+        tab.tabIndex = selected ? 0 : -1;
+        tab.dataset.cursorLabel = selected ? `OPEN ${panel.dataset.bookSlug || 'BOOK'}` : `SELECT ${panels[index].dataset.bookSlug || 'BOOK'}`;
+      });
+
+      root.style.setProperty('--world-accent', panel.dataset.bookAccent || '#55f4a0');
+      root.style.setProperty('--world-rgb', panel.dataset.bookRgb || '85, 244, 160');
+      root.dataset.activeBook = panel.dataset.bookSlug || '';
+      if (counter) counter.textContent = `${String(active + 1).padStart(2, '0')} / ${String(panels.length).padStart(2, '0')}`;
+      if (status) status.textContent = 'SELECT · OPEN · ENTER';
+
+      if (focusTab) tabs[active].focus({ preventScroll: true });
+      tabs[active].scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'nearest', inline: 'center' });
+
+      if (!reducedMotion) {
+        panel.animate(
+          [
+            { opacity: 0, transform: 'translate3d(0, 24px, 0) scale(.985)' },
+            { opacity: 1, transform: 'translate3d(0, 0, 0) scale(1)' },
+          ],
+          { duration: 520, easing: 'cubic-bezier(.16,1,.3,1)' },
+        );
+      }
+    };
+
+    panels.forEach((panel, index) => {
+      if (index === 0) panel.classList.add('is-active');
+
+      panel.querySelector<HTMLButtonElement>('[data-book-toggle]')?.addEventListener('click', () => {
+        if (index !== active) {
+          setActive(index);
+          return;
+        }
+        setOpen(!open);
+      }, { signal });
+
+      panel.querySelector<HTMLButtonElement>('[data-book-close]')?.addEventListener('click', () => setOpen(false), { signal });
+    });
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener('click', () => setActive(index), { signal });
+      tab.addEventListener('keydown', (event) => {
+        if (!['ArrowLeft', 'ArrowRight', 'Home', 'End', 'Enter', ' '].includes(event.key)) return;
+        event.preventDefault();
+        if (event.key === 'ArrowLeft') setActive(active - 1, true);
+        if (event.key === 'ArrowRight') setActive(active + 1, true);
+        if (event.key === 'Home') setActive(0, true);
+        if (event.key === 'End') setActive(panels.length - 1, true);
+        if (event.key === 'Enter' || event.key === ' ') setOpen(!open);
+      }, { signal });
+    });
+
+    prev?.addEventListener('click', () => setActive(active - 1), { signal });
+    next?.addEventListener('click', () => setActive(active + 1), { signal });
+
+    stage?.addEventListener('pointerdown', (event) => {
+      pointerX = event.clientX;
+      pointerY = event.clientY;
+      pointerMoved = 0;
+    }, { signal });
+
+    stage?.addEventListener('pointermove', (event) => {
+      pointerMoved = Math.max(pointerMoved, Math.hypot(event.clientX - pointerX, event.clientY - pointerY));
+    }, { signal });
+
+    stage?.addEventListener('pointerup', (event) => {
+      const dx = event.clientX - pointerX;
+      const dy = event.clientY - pointerY;
+      if (open || pointerMoved < 42 || Math.abs(dx) < Math.abs(dy) * 1.15) return;
+      setActive(active + (dx < 0 ? 1 : -1));
+    }, { signal });
+
+    tabRail?.addEventListener('wheel', (event) => {
+      if (Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return;
+      tabRail.scrollLeft += event.deltaX;
+    }, { passive: true, signal });
+
+    root.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && open) {
+        setOpen(false);
+        activePanel().querySelector<HTMLButtonElement>('[data-book-toggle]')?.focus({ preventScroll: true });
+      }
+    }, { signal });
+
+    cleanupWorldLibrary = () => controller.abort();
   };
 
-  document.addEventListener('astro:page-load', initTouchEnter);
-  document.addEventListener('astro:before-preparation', () => cleanupTouchEnter());
+  document.addEventListener('astro:page-load', initWorldLibrary);
+  document.addEventListener('astro:before-preparation', () => cleanupWorldLibrary());
 
-  if (document.readyState !== 'loading') {
-    queueMicrotask(initTouchEnter);
-  }
+  if (document.readyState !== 'loading') queueMicrotask(initWorldLibrary);
 </script>
