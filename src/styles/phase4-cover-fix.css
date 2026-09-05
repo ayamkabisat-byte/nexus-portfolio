@@ -1,6 +1,11 @@
 /* Phase 4 cover correction layer.
-   Keeps every physical book frame the same size while normalizing source artwork
-   that has a different canvas/aspect treatment. */
+   Keeps every physical book frame consistent while correcting source artwork
+   and forcing a reliable inside-cover surface during the opening animation. */
+
+/* Requested tuning: reduce the large/hero book by 5% from the current size. */
+.world-library__book-object {
+  width: clamp(256.5px, 23.75vw, 356.25px) !important;
+}
 
 .world-library__experience[data-book-slug='hydra'] .world-library__book-object,
 .world-library__experience[data-book-slug='lucidreamer'] .world-library__book-object {
@@ -31,9 +36,10 @@
 
 /*
    Physical cover construction.
-   The front artwork faces outward. The paper lining is a dedicated reverse-facing
-   surface on the rotating cover itself, so it cannot disappear behind the page block
-   or show the front artwork mirrored when the cover opens.
+   Do not rely on a reverse-facing child with rotateY(180deg): some browsers can
+   cull that face during the parent's 3D rotation. Instead the ivory lining is a
+   surface attached directly to the rotating cover. It stays invisible while the
+   book is closed and fades in after the cover passes roughly 90 degrees.
 */
 .world-library__book-cover {
   overflow: visible !important;
@@ -48,53 +54,74 @@
   -webkit-backface-visibility: hidden !important;
 }
 
-/* Retire the old reverse face; the pseudo-element below is the actual inner cover. */
+/* Retire the old reverse face completely. */
 .world-library__cover-back {
   display: none !important;
 }
 
+/* Real visible inside-cover lining. Because it is attached to the rotating cover,
+   it follows the exact same hinge motion. The backface is deliberately visible:
+   the surface contains no text/artwork, so there is nothing that can mirror. */
 .world-library__book-cover::after {
   content: '';
   position: absolute;
   inset: 0;
-  z-index: 5;
+  z-index: 8;
   display: block;
   pointer-events: none;
-  border: 1px solid rgba(72, 65, 55, 0.24);
+  opacity: 0;
+  border: 1px solid rgba(72, 65, 55, 0.25);
   border-radius: 5px 13px 13px 5px;
   background:
-    linear-gradient(90deg, rgba(74, 60, 43, 0.18) 0%, rgba(74, 60, 43, 0.07) 7%, transparent 15%),
+    linear-gradient(90deg, rgba(74, 60, 43, 0.20) 0%, rgba(74, 60, 43, 0.08) 8%, transparent 17%),
     radial-gradient(circle at 76% 18%, rgba(var(--world-rgb), 0.035), transparent 34%),
-    repeating-linear-gradient(0deg, rgba(42, 36, 30, 0.022) 0 1px, transparent 1px 4px),
-    #eee9df;
+    repeating-linear-gradient(0deg, rgba(42, 36, 30, 0.024) 0 1px, transparent 1px 4px),
+    #f1ede5;
   box-shadow:
-    inset 18px 0 30px rgba(61, 49, 34, 0.14),
-    inset -2px 0 rgba(255, 255, 255, 0.66),
-    0 0 0 1px rgba(255, 255, 255, 0.14);
-  transform: rotateY(180deg) translateZ(2px);
-  transform-origin: center;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
+    inset 19px 0 32px rgba(61, 49, 34, 0.16),
+    inset -2px 0 rgba(255, 255, 255, 0.72),
+    0 0 0 1px rgba(255, 255, 255, 0.16);
+  transform: translateZ(-2px);
+  transform-origin: left center;
+  backface-visibility: visible !important;
+  -webkit-backface-visibility: visible !important;
+  transition: opacity 0.12s linear 0s;
 }
 
-/* A subtle hinge strip makes the open cover read as a physical board, not another page. */
+.world-library__experience.is-open .world-library__book-cover::after {
+  opacity: 1;
+  transition-delay: 0.48s;
+}
+
+/* Hinge shadow on the inside of the opened cover. */
 .world-library__book-cover::before {
   content: '';
   position: absolute;
-  z-index: 6;
+  z-index: 9;
   top: 1.5%;
   bottom: 1.5%;
   left: 0;
-  width: 13px;
+  width: 14px;
   pointer-events: none;
-  background: linear-gradient(90deg, rgba(71, 57, 39, 0.24), rgba(255, 255, 255, 0.12), transparent);
-  transform: rotateY(180deg) translateZ(3px);
-  transform-origin: center;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
+  opacity: 0;
+  background: linear-gradient(90deg, rgba(63, 50, 34, 0.30), rgba(255, 255, 255, 0.13), transparent);
+  transform: translateZ(-1px);
+  transform-origin: left center;
+  backface-visibility: visible !important;
+  -webkit-backface-visibility: visible !important;
+  transition: opacity 0.12s linear 0s;
+}
+
+.world-library__experience.is-open .world-library__book-cover::before {
+  opacity: 1;
+  transition-delay: 0.48s;
 }
 
 @media (max-width: 760px) {
+  .world-library__book-object {
+    width: min(49.4vw, 213.75px) !important;
+  }
+
   .world-library__experience[data-book-slug='hydra'] .world-library__book-object,
   .world-library__experience[data-book-slug='lucidreamer'] .world-library__book-object {
     --phase4-book-scale: 1.035 !important;
@@ -105,5 +132,11 @@
     inset: -4% !important;
     width: 108% !important;
     height: 108% !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .world-library__book-object {
+    width: min(46.55vw, 180.5px) !important;
   }
 }
