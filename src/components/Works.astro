@@ -130,6 +130,132 @@ import '@/styles/home-book-showcase.css';
   </div>
 </section>
 
+<style>
+  /* Phase 4 tuning: make the book itself the hero, without the large descriptive block. */
+  .world-library__experience {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 0;
+  }
+
+  .world-library__identity {
+    display: none;
+  }
+
+  .world-library__book-zone {
+    width: 100%;
+    min-height: clamp(520px, 64vh, 710px);
+    animation: phase4BookFloat 5.2s ease-in-out infinite;
+  }
+
+  .world-library__experience.is-open .world-library__book-zone {
+    animation-play-state: paused;
+  }
+
+  .world-library__book-object {
+    --phase4-book-scale: 1.055;
+    width: clamp(270px, 25vw, 375px);
+    transform: translateX(0) rotateX(1deg) rotateY(-2deg) scale(var(--phase4-book-scale));
+  }
+
+  .world-library__experience.is-open .world-library__book-object {
+    transform: translateX(50%) rotateX(1deg) rotateY(0deg) scale(var(--phase4-book-scale));
+  }
+
+  /* HYDRA and LUCIDREAMER use slightly different source canvases; normalize their apparent size without cropping. */
+  .world-library__experience[data-book-slug='hydra'] .world-library__book-object,
+  .world-library__experience[data-book-slug='lucidreamer'] .world-library__book-object {
+    --phase4-book-scale: 1.105;
+  }
+
+  .world-library__cover-front,
+  .world-library__cover-back {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  .world-library__cover-front {
+    z-index: 2;
+    transform: translateZ(1px);
+  }
+
+  /* The inside of a physical cover is paper, not a mirrored copy of the front artwork. */
+  .world-library__cover-back {
+    z-index: 3;
+    padding: 0;
+    border-color: rgba(72, 65, 55, 0.2);
+    background:
+      linear-gradient(90deg, rgba(78, 66, 48, 0.13), transparent 11%),
+      repeating-linear-gradient(0deg, rgba(38, 33, 28, 0.018) 0 1px, transparent 1px 4px),
+      #eee9df;
+    color: transparent;
+    box-shadow:
+      inset 16px 0 30px rgba(65, 53, 38, 0.13),
+      inset -1px 0 rgba(255, 255, 255, 0.65);
+    transform: rotateY(180deg) translateZ(2px);
+  }
+
+  .world-library__cover-back > * {
+    opacity: 0;
+  }
+
+  @keyframes phase4BookFloat {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50% { transform: translate3d(0, -9px, 0); }
+  }
+
+  @media (max-width: 760px) {
+    .world-library__stage,
+    .world-library__experiences {
+      min-height: 540px;
+    }
+
+    .world-library__experience {
+      grid-template-rows: 1fr;
+      padding: 14px 0 8px;
+    }
+
+    .world-library__book-zone {
+      min-height: 430px;
+    }
+
+    .world-library__book-object {
+      width: min(52vw, 225px);
+      --phase4-book-scale: 1.035;
+    }
+
+    .world-library__experience[data-book-slug='hydra'] .world-library__book-object,
+    .world-library__experience[data-book-slug='lucidreamer'] .world-library__book-object {
+      --phase4-book-scale: 1.075;
+    }
+
+    .world-library__experience.is-open .world-library__book-object {
+      transform: translateX(24%) rotateX(1deg) rotateY(0deg) scale(var(--phase4-book-scale));
+    }
+  }
+
+  @media (max-width: 390px) {
+    .world-library__stage,
+    .world-library__experiences {
+      min-height: 500px;
+    }
+
+    .world-library__book-zone {
+      min-height: 390px;
+    }
+
+    .world-library__book-object {
+      width: min(49vw, 190px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .world-library__book-zone {
+      animation: none;
+    }
+  }
+</style>
+
 <script>
   let cleanupWorldLibrary = () => {};
 
