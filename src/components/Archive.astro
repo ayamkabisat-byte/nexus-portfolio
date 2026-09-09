@@ -1,5 +1,6 @@
 ---
 import { ARCHIVE_ENTRIES } from '@/data/archive';
+import { withBase } from '@/lib/urls';
 ---
 
 <section class="archive" id="archive" data-archive>
@@ -52,6 +53,7 @@ import { ARCHIVE_ENTRIES } from '@/data/archive';
           <p class="archive__panel-subtitle">{entry.subtitle}</p>
           <h3>{entry.title}</h3>
           <p class="archive__panel-text">{entry.text}</p>
+          <a class="archive__book-link" href={withBase(`books/${entry.bookSlug}/`)}>Explore {entry.bookSlug.toUpperCase()} <span aria-hidden="true">↗</span></a>
           <div class="archive__coordinates" aria-hidden="true">
             <span>LAT 06°12′S</span>
             <span>LONG 106°49′E</span>

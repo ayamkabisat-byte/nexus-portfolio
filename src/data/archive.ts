@@ -1,6 +1,7 @@
 export const ARCHIVE_ENTRIES = [
   {
     id: 'nexus-device',
+    bookSlug: 'nexus',
     index: '001',
     code: 'ARTEFACT / NEXUS',
     title: 'Nexus Device',
@@ -10,6 +11,7 @@ export const ARCHIVE_ENTRIES = [
   },
   {
     id: 'olfactory-trace',
+    bookSlug: 'sillage',
     index: '002',
     code: 'EVIDENCE / SILLAGE',
     title: 'Olfactory Trace',
@@ -19,6 +21,7 @@ export const ARCHIVE_ENTRIES = [
   },
   {
     id: 'dream-insurgency',
+    bookSlug: 'manifesto',
     index: '003',
     code: 'PHENOMENON / MANIFESTO',
     title: 'Dream Insurgency',
@@ -28,6 +31,7 @@ export const ARCHIVE_ENTRIES = [
   },
   {
     id: 'residual-light',
+    bookSlug: 'capture',
     index: '004',
     code: 'EVIDENCE / CAPTURE',
     title: 'Residual Light',

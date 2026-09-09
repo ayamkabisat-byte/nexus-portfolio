@@ -12,10 +12,11 @@ import '@/styles/home-book-showcase.css';
       <span class="eyebrow">SELECTED FICTION / WORLD LIBRARY</span>
       <h2 id="world-library-title">Enter the worlds.</h2>
     </div>
-    <div class="world-library__status" aria-live="polite">
-      <span data-world-counter>01 / 06</span>
+    <div class="world-library__status">
+      <span data-world-counter>01 / {String(BOOKS.length).padStart(2, '0')}</span>
       <span class="world-library__status-line" aria-hidden="true"></span>
-      <span data-world-status>REEL MOVING · CLICK CENTER TO OPEN</span>
+      <span data-world-status>SELECT A WORLD</span>
+      <button class="world-library__pause" type="button" data-world-pause aria-label="Pause automatic book rotation">Pause rotation</button>
     </div>
   </header>
 
@@ -23,14 +24,14 @@ import '@/styles/home-book-showcase.css';
     <button class="world-library__arrow world-library__arrow--prev" type="button" data-world-prev aria-label="Previous book" data-cursor-label="PREVIOUS WORLD">←</button>
 
     <div class="world-library__reel-shell" data-world-reel>
-      <div class="world-library__reel" role="tablist" aria-label="Choose a book world">
+      <div class="world-library__reel" role="group" aria-label="Choose a book world">
         {BOOKS.map((book, index) => (
           <button
             class:list={['world-library__reel-book', { 'is-active': index === 0 }]}
             type="button"
-            role="tab"
-            aria-selected={index === 0 ? 'true' : 'false'}
+            aria-pressed={index === 0 ? 'true' : 'false'}
             aria-controls={`book-panel-${book.slug}`}
+            aria-expanded="false"
             tabindex={index === 0 ? '0' : '-1'}
             data-reel-book
             data-book-index={index}
@@ -66,6 +67,8 @@ import '@/styles/home-book-showcase.css';
         <article
           class="world-library__experience"
           id={`book-panel-${book.slug}`}
+          aria-label={`${book.title} synopsis`}
+          inert
           data-world-panel
           data-book-index={index}
           data-book-slug={book.slug}
@@ -84,12 +87,12 @@ import '@/styles/home-book-showcase.css';
             <div class="world-library__book-object" data-book-object>
               <div class="world-library__page-stack" aria-hidden="true"><span></span><span></span><span></span></div>
 
-              <div class="world-library__inside-page">
+              <div class="world-library__inside-page" data-desktop-brief>
                 <div class="world-library__page-head">
                   <span>{book.number} / {book.title}</span>
                   <button type="button" data-book-close aria-label={`Close ${book.title}`} data-cursor-label="CLOSE BOOK">×</button>
                 </div>
-                <div class="world-library__page-copy">
+                <div class="world-library__page-copy" data-lenis-prevent>
                   <span class="world-library__page-label">WORLD BRIEF</span>
                   <blockquote>{book.tagline}</blockquote>
                   <p>{book.synopsis[0]}</p>
@@ -118,12 +121,49 @@ import '@/styles/home-book-showcase.css';
               </button>
             </div>
             <span class="world-library__book-shadow" aria-hidden="true"></span>
+            <div class="world-library__mobile-brief" data-mobile-brief>
+              <div class="world-library__mobile-heading">
+                <h3>{book.title}</h3>
+                <button type="button" data-book-close aria-label={`Close ${book.title} synopsis`}>×</button>
+              </div>
+              <p class="world-library__mobile-genre">{book.genre}</p>
+              <blockquote>{book.tagline}</blockquote>
+              <p>{book.synopsis[0]}</p>
+              <a class="button button--primary" href={withBase(`books/${book.slug}/`)}>Enter {book.title} <span aria-hidden="true">↗</span></a>
+            </div>
           </div>
         </article>
       ))}
     </div>
 
     <button class="world-library__arrow world-library__arrow--next" type="button" data-world-next aria-label="Next book" data-cursor-label="NEXT WORLD">→</button>
+  </div>
+
+  <div class="world-library__summaries" data-world-summaries>
+    {BOOKS.map((book, index) => (
+      <div class="world-library__summary" data-world-summary hidden={index !== 0}>
+        <span class="eyebrow">{book.genre}</span>
+        <h3>{book.title}</h3>
+        <p>{book.tagline}</p>
+        <div class="world-library__summary-actions">
+          <button class="button button--ghost" type="button" data-preview-book={index} aria-controls={`book-panel-${book.slug}`}>Open synopsis</button>
+          <a class="button button--primary" href={withBase(`books/${book.slug}/`)}>Explore {book.title} <span aria-hidden="true">↗</span></a>
+          {book.externalUrl && <a class="world-library__read" href={book.externalUrl} target="_blank" rel="noreferrer">{book.externalLabel} ↗</a>}
+        </div>
+      </div>
+    ))}
+  </div>
+  <p class="sr-only" data-world-announcement aria-live="polite" aria-atomic="true"></p>
+
+  <div class="world-library__fallback" data-world-fallback>
+    {BOOKS.map((book) => (
+      <a href={withBase(`books/${book.slug}/`)}>
+        <img src={withBase(book.cover)} alt={`${book.title} book cover`} width="800" height="1200" loading="lazy" />
+        <h3>{book.title}</h3>
+        <p>{book.genre}</p>
+        <span>Explore this world ↗</span>
+      </a>
+    ))}
   </div>
 </section>
 
@@ -413,203 +453,80 @@ import '@/styles/home-book-showcase.css';
     .world-library__book-zone { transition-duration: .01ms !important; }
     .world-library__reel-book[data-reel-position='0'] .world-library__reel-cover { animation: none; }
   }
+
+  /* Content first: the fallback remains usable until initialization succeeds. */
+  .world-library:not(.is-ready) .world-library__stage,
+  .world-library:not(.is-ready) .world-library__summaries,
+  .world-library:not(.is-ready) .world-library__status,
+  .world-library.is-ready .world-library__fallback { display: none; }
+  .world-library__fallback { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 28px; padding-top: 40px; }
+  .world-library__fallback img { width: 100%; height: auto; aspect-ratio: 2 / 3; object-fit: contain; }
+  .world-library__fallback h3 { margin-top: 16px; }
+  .world-library__fallback p { margin-block: 8px; color: var(--muted); }
+  .world-library__fallback span { color: var(--world-accent); }
+  .world-library__status { white-space: normal; flex-wrap: wrap; font-size: 11px; line-height: 1.5; color: #b7c1cb; }
+  .world-library__pause { padding: 10px 14px; min-height: 44px; border: 1px solid var(--line-soft); border-radius: 24px; color: var(--text); background: #111923; font: inherit; cursor: pointer; }
+  .world-library__pause:disabled { opacity: .7; cursor: default; }
+  .world-library__reel-hint { font-size: 11px; color: #b7c1cb; line-height: 1.5; }
+  .world-library__reel-meta strong { font-size: 12px; }
+  .world-library__reel-meta small { font-size: 10px; }
+  .world-library__reel-book:focus-visible { outline: 2px solid var(--world-accent); outline-offset: 10px; border-radius: 8px; }
+  .world-library__summaries { position: relative; z-index: 9; max-width: 780px; margin: 0 auto; text-align: center; }
+  .world-library__summary[hidden] { display: none; }
+  .world-library__summary h3 { margin: 12px 0; font-size: clamp(26px, 5vw, 42px); letter-spacing: -.03em; }
+  .world-library__summary > p { font-size: 17px; line-height: 1.65; color: #bac4ce; }
+  .world-library__summary .eyebrow { font-size: 12px; }
+  .world-library__summary-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 14px; margin-top: 24px; }
+  .world-library__read { color: var(--world-accent); padding: 12px; }
+  .world-library__inside-page { grid-template-rows: auto minmax(0, 1fr) auto; }
+  .world-library__page-copy { overflow-y: auto; min-height: 0; padding-right: 4px; overscroll-behavior: contain; }
+  .world-library__page-copy p { font-size: 14px; line-height: 1.6; }
+  .world-library__motifs span { font-size: 10px; }
+  .world-library__page-head { font-size: 10px; }
+  .world-library__page-head button { width: 44px; height: 44px; flex-shrink: 0; }
+  .world-library__enter { min-height: 44px; font-size: 12px; }
+  .world-library__mobile-brief { display: none; }
+  .world-library__arrow { width: 44px; height: 44px; }
+  .world-library button:focus-visible, .world-library a:focus-visible { outline: 2px solid var(--world-accent); outline-offset: 4px; }
+
+  @media (max-width: 760px) {
+    .world-library__header { align-items: flex-start; }
+    .world-library__status { justify-content: flex-start; gap: 10px; width: 100%; }
+    .world-library__status-line { display: none; }
+    .world-library__stage { grid-template-columns: 44px minmax(0, 1fr) 44px; }
+    .world-library__reel-hint { font-size: 10px; white-space: normal; text-align: center; width: 100%; }
+    .world-library__summary-actions { flex-direction: column; }
+    .world-library__summary-actions .button { width: 100%; justify-content: center; }
+    .world-library.is-book-open .world-library__experiences { grid-column: 1 / -1; min-height: 0; }
+    .world-library.is-book-open .world-library__experience { position: relative; inset: auto; }
+    .world-library.is-book-open .world-library__book-zone { display: flex; flex-direction: column; gap: 32px; min-height: 0; padding: 36px 0 24px; }
+    .world-library.is-book-open .world-library__stage { min-height: 0; }
+    .world-library.is-book-open .world-library__arrow { align-self: start; margin-top: 24px; z-index: 12; }
+    .world-library.is-book-open .world-library__book-object { flex-shrink: 0; width: min(40vw, 180px) !important; }
+    .world-library__inside-page { pointer-events: none; }
+    .world-library__inside-page > * { visibility: hidden; }
+    .world-library__book-shadow { display: none; }
+    .world-library__mobile-brief { display: block; width: 100%; padding: 24px; border: 1px solid var(--line-soft); border-radius: 16px; background: #101722; }
+    .world-library__mobile-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .world-library__mobile-heading h3 { font-size: clamp(22px, 6vw, 32px); overflow-wrap: anywhere; }
+    .world-library__mobile-heading button { width: 44px; height: 44px; flex-shrink: 0; border: 1px solid var(--line-soft); border-radius: 50%; background: #1c2633; color: #fff; font-size: 24px; }
+    .world-library__mobile-brief p { font-size: 16px; line-height: 1.7; margin: 16px 0; color: #c6d0dc; }
+    .world-library__mobile-brief blockquote { font-size: 20px; line-height: 1.4; color: var(--world-accent); margin: 24px 0 16px; }
+    .world-library__mobile-brief .world-library__mobile-genre { font-size: 13px; }
+    .world-library__mobile-brief .button { display: flex; justify-content: center; width: 100%; margin-top: 24px; }
+  }
+
 </style>
 
 <script>
+  import { initWorldLibrary } from '@/scripts/world-library';
+
   let cleanupWorldLibrary = () => {};
-
-  const initWorldLibrary = () => {
+  const mount = () => {
     cleanupWorldLibrary();
-
     const root = document.querySelector<HTMLElement>('[data-world-library]');
-    if (!root) return;
-
-    const panels = Array.from(root.querySelectorAll<HTMLElement>('[data-world-panel]'));
-    const reelBooks = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-reel-book]'));
-    const prev = root.querySelector<HTMLButtonElement>('[data-world-prev]');
-    const next = root.querySelector<HTMLButtonElement>('[data-world-next]');
-    const counter = root.querySelector<HTMLElement>('[data-world-counter]');
-    const status = root.querySelector<HTMLElement>('[data-world-status]');
-    const stage = root.querySelector<HTMLElement>('[data-world-stage]');
-    const reel = root.querySelector<HTMLElement>('[data-world-reel]');
-    if (!panels.length || panels.length !== reelBooks.length) return;
-
-    const controller = new AbortController();
-    const { signal } = controller;
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const AUTO_DELAY = 3900;
-    const RESUME_DELAY = 5200;
-    let active = 0;
-    let open = false;
-    let pointerX = 0;
-    let pointerY = 0;
-    let pointerMoved = 0;
-    let autoTimer = 0;
-    let resumeTimer = 0;
-
-    const activePanel = () => panels[active];
-
-    const clearAuto = () => {
-      if (autoTimer) window.clearTimeout(autoTimer);
-      if (resumeTimer) window.clearTimeout(resumeTimer);
-      autoTimer = 0;
-      resumeTimer = 0;
-    };
-
-    const renderReel = () => {
-      const total = reelBooks.length;
-      reelBooks.forEach((book, index) => {
-        let offset = index - active;
-        const half = Math.floor(total / 2);
-        if (offset > half) offset -= total;
-        if (offset < -half) offset += total;
-
-        const selected = offset === 0;
-        book.dataset.reelPosition = String(offset);
-        book.classList.toggle('is-active', selected);
-        book.setAttribute('aria-selected', String(selected));
-        book.tabIndex = selected ? 0 : -1;
-        book.dataset.cursorLabel = selected
-          ? `OPEN ${activePanel().dataset.bookSlug || 'BOOK'}`
-          : `SELECT ${panels[index].dataset.bookSlug || 'BOOK'}`;
-      });
-    };
-
-    const scheduleAuto = (delay = AUTO_DELAY) => {
-      if (reducedMotion || open || document.hidden) return;
-      if (autoTimer) window.clearTimeout(autoTimer);
-      autoTimer = window.setTimeout(() => {
-        setActive(active + 1, false, true);
-        scheduleAuto();
-      }, delay);
-    };
-
-    const pauseAuto = (resume = true) => {
-      if (autoTimer) window.clearTimeout(autoTimer);
-      if (resumeTimer) window.clearTimeout(resumeTimer);
-      autoTimer = 0;
-      resumeTimer = 0;
-      if (resume && !open && !reducedMotion) {
-        resumeTimer = window.setTimeout(() => scheduleAuto(), RESUME_DELAY);
-      }
-    };
-
-    const setOpen = (nextOpen: boolean) => {
-      open = nextOpen;
-      root.classList.toggle('is-book-open', open);
-      const panel = activePanel();
-      panel.classList.toggle('is-open', open);
-      panel.querySelector<HTMLButtonElement>('[data-book-toggle]')?.setAttribute('aria-expanded', String(open));
-      reelBooks[active]?.setAttribute('aria-expanded', String(open));
-      if (status) status.textContent = open ? 'BOOK OPEN · ENTER THE WORLD' : 'REEL MOVING · CLICK CENTER TO OPEN';
-      if (open) pauseAuto(false);
-      else scheduleAuto(RESUME_DELAY);
-    };
-
-    const setActive = (nextIndex: number, focusBook = false, fromAuto = false) => {
-      const normalized = (nextIndex + panels.length) % panels.length;
-      if (normalized === active) {
-        if (!open) setOpen(true);
-        return;
-      }
-
-      setOpen(false);
-      panels[active].classList.remove('is-active', 'is-open');
-      panels[active].hidden = true;
-
-      active = normalized;
-      const panel = panels[active];
-      panel.hidden = false;
-      panel.classList.add('is-active');
-
-      root.style.setProperty('--world-accent', panel.dataset.bookAccent || '#55f4a0');
-      root.style.setProperty('--world-rgb', panel.dataset.bookRgb || '85, 244, 160');
-      root.dataset.activeBook = panel.dataset.bookSlug || '';
-      if (counter) counter.textContent = `${String(active + 1).padStart(2, '0')} / ${String(panels.length).padStart(2, '0')}`;
-      if (status) status.textContent = fromAuto ? 'REEL MOVING · CLICK CENTER TO OPEN' : 'SELECTED · CLICK CENTER TO OPEN';
-
-      renderReel();
-      if (focusBook) reelBooks[active]?.focus({ preventScroll: true });
-      if (!fromAuto) pauseAuto(true);
-    };
-
-    panels.forEach((panel, index) => {
-      if (index === 0) panel.classList.add('is-active');
-      panel.querySelector<HTMLButtonElement>('[data-book-toggle]')?.addEventListener('click', () => {
-        if (index !== active) return;
-        setOpen(!open);
-      }, { signal });
-      panel.querySelector<HTMLButtonElement>('[data-book-close]')?.addEventListener('click', () => setOpen(false), { signal });
-    });
-
-    reelBooks.forEach((book, index) => {
-      book.addEventListener('click', () => {
-        if (index === active) setOpen(true);
-        else setActive(index);
-      }, { signal });
-
-      book.addEventListener('keydown', (event) => {
-        if (!['ArrowLeft', 'ArrowRight', 'Home', 'End', 'Enter', ' '].includes(event.key)) return;
-        event.preventDefault();
-        if (event.key === 'ArrowLeft') setActive(active - 1, true);
-        if (event.key === 'ArrowRight') setActive(active + 1, true);
-        if (event.key === 'Home') setActive(0, true);
-        if (event.key === 'End') setActive(panels.length - 1, true);
-        if (event.key === 'Enter' || event.key === ' ') setOpen(true);
-      }, { signal });
-    });
-
-    prev?.addEventListener('click', () => { setActive(active - 1); pauseAuto(true); }, { signal });
-    next?.addEventListener('click', () => { setActive(active + 1); pauseAuto(true); }, { signal });
-
-    stage?.addEventListener('pointerdown', (event) => {
-      pointerX = event.clientX;
-      pointerY = event.clientY;
-      pointerMoved = 0;
-      pauseAuto(false);
-    }, { signal });
-
-    stage?.addEventListener('pointermove', (event) => {
-      pointerMoved = Math.max(pointerMoved, Math.hypot(event.clientX - pointerX, event.clientY - pointerY));
-    }, { signal });
-
-    stage?.addEventListener('pointerup', (event) => {
-      const dx = event.clientX - pointerX;
-      const dy = event.clientY - pointerY;
-      if (!open && pointerMoved >= 42 && Math.abs(dx) >= Math.abs(dy) * 1.15) {
-        setActive(active + (dx < 0 ? 1 : -1));
-      } else if (!open) {
-        pauseAuto(true);
-      }
-    }, { signal });
-
-    reel?.addEventListener('mouseenter', () => pauseAuto(false), { signal });
-    reel?.addEventListener('mouseleave', () => { if (!open) scheduleAuto(RESUME_DELAY); }, { signal });
-    reel?.addEventListener('focusin', () => pauseAuto(false), { signal });
-    reel?.addEventListener('focusout', () => { if (!open) scheduleAuto(RESUME_DELAY); }, { signal });
-
-    root.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && open) {
-        setOpen(false);
-        reelBooks[active]?.focus({ preventScroll: true });
-      }
-    }, { signal });
-
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) pauseAuto(false);
-      else if (!open) scheduleAuto(RESUME_DELAY);
-    }, { signal });
-
-    renderReel();
-    scheduleAuto();
-
-    cleanupWorldLibrary = () => {
-      clearAuto();
-      controller.abort();
-    };
+    cleanupWorldLibrary = root ? initWorldLibrary(root) : () => {};
   };
-
-  document.addEventListener('astro:page-load', initWorldLibrary);
+  document.addEventListener('astro:page-load', mount);
   document.addEventListener('astro:before-preparation', () => cleanupWorldLibrary());
-  if (document.readyState !== 'loading') queueMicrotask(initWorldLibrary);
 </script>

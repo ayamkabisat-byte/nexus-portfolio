@@ -49,13 +49,17 @@ function initSmoothScroll(signal: AbortSignal) {
     anchor.addEventListener(
       'click',
       (event) => {
+        if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
         const url = new URL(anchor.href, window.location.href);
         if (url.pathname !== window.location.pathname || !url.hash) return;
-        const target = document.querySelector(url.hash);
+        const target = document.getElementById(decodeURIComponent(url.hash.slice(1)));
+        if (anchor.hasAttribute('data-menu-link')) lenis?.start();
         if (!target) return;
         event.preventDefault();
         lenis?.scrollTo(target as HTMLElement, { offset: -58, duration: 1.15 });
-        history.replaceState(null, '', url.hash);
+        history.replaceState(history.state, '', url.hash);
+        if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
+        target.focus({ preventScroll: true });
       },
       { signal },
     );
@@ -264,44 +268,51 @@ function initNavigation(signal: AbortSignal) {
   let previousFocus: HTMLElement | null = null;
   const focusable = () => [toggle, ...Array.from(menu.querySelectorAll<HTMLElement>('a[href], button:not([disabled])'))];
 
-  const setMenu = (next: boolean) => {
+  const background = Array.from(document.querySelectorAll<HTMLElement>('main, footer'));
+  const menuLinks = menu.querySelectorAll<HTMLElement>('[data-menu-link]');
+  const setMenu = (next: boolean, restoreFocus = true) => {
     open = next;
+    gsap.killTweensOf([menu, ...menuLinks]);
     toggle.setAttribute('aria-expanded', String(open));
     toggle.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
     menu.setAttribute('aria-hidden', String(!open));
+    menu.inert = !open;
+    background.forEach((element) => { element.inert = open; });
     document.body.dataset.menuOpen = String(open);
 
     if (open) {
       previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : toggle;
+      lenis?.stop();
       menu.classList.add('is-open');
-      gsap.fromTo(
-        menu,
-        { clipPath: 'inset(0 0 100% 0)' },
-        { clipPath: 'inset(0 0 0% 0)', duration: 0.72, ease: 'power4.inOut' },
-      );
-      gsap.fromTo(
-        menu.querySelectorAll('.menu__links a'),
-        { yPercent: 70, opacity: 0 },
-        { yPercent: 0, opacity: 1, stagger: 0.055, duration: 0.72, ease: 'power3.out', delay: 0.25 },
-      );
-      window.setTimeout(() => menu.querySelector<HTMLElement>('[data-menu-link]')?.focus(), 420);
+      gsap.to(menu, { clipPath: 'inset(0 0 0% 0)', duration: reduceMotion() ? 0 : 0.55, ease: 'power4.inOut' });
+      gsap.fromTo(menuLinks, { yPercent: 35, opacity: 0 }, { yPercent: 0, opacity: 1, stagger: reduceMotion() ? 0 : 0.04, duration: reduceMotion() ? 0 : 0.45 });
+      menuLinks[0]?.focus({ preventScroll: true });
     } else {
+      lenis?.start();
+      if (restoreFocus) previousFocus?.focus({ preventScroll: true });
       gsap.to(menu, {
-        clipPath: 'inset(0 0 100% 0)',
-        duration: 0.62,
-        ease: 'power4.inOut',
-        onComplete: () => {
-          menu.classList.remove('is-open');
-          previousFocus?.focus();
-        },
+        clipPath: 'inset(0 0 100% 0)', duration: reduceMotion() ? 0 : 0.45, ease: 'power4.inOut',
+        onComplete: () => { if (!open) menu.classList.remove('is-open'); },
       });
     }
   };
-
   toggle.addEventListener('click', () => setMenu(!open), { signal });
-  menu.querySelectorAll('[data-menu-link]').forEach((link) => {
-    link.addEventListener('click', () => setMenu(false), { signal });
-  });
+  menuLinks.forEach((link) => link.addEventListener('click', () => {
+    setMenu(false, false);
+    const url = new URL((link as HTMLAnchorElement).href, window.location.href);
+    if (url.pathname === window.location.pathname && url.hash) {
+      const target = document.getElementById(decodeURIComponent(url.hash.slice(1)));
+      if (target) {
+        if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
+        target.focus({ preventScroll: true });
+      }
+    }
+  }, { signal }));
+  signal.addEventListener('abort', () => {
+    gsap.killTweensOf([menu, ...menuLinks]);
+    background.forEach((element) => { element.inert = false; });
+    delete document.body.dataset.menuOpen;
+  }, { once: true });
 
   window.addEventListener(
     'keydown',
@@ -394,271 +405,6 @@ function initHero(signal: AbortSignal) {
   }
 }
 
-function initWorks(signal: AbortSignal) {
-  const root = document.querySelector<HTMLElement>('[data-book-showcase]');
-  const viewport = root?.querySelector<HTMLElement>('[data-showcase-viewport]');
-  const track = root?.querySelector<HTMLElement>('[data-showcase-track]');
-  if (!root || !viewport || !track) return;
-
-  const cards = Array.from(track.querySelectorAll<HTMLElement>('[data-showcase-card]'));
-  if (!cards.length) return;
-
-  const originalCount = Math.max(1, cards.length / 2);
-
-  if (reduceMotion()) {
-    cards.slice(originalCount).forEach((card) => card.remove());
-    root.classList.add('is-static');
-    return;
-  }
-
-  let halfWidth = 1;
-  let position = 0;
-  let targetVelocity = window.innerWidth < 760 ? -58 : -84;
-  let velocity = targetVelocity;
-  let frame = 0;
-  let lastTime = performance.now();
-  let paused = false;
-  let dragging = false;
-  let pointerStart = 0;
-  let positionStart = 0;
-  let draggedDistance = 0;
-  let activeIndex = -1;
-
-  const wrap = (value: number) => {
-    if (!halfWidth) return value;
-    return ((value % halfWidth) + halfWidth) % halfWidth - halfWidth;
-  };
-
-  const setActive = (index: number) => {
-    const normalized = ((index % originalCount) + originalCount) % originalCount;
-    if (normalized === activeIndex) return;
-
-    activeIndex = normalized;
-    root.dataset.activeBook = cards[normalized]?.dataset.showcaseSlug || '';
-
-    cards.forEach((card, cardIndex) => {
-      card.classList.toggle('is-active', cardIndex % originalCount === normalized);
-    });
-  };
-
-  const render = () => {
-    gsap.set(track, { x: position, force3D: true });
-
-    const viewportRect = viewport.getBoundingClientRect();
-    const trackRect = track.getBoundingClientRect();
-    const viewportCenter = viewportRect.left + viewportRect.width / 2;
-
-    let nearest = 0;
-    let nearestDistance = Number.POSITIVE_INFINITY;
-
-    cards.forEach((card, index) => {
-      const center = trackRect.left + card.offsetLeft + card.offsetWidth / 2;
-      const normalizedDistance = (center - viewportCenter) / Math.max(1, viewportRect.width * 0.54);
-      const distance = Math.abs(normalizedDistance);
-
-      if (distance < nearestDistance) {
-        nearestDistance = distance;
-        nearest = index;
-      }
-
-      const scale = gsap.utils.clamp(0.78, 1.08, 1.08 - distance * 0.23);
-      const opacity = gsap.utils.clamp(0.36, 1, 1 - distance * 0.52);
-      const rotateY = gsap.utils.clamp(-18, 18, normalizedDistance * -18);
-      const y = Math.min(48, distance * 34);
-
-      gsap.set(card, {
-        scale,
-        opacity,
-        rotateY,
-        y,
-        z: (1 - distance) * 90,
-        force3D: true,
-      });
-    });
-
-    setActive(nearest);
-  };
-
-  const refreshMeasurements = () => {
-    halfWidth = Math.max(1, cards[originalCount].offsetLeft - cards[0].offsetLeft);
-    position = wrap(position);
-    render();
-  };
-
-  const animate = (time: number) => {
-    const delta = Math.min(48, time - lastTime) / 1000;
-    lastTime = time;
-
-    const desiredVelocity = paused || dragging ? 0 : targetVelocity;
-    velocity += (desiredVelocity - velocity) * Math.min(1, delta * 7.5);
-
-    if (!dragging) position = wrap(position + velocity * delta);
-    render();
-
-    frame = window.requestAnimationFrame(animate);
-  };
-
-  viewport.addEventListener('pointerenter', () => {
-    paused = true;
-  }, { signal });
-
-  viewport.addEventListener('pointerleave', () => {
-    if (!dragging) paused = false;
-  }, { signal });
-
-  viewport.addEventListener('pointerdown', (event) => {
-    dragging = true;
-    paused = true;
-    pointerStart = event.clientX;
-    positionStart = position;
-    draggedDistance = 0;
-    viewport.setPointerCapture(event.pointerId);
-    root.classList.add('is-dragging');
-  }, { signal });
-
-  viewport.addEventListener('pointermove', (event) => {
-    if (!dragging) return;
-    draggedDistance = event.clientX - pointerStart;
-    position = wrap(positionStart + draggedDistance);
-    render();
-  }, { signal });
-
-  const finishDrag = (event: PointerEvent) => {
-    if (!dragging) return;
-
-    dragging = false;
-    root.classList.remove('is-dragging');
-
-    if (viewport.hasPointerCapture(event.pointerId)) {
-      viewport.releasePointerCapture(event.pointerId);
-    }
-
-    if (Math.abs(draggedDistance) > 8) {
-      const suppressClick = (clickEvent: MouseEvent) => {
-        clickEvent.preventDefault();
-        clickEvent.stopPropagation();
-      };
-      viewport.addEventListener('click', suppressClick, { capture: true, once: true });
-    }
-
-    velocity = draggedDistance * 2.8;
-    window.setTimeout(() => {
-      paused = false;
-    }, 240);
-  };
-
-  viewport.addEventListener('pointerup', finishDrag, { signal });
-  viewport.addEventListener('pointercancel', finishDrag, { signal });
-
-  root.addEventListener('focusin', () => {
-    paused = true;
-  }, { signal });
-
-  root.addEventListener('focusout', () => {
-    paused = false;
-  }, { signal });
-
-  let lastActivatedCard: HTMLElement | null = null;
-  let lastActivationTime = 0;
-  let activationResetTimer = 0;
-
-  const openBook = (card: HTMLElement) => {
-    const link = card as HTMLAnchorElement;
-    if (!link.href) return;
-    window.location.assign(link.href);
-  };
-
-  const markAwaitingSecondClick = (card: HTMLElement) => {
-    cards.forEach((item) => item.classList.toggle('is-awaiting-enter', item === card));
-    window.clearTimeout(activationResetTimer);
-    activationResetTimer = window.setTimeout(() => {
-      cards.forEach((item) => item.classList.remove('is-awaiting-enter'));
-      lastActivatedCard = null;
-      lastActivationTime = 0;
-    }, 520);
-  };
-
-  cards.forEach((card, index) => {
-    card.addEventListener('click', (event) => {
-      event.preventDefault();
-
-      // Keyboard activation must remain immediate and accessible.
-      if (event.detail === 0) {
-        openBook(card);
-        return;
-      }
-
-      // A completed drag must never be interpreted as one of the two clicks.
-      if (Math.abs(draggedDistance) > 8) {
-        lastActivatedCard = null;
-        lastActivationTime = 0;
-        return;
-      }
-
-      const now = performance.now();
-      const isSecondClick =
-        lastActivatedCard === card &&
-        now - lastActivationTime <= 500;
-
-      setActive(index);
-      paused = true;
-
-      if (isSecondClick) {
-        openBook(card);
-        return;
-      }
-
-      lastActivatedCard = card;
-      lastActivationTime = now;
-      markAwaitingSecondClick(card);
-    }, { signal });
-
-    card.addEventListener('dblclick', (event) => {
-      event.preventDefault();
-      openBook(card);
-    }, { signal });
-
-    card.addEventListener('keydown', (event) => {
-      if (event.key !== 'Enter') return;
-      event.preventDefault();
-      openBook(card);
-    }, { signal });
-  });
-
-  window.addEventListener('resize', () => {
-    targetVelocity = window.innerWidth < 760 ? -58 : -84;
-    refreshMeasurements();
-  }, { signal });
-
-  const images = Array.from(root.querySelectorAll<HTMLImageElement>('img'));
-  Promise.all(
-    images.map(async (image) => {
-      if (!image.complete) {
-        await new Promise<void>((resolve) => {
-          image.addEventListener('load', () => resolve(), { once: true });
-          image.addEventListener('error', () => resolve(), { once: true });
-        });
-      }
-
-      try {
-        await image.decode();
-      } catch {
-        // A failed image must not block the reel.
-      }
-    }),
-  ).finally(refreshMeasurements);
-
-  refreshMeasurements();
-  frame = window.requestAnimationFrame(animate);
-
-  signal.addEventListener('abort', () => {
-    window.cancelAnimationFrame(frame);
-    window.clearTimeout(activationResetTimer);
-    gsap.killTweensOf(track);
-    cards.forEach((card) => gsap.killTweensOf(card));
-  }, { once: true });
-}
-
 function initArchive(signal: AbortSignal) {
   const root = document.querySelector<HTMLElement>('[data-archive]');
   if (!root) return;
@@ -678,36 +424,16 @@ function initArchive(signal: AbortSignal) {
       tab.tabIndex = active ? 0 : -1;
     });
 
-    if (reduceMotion()) {
-      panels.forEach((panel) => { panel.hidden = panel !== next; });
-      return;
-    }
-
-    const revealNext = () => {
-      next.hidden = false;
-      gsap.fromTo(
-        next,
-        { opacity: 0, y: 22, filter: 'blur(7px)' },
-        { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.55, ease: 'power3.out' },
-      );
-    };
-
-    if (current) {
-      gsap.to(current, {
-        opacity: 0,
-        y: -16,
-        filter: 'blur(6px)',
-        duration: 0.28,
-        ease: 'power2.in',
-        onComplete: () => {
-          current.hidden = true;
-          gsap.set(current, { clearProps: 'all' });
-          revealNext();
-        },
-      });
-    } else {
-      revealNext();
-    }
+    gsap.killTweensOf(panels);
+    panels.forEach((panel) => {
+      panel.hidden = panel !== next;
+      panel.classList.toggle('is-active', panel === next);
+      gsap.set(panel, { clearProps: 'opacity,transform,filter' });
+    });
+    if (!reduceMotion()) gsap.fromTo(next,
+      { opacity: 0, y: 18 },
+      { opacity: 1, y: 0, duration: 0.4, ease: 'power3.out' },
+    );
   };
 
   tabs.forEach((tab, index) => {
@@ -773,6 +499,7 @@ function initBookHero(signal: AbortSignal) {
 }
 
 function initSite() {
+  document.documentElement.classList.add('js');
   destroySite();
   controller = new AbortController();
   const { signal } = controller;
@@ -785,7 +512,6 @@ function initSite() {
     initNavigation(signal);
     initReveals();
     initHero(signal);
-    initWorks(signal);
     initArchive(signal);
     initBookHero(signal);
   });
