@@ -3,6 +3,7 @@ import { ClientRouter } from 'astro:transitions';
 import { SITE } from '@/config/site';
 import { withBase } from '@/lib/urls';
 import '@/styles/global.css';
+import '@/styles/phase4-cover-fix.css';
 import Atmosphere from '@/components/Atmosphere.astro';
 
 interface Props {
@@ -45,7 +46,7 @@ const googleVerification = import.meta.env.GOOGLE_SITE_VERIFICATION;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="dark" />
-    <script is:inline>document.documentElement.classList.add('js');</script>
+    <script is:inline data-astro-rerun>document.documentElement.classList.add('js');</script>
     <meta name="theme-color" content="#05070d" />
     <meta name="robots" content={robots} />
 

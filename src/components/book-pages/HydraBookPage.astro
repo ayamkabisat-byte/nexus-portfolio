@@ -1,0 +1,133 @@
+---
+import BookWorldRenderer from '@/components/book-worlds/BookWorldRenderer.astro';
+import type { Book } from '@/data/books';
+import { withBase } from '@/lib/urls';
+
+interface Props {
+  book: Book;
+  previous: Book;
+  next: Book;
+  themeStyle: string;
+}
+
+const { book, previous, next, themeStyle } = Astro.props;
+---
+
+<main
+  id="main-content"
+  class="book-page phase3-page phase3-hydra"
+  data-book-theme="hydra"
+  data-book-layout="ninefold"
+  data-book-theme-engine="v3"
+  style={themeStyle}
+>
+  <section class="hydra-ninefold" id="home">
+    <BookWorldRenderer slug={book.slug} />
+    <div class="hydra-ninefold__grid" aria-hidden="true"></div>
+
+    <a class="phase3-back" href={`${withBase('')}#works`} data-cursor-label="BACK TO ARCHIVE">← Archive</a>
+
+    <div class="hydra-ninefold__meta" aria-hidden="true">
+      <span>HY-04 / SUBJECT MORGAN</span>
+      <span>NINEFOLD IDENTITY / ACTIVE</span>
+      <span>MEMORY COLLISION / UNSTABLE</span>
+    </div>
+
+    <div class="hydra-orbit" data-book-cover>
+      <div class="hydra-orbit__rings" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
+      <div class="hydra-orbit__nodes" aria-hidden="true">
+        {Array.from({ length: 9 }).map((_, index) => (
+          <span style={`--node:${index}`}>{String(index + 1).padStart(2, '0')}</span>
+        ))}
+      </div>
+      <div class="hydra-orbit__cover">
+        <span class="hydra-orbit__code">{book.archiveCode}</span>
+        <img
+          src={withBase(book.cover)}
+          alt={`${book.title} book cover`}
+          width="600"
+          height="900"
+          loading="eager"
+          decoding="async"
+          fetchpriority="high"
+        />
+      </div>
+    </div>
+
+    <div class="hydra-ninefold__copy">
+      <span class="phase3-kicker">04 / SCI-FI ACTION THRILLER / NINEFOLD SUBJECT</span>
+      <h1>HYDRA</h1>
+      <blockquote>{book.tagline}</blockquote>
+      <p>Nine lives collapse into one body. Every advantage arrives carrying someone else’s damage.</p>
+      <div class="phase3-actions">
+        <a class="button button--primary" href="#memory-ledger" data-cursor-label="OPEN MEMORY LEDGER">Enter the ninefold ↓</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="hydra-ledger" id="memory-ledger">
+    <header class="hydra-ledger__header" data-reveal>
+      <div>
+        <span class="phase3-kicker">MEMORY LEDGER / HOST INTEGRATION</span>
+        <h2>Every gift arrives with a ghost.</h2>
+      </div>
+      <p>Three entries trace the collapse from sudden abundance to a fight for a single coherent self.</p>
+    </header>
+
+    <div class="hydra-ledger__entries">
+      {book.synopsis.map((paragraph, index) => (
+        <article class="hydra-entry" data-reveal>
+          <div class="hydra-entry__index">0{index + 1}</div>
+          <div class="hydra-entry__copy">
+            <span>{index === 0 ? 'INHERITANCE' : index === 1 ? 'CONTAMINATION' : 'INTEGRATION'}</span>
+            <p>{paragraph}</p>
+          </div>
+          <div class="hydra-entry__pulse" aria-hidden="true"><span></span></div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="hydra-matrix">
+    <div class="hydra-matrix__visual" aria-hidden="true">
+      <div class="hydra-matrix__core">01</div>
+      {Array.from({ length: 9 }).map((_, index) => (
+        <span class="hydra-matrix__node" style={`--node:${index}`}>{String(index + 1).padStart(2, '0')}</span>
+      ))}
+    </div>
+
+    <div class="hydra-matrix__content">
+      <header data-reveal>
+        <span class="phase3-kicker">IDENTITY MATRIX / PRIMARY PRESSURES</span>
+        <h2>Nine heads.<br />Four forces.</h2>
+        <p>The identities multiply, but the conflict keeps returning to the same pressure points.</p>
+      </header>
+      <div class="hydra-motif-list">
+        {book.motifs.map((motif, index) => (
+          <article class="hydra-motif" data-reveal>
+            <span>0{index + 1}</span>
+            <strong>{motif}</strong>
+            <small>{index === 0 ? 'SOURCE' : index === 1 ? 'BURDEN' : index === 2 ? 'ANCHOR' : 'FRACTURE'}</small>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="hydra-verdict" aria-label="Book tagline">
+    <div class="hydra-verdict__numbers" aria-hidden="true">01 02 03 04 05 06 07 08 09</div>
+    <blockquote data-reveal>{book.tagline}</blockquote>
+    <span class="hydra-verdict__line" aria-hidden="true"></span>
+  </section>
+
+  <nav class="phase3-navigation phase3-navigation--hydra" aria-label="Other books">
+    <a href={withBase(`books/${previous.slug}/`)} data-cursor-label={`PREVIOUS ${previous.title}`}>
+      <small>PREVIOUS IDENTITY</small><strong>← {previous.title}</strong>
+    </a>
+    <a href={withBase(`books/${next.slug}/`)} data-cursor-label={`NEXT ${next.title}`}>
+      <small>NEXT IDENTITY</small><strong>{next.title} →</strong>
+    </a>
+  </nav>
+</main>

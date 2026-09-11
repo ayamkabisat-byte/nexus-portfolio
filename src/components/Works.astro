@@ -1,128 +1,532 @@
 ---
 import { BOOKS } from '@/data/books';
 import { withBase } from '@/lib/urls';
-
-const REEL_BOOKS = [...BOOKS, ...BOOKS];
+import '@/styles/home-book-showcase.css';
 ---
 
-<section class="cover-reel" id="works" data-book-showcase aria-labelledby="cover-reel-title">
-  <header class="cover-reel__header">
+<section class="world-library" id="works" data-world-library aria-labelledby="world-library-title" style={`--world-accent:${BOOKS[0].accent}; --world-rgb:${BOOKS[0].accentRgb};`}>
+  <div class="world-library__aura" aria-hidden="true"></div>
+
+  <header class="world-library__header">
     <div>
-      <span class="eyebrow">SELECTED FICTION / 2026</span>
-      <h2 id="cover-reel-title">Featured works.</h2>
+      <span class="eyebrow">SELECTED FICTION / WORLD LIBRARY</span>
+      <h2 id="world-library-title">Enter the worlds.</h2>
     </div>
-    <span class="cover-reel__hint cover-reel__hint--desktop" aria-hidden="true">AUTO-MOVING · HOVER TO PAUSE · DOUBLE-CLICK TO ENTER</span>
-    <span class="cover-reel__hint cover-reel__hint--touch" aria-hidden="true">SWIPE TO EXPLORE · TAP TO ENTER</span>
+    <div class="world-library__status">
+      <span data-world-counter>01 / {String(BOOKS.length).padStart(2, '0')}</span>
+      <span class="world-library__status-line" aria-hidden="true"></span>
+      <span data-world-status>SELECT A WORLD</span>
+      <button class="world-library__pause" type="button" data-world-pause aria-label="Pause automatic book rotation">Pause rotation</button>
+    </div>
   </header>
 
-  <div class="cover-reel__viewport" data-showcase-viewport>
-    <div class="cover-reel__track" data-showcase-track>
-      {REEL_BOOKS.map((book, index) => {
-        const clone = index >= BOOKS.length;
-        const priorityCover = !clone && index < 2;
+  <div class="world-library__stage" data-world-stage>
+    <button class="world-library__arrow world-library__arrow--prev" type="button" data-world-prev aria-label="Previous book" data-cursor-label="PREVIOUS WORLD">←</button>
 
-        return (
-          <a
-            class="cover-reel__item"
-            href={withBase(`books/${book.slug}/`)}
+    <div class="world-library__reel-shell" data-world-reel>
+      <div class="world-library__reel" role="group" aria-label="Choose a book world">
+        {BOOKS.map((book, index) => (
+          <button
+            class:list={['world-library__reel-book', { 'is-active': index === 0 }]}
+            type="button"
+            aria-pressed={index === 0 ? 'true' : 'false'}
+            aria-controls={`book-panel-${book.slug}`}
+            aria-expanded="false"
+            tabindex={index === 0 ? '0' : '-1'}
+            data-reel-book
+            data-book-index={index}
+            data-book-slug={book.slug}
             style={`--book-accent:${book.accent}; --book-rgb:${book.accentRgb};`}
-            data-showcase-card
-            data-showcase-link
-            data-showcase-slug={book.slug}
-            data-cursor-label={`DOUBLE-CLICK ${book.title}`}
-            aria-label={clone ? undefined : `Open ${book.title}`}
-            aria-hidden={clone ? 'true' : undefined}
-            tabindex={clone ? '-1' : undefined}
+            data-cursor-label={index === 0 ? `OPEN ${book.title}` : `SELECT ${book.title}`}
           >
-            <span class="cover-reel__cover">
+            <span class="world-library__reel-cover">
               <img
                 src={withBase(book.cover)}
-                alt={clone ? '' : `${book.title} book cover`}
+                alt={`${book.title} book cover`}
                 width="800"
                 height="1200"
-                loading={priorityCover ? 'eager' : 'lazy'}
+                loading={index < 3 ? 'eager' : 'lazy'}
                 fetchpriority={index === 0 ? 'high' : 'auto'}
                 decoding="async"
               />
-              <span class="cover-reel__shine" aria-hidden="true"></span>
+              <span class="world-library__reel-gloss" aria-hidden="true"></span>
+              <span class="world-library__reel-pages" aria-hidden="true"></span>
             </span>
-          </a>
-        );
-      })}
+            <span class="world-library__reel-meta">
+              <small>{book.number}</small>
+              <strong>{book.title}</strong>
+            </span>
+          </button>
+        ))}
+      </div>
+      <span class="world-library__reel-hint" aria-hidden="true">← DRAG / SWIPE · CLICK CENTER TO OPEN →</span>
     </div>
+
+    <div class="world-library__experiences">
+      {BOOKS.map((book, index) => (
+        <article
+          class="world-library__experience"
+          id={`book-panel-${book.slug}`}
+          aria-label={`${book.title} synopsis`}
+          inert
+          data-world-panel
+          data-book-index={index}
+          data-book-slug={book.slug}
+          data-book-accent={book.accent}
+          data-book-rgb={book.accentRgb}
+          hidden={index !== 0}
+        >
+          <div class="world-library__identity" data-world-copy>
+            <span class="world-library__code">{book.archiveCode}</span>
+            <div class="world-library__title-row"><span>{book.number}</span><h3>{book.title}</h3></div>
+            <p class="world-library__genre">{book.genre}</p>
+            <p class="world-library__tagline">{book.tagline}</p>
+          </div>
+
+          <div class="world-library__book-zone">
+            <div class="world-library__book-object" data-book-object>
+              <div class="world-library__page-stack" aria-hidden="true"><span></span><span></span><span></span></div>
+
+              <div class="world-library__inside-page" data-desktop-brief>
+                <div class="world-library__page-head">
+                  <span>{book.number} / {book.title}</span>
+                  <button type="button" data-book-close aria-label={`Close ${book.title}`} data-cursor-label="CLOSE BOOK">×</button>
+                </div>
+                <div class="world-library__page-copy" data-lenis-prevent>
+                  <span class="world-library__page-label">WORLD BRIEF</span>
+                  <blockquote>{book.tagline}</blockquote>
+                  <p>{book.synopsis[0]}</p>
+                  <div class="world-library__motifs" aria-label="Story motifs">
+                    {book.motifs.slice(0, 3).map((motif) => <span>{motif}</span>)}
+                  </div>
+                </div>
+                <a class="world-library__enter" href={withBase(`books/${book.slug}/`)} data-cursor-label={`ENTER ${book.title}`}>
+                  <span>ENTER WORLD</span><strong>↗</strong>
+                </a>
+              </div>
+
+              <button
+                class="world-library__book-cover"
+                type="button"
+                data-book-toggle
+                aria-expanded="false"
+                aria-label={`Open ${book.title} synopsis`}
+                data-cursor-label={`OPEN ${book.title}`}
+              >
+                <span class="world-library__cover-front">
+                  <img src={withBase(book.cover)} alt={`${book.title} book cover`} width="800" height="1200" loading="lazy" decoding="async" />
+                  <span class="world-library__cover-gloss" aria-hidden="true"></span>
+                </span>
+                <span class="world-library__cover-back" aria-hidden="true"></span>
+              </button>
+            </div>
+            <span class="world-library__book-shadow" aria-hidden="true"></span>
+            <div class="world-library__mobile-brief" data-mobile-brief>
+              <div class="world-library__mobile-heading">
+                <h3>{book.title}</h3>
+                <button type="button" data-book-close aria-label={`Close ${book.title} synopsis`}>×</button>
+              </div>
+              <p class="world-library__mobile-genre">{book.genre}</p>
+              <blockquote>{book.tagline}</blockquote>
+              <p>{book.synopsis[0]}</p>
+              <a class="button button--primary" href={withBase(`books/${book.slug}/`)}>Enter {book.title} <span aria-hidden="true">↗</span></a>
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+
+    <button class="world-library__arrow world-library__arrow--next" type="button" data-world-next aria-label="Next book" data-cursor-label="NEXT WORLD">→</button>
+  </div>
+
+  <div class="world-library__summaries" data-world-summaries>
+    {BOOKS.map((book, index) => (
+      <div class="world-library__summary" data-world-summary hidden={index !== 0}>
+        <span class="eyebrow">{book.genre}</span>
+        <h3>{book.title}</h3>
+        <p>{book.tagline}</p>
+        <div class="world-library__summary-actions">
+          <button class="button button--ghost" type="button" data-preview-book={index} aria-controls={`book-panel-${book.slug}`}>Open synopsis</button>
+          <a class="button button--primary" href={withBase(`books/${book.slug}/`)}>Explore {book.title} <span aria-hidden="true">↗</span></a>
+          {book.externalUrl && <a class="world-library__read" href={book.externalUrl} target="_blank" rel="noreferrer">{book.externalLabel} ↗</a>}
+        </div>
+      </div>
+    ))}
+  </div>
+  <p class="sr-only" data-world-announcement aria-live="polite" aria-atomic="true"></p>
+
+  <div class="world-library__fallback" data-world-fallback>
+    {BOOKS.map((book) => (
+      <a href={withBase(`books/${book.slug}/`)}>
+        <img src={withBase(book.cover)} alt={`${book.title} book cover`} width="800" height="1200" loading="lazy" />
+        <h3>{book.title}</h3>
+        <p>{book.genre}</p>
+        <span>Explore this world ↗</span>
+      </a>
+    ))}
   </div>
 </section>
 
 <style>
-  .cover-reel__hint--touch {
-    display: none;
+  /* Phase 4.2 — cinematic moving reel + the existing opening-book interaction. */
+  .world-library__stage {
+    grid-template-columns: 60px minmax(0, 1fr) 60px;
+    min-height: clamp(560px, 68vh, 760px);
   }
 
-  @media (pointer: coarse) {
-    .cover-reel__hint--desktop {
-      display: none;
-    }
+  .world-library__arrow--prev { grid-column: 1; grid-row: 1; }
+  .world-library__arrow--next { grid-column: 3; grid-row: 1; }
 
-    .cover-reel__hint--touch {
-      display: block;
+  .world-library__reel-shell,
+  .world-library__experiences {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .world-library__reel-shell {
+    position: relative;
+    z-index: 6;
+    width: 100%;
+    min-height: clamp(500px, 61vh, 680px);
+    perspective: 1700px;
+    transition: opacity .55s ease, transform .7s var(--ease-fluid), filter .55s ease;
+  }
+
+  .world-library__reel {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+  }
+
+  .world-library__reel-book {
+    position: absolute;
+    top: 48%;
+    left: 50%;
+    z-index: 1;
+    display: grid;
+    justify-items: center;
+    gap: 15px;
+    width: clamp(150px, 16vw, 238px);
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+    transform-style: preserve-3d;
+    transform-origin: center center;
+    transition:
+      transform 1.05s cubic-bezier(.16,1,.3,1),
+      opacity .75s ease,
+      filter .75s ease;
+    will-change: transform, opacity;
+  }
+
+  .world-library__reel-cover {
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 4px 10px 10px 4px;
+    background: #080b12;
+    box-shadow: 0 24px 60px rgba(0,0,0,.46);
+    transform-style: preserve-3d;
+  }
+
+  .world-library__reel-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    background: #080b12;
+  }
+
+  .world-library__reel-gloss {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(118deg, rgba(255,255,255,.13), transparent 19%, transparent 64%, rgba(255,255,255,.045));
+    mix-blend-mode: screen;
+  }
+
+  .world-library__reel-pages {
+    position: absolute;
+    top: 7px;
+    right: -7px;
+    bottom: 7px;
+    width: 9px;
+    border-radius: 0 5px 5px 0;
+    background: repeating-linear-gradient(0deg, #bdb6a8 0 1px, #e8e2d5 1px 3px);
+    transform: rotateY(76deg);
+    transform-origin: left center;
+    opacity: .72;
+  }
+
+  .world-library__reel-meta {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    opacity: .38;
+    font-family: var(--mono);
+    text-transform: uppercase;
+    transition: opacity .45s ease, transform .45s ease;
+  }
+
+  .world-library__reel-meta small {
+    color: var(--book-accent);
+    font-size: 8px;
+    letter-spacing: .1em;
+  }
+
+  .world-library__reel-meta strong {
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: .12em;
+  }
+
+  .world-library__reel-book[data-reel-position='0'] {
+    z-index: 10;
+    opacity: 1;
+    filter: saturate(1.04) brightness(1.02);
+    transform: translate3d(-50%, -50%, 120px) scale(1.10) rotateY(0deg);
+  }
+
+  .world-library__reel-book[data-reel-position='0'] .world-library__reel-cover {
+    animation: phase42ReelFloat 4.6s ease-in-out infinite;
+    border-color: rgba(var(--book-rgb), .42);
+    box-shadow: 0 34px 85px rgba(0,0,0,.58), 0 0 50px rgba(var(--book-rgb), .12);
+  }
+
+  .world-library__reel-book[data-reel-position='0'] .world-library__reel-meta {
+    opacity: .92;
+    transform: translateY(3px);
+  }
+
+  .world-library__reel-book[data-reel-position='-1'] {
+    z-index: 7;
+    opacity: .76;
+    filter: saturate(.72) brightness(.74);
+    transform: translate3d(calc(-50% - clamp(190px, 21vw, 315px)), -43%, 0) scale(.86) rotateY(13deg);
+  }
+  .world-library__reel-book[data-reel-position='1'] {
+    z-index: 7;
+    opacity: .76;
+    filter: saturate(.72) brightness(.74);
+    transform: translate3d(calc(-50% + clamp(190px, 21vw, 315px)), -43%, 0) scale(.86) rotateY(-13deg);
+  }
+  .world-library__reel-book[data-reel-position='-2'] {
+    z-index: 4;
+    opacity: .36;
+    filter: saturate(.48) brightness(.54) blur(.2px);
+    transform: translate3d(calc(-50% - clamp(330px, 36vw, 545px)), -34%, -130px) scale(.69) rotateY(21deg);
+  }
+  .world-library__reel-book[data-reel-position='2'] {
+    z-index: 4;
+    opacity: .36;
+    filter: saturate(.48) brightness(.54) blur(.2px);
+    transform: translate3d(calc(-50% + clamp(330px, 36vw, 545px)), -34%, -130px) scale(.69) rotateY(-21deg);
+  }
+  .world-library__reel-book[data-reel-position='-3'] {
+    z-index: 1;
+    opacity: .08;
+    transform: translate3d(calc(-50% - clamp(460px, 49vw, 720px)), -29%, -220px) scale(.56) rotateY(27deg);
+  }
+  .world-library__reel-book[data-reel-position='3'] {
+    z-index: 1;
+    opacity: .08;
+    transform: translate3d(calc(-50% + clamp(460px, 49vw, 720px)), -29%, -220px) scale(.56) rotateY(-27deg);
+  }
+
+  .world-library__reel-hint {
+    position: absolute;
+    left: 50%;
+    bottom: 18px;
+    transform: translateX(-50%);
+    color: var(--faint);
+    font: 500 7px/1 var(--mono);
+    letter-spacing: .17em;
+    white-space: nowrap;
+  }
+
+  .world-library__experience {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 0;
+  }
+
+  .world-library__identity { display: none; }
+
+  .world-library__experiences {
+    position: relative;
+    z-index: 7;
+    min-height: clamp(500px, 61vh, 680px);
+    pointer-events: none;
+  }
+
+  .world-library__book-zone {
+    width: 100%;
+    min-height: clamp(500px, 61vh, 680px);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(16px) scale(.96);
+    transition: opacity .42s ease, transform .62s var(--ease-fluid), visibility 0s linear .5s;
+  }
+
+  .world-library.is-book-open .world-library__reel-shell {
+    opacity: 0;
+    filter: blur(4px);
+    transform: scale(.94) translateY(12px);
+    pointer-events: none;
+  }
+
+  .world-library.is-book-open .world-library__experiences { pointer-events: auto; }
+  .world-library.is-book-open .world-library__experience.is-open .world-library__book-zone {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    transition-delay: .14s, .08s, 0s;
+    animation: none;
+  }
+
+  .world-library__book-object {
+    --phase4-book-scale: 1.055;
+    transform: translateX(0) rotateX(1deg) rotateY(-2deg) scale(var(--phase4-book-scale));
+  }
+
+  .world-library__experience.is-open .world-library__book-object {
+    transform: translateX(50%) rotateX(1deg) rotateY(0deg) scale(var(--phase4-book-scale));
+  }
+
+  .world-library__experience[data-book-slug='hydra'] .world-library__book-object,
+  .world-library__experience[data-book-slug='lucidreamer'] .world-library__book-object {
+    --phase4-book-scale: 1.055;
+  }
+
+  .world-library__reel-book[data-book-slug='hydra'] .world-library__reel-cover img,
+  .world-library__reel-book[data-book-slug='lucidreamer'] .world-library__reel-cover img {
+    width: 109%;
+    height: 109%;
+    max-width: none;
+    object-fit: cover;
+    transform: translate(-4.15%, -4.15%);
+  }
+
+  @keyframes phase42ReelFloat {
+    0%, 100% { transform: translate3d(0, 0, 0) rotateX(0deg); }
+    50% { transform: translate3d(0, -8px, 8px) rotateX(.8deg); }
+  }
+
+  @media (max-width: 900px) {
+    .world-library__stage { grid-template-columns: 46px minmax(0,1fr) 46px; }
+    .world-library__reel-book { width: clamp(138px, 22vw, 205px); }
+    .world-library__reel-book[data-reel-position='-1'] { transform: translate3d(calc(-50% - clamp(145px, 25vw, 230px)), -43%, 0) scale(.82) rotateY(12deg); }
+    .world-library__reel-book[data-reel-position='1'] { transform: translate3d(calc(-50% + clamp(145px, 25vw, 230px)), -43%, 0) scale(.82) rotateY(-12deg); }
+    .world-library__reel-book[data-reel-position='-2'] { transform: translate3d(calc(-50% - clamp(260px, 45vw, 390px)), -34%, -130px) scale(.62) rotateY(20deg); }
+    .world-library__reel-book[data-reel-position='2'] { transform: translate3d(calc(-50% + clamp(260px, 45vw, 390px)), -34%, -130px) scale(.62) rotateY(-20deg); }
+  }
+
+  @media (max-width: 760px) {
+    .world-library__stage { min-height: 520px; grid-template-columns: 38px minmax(0,1fr) 38px; }
+    .world-library__reel-shell,
+    .world-library__experiences,
+    .world-library__book-zone { min-height: 470px; }
+    .world-library__reel-book { top: 47%; width: min(39vw, 170px); }
+    .world-library__reel-book[data-reel-position='0'] { transform: translate3d(-50%, -50%, 80px) scale(1.08); }
+    .world-library__reel-book[data-reel-position='-1'] { opacity:.64; transform: translate3d(calc(-50% - 41vw), -43%, 0) scale(.73) rotateY(11deg); }
+    .world-library__reel-book[data-reel-position='1'] { opacity:.64; transform: translate3d(calc(-50% + 41vw), -43%, 0) scale(.73) rotateY(-11deg); }
+    .world-library__reel-book[data-reel-position='-2'],
+    .world-library__reel-book[data-reel-position='2'],
+    .world-library__reel-book[data-reel-position='-3'],
+    .world-library__reel-book[data-reel-position='3'] { opacity: 0; pointer-events: none; }
+    .world-library__reel-meta { gap: 5px; }
+    .world-library__reel-meta strong { font-size: 7px; }
+    .world-library__reel-hint { bottom: 8px; font-size: 6px; letter-spacing: .11em; }
+    .world-library__experience.is-open .world-library__book-object {
+      transform: translateX(24%) rotateX(1deg) rotateY(0deg) scale(var(--phase4-book-scale));
     }
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    .world-library__reel-book,
+    .world-library__reel-shell,
+    .world-library__book-zone { transition-duration: .01ms !important; }
+    .world-library__reel-book[data-reel-position='0'] .world-library__reel-cover { animation: none; }
+  }
+
+  /* Content first: the fallback remains usable until initialization succeeds. */
+  .world-library:not(.is-ready) .world-library__stage,
+  .world-library:not(.is-ready) .world-library__summaries,
+  .world-library:not(.is-ready) .world-library__status,
+  .world-library.is-ready .world-library__fallback { display: none; }
+  .world-library__fallback { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 28px; padding-top: 40px; }
+  .world-library__fallback img { width: 100%; height: auto; aspect-ratio: 2 / 3; object-fit: contain; }
+  .world-library__fallback h3 { margin-top: 16px; }
+  .world-library__fallback p { margin-block: 8px; color: var(--muted); }
+  .world-library__fallback span { color: var(--world-accent); }
+  .world-library__status { white-space: normal; flex-wrap: wrap; font-size: 11px; line-height: 1.5; color: #b7c1cb; }
+  .world-library__pause { padding: 10px 14px; min-height: 44px; border: 1px solid var(--line-soft); border-radius: 24px; color: var(--text); background: #111923; font: inherit; cursor: pointer; }
+  .world-library__pause:disabled { opacity: .7; cursor: default; }
+  .world-library__reel-hint { font-size: 11px; color: #b7c1cb; line-height: 1.5; }
+  .world-library__reel-meta strong { font-size: 12px; }
+  .world-library__reel-meta small { font-size: 10px; }
+  .world-library__reel-book:focus-visible { outline: 2px solid var(--world-accent); outline-offset: 10px; border-radius: 8px; }
+  .world-library__summaries { position: relative; z-index: 9; max-width: 780px; margin: 0 auto; text-align: center; }
+  .world-library__summary[hidden] { display: none; }
+  .world-library__summary h3 { margin: 12px 0; font-size: clamp(26px, 5vw, 42px); letter-spacing: -.03em; }
+  .world-library__summary > p { font-size: 17px; line-height: 1.65; color: #bac4ce; }
+  .world-library__summary .eyebrow { font-size: 12px; }
+  .world-library__summary-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 14px; margin-top: 24px; }
+  .world-library__read { color: var(--world-accent); padding: 12px; }
+  .world-library__inside-page { grid-template-rows: auto minmax(0, 1fr) auto; }
+  .world-library__page-copy { overflow-y: auto; min-height: 0; padding-right: 4px; overscroll-behavior: contain; }
+  .world-library__page-copy p { font-size: 14px; line-height: 1.6; }
+  .world-library__motifs span { font-size: 10px; }
+  .world-library__page-head { font-size: 10px; }
+  .world-library__page-head button { width: 44px; height: 44px; flex-shrink: 0; }
+  .world-library__enter { min-height: 44px; font-size: 12px; }
+  .world-library__mobile-brief { display: none; }
+  .world-library__arrow { width: 44px; height: 44px; }
+  .world-library button:focus-visible, .world-library a:focus-visible { outline: 2px solid var(--world-accent); outline-offset: 4px; }
+
+  @media (max-width: 760px) {
+    .world-library__header { align-items: flex-start; }
+    .world-library__status { justify-content: flex-start; gap: 10px; width: 100%; }
+    .world-library__status-line { display: none; }
+    .world-library__stage { grid-template-columns: 44px minmax(0, 1fr) 44px; }
+    .world-library__reel-hint { font-size: 10px; white-space: normal; text-align: center; width: 100%; }
+    .world-library__summary-actions { flex-direction: column; }
+    .world-library__summary-actions .button { width: 100%; justify-content: center; }
+    .world-library.is-book-open .world-library__experiences { grid-column: 1 / -1; min-height: 0; }
+    .world-library.is-book-open .world-library__experience { position: relative; inset: auto; }
+    .world-library.is-book-open .world-library__book-zone { display: flex; flex-direction: column; gap: 32px; min-height: 0; padding: 36px 0 24px; }
+    .world-library.is-book-open .world-library__stage { min-height: 0; }
+    .world-library.is-book-open .world-library__arrow { align-self: start; margin-top: 24px; z-index: 12; }
+    .world-library.is-book-open .world-library__book-object { flex-shrink: 0; width: min(40vw, 180px) !important; }
+    .world-library__inside-page { pointer-events: none; }
+    .world-library__inside-page > * { visibility: hidden; }
+    .world-library__book-shadow { display: none; }
+    .world-library__mobile-brief { display: block; width: 100%; padding: 24px; border: 1px solid var(--line-soft); border-radius: 16px; background: #101722; }
+    .world-library__mobile-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .world-library__mobile-heading h3 { font-size: clamp(22px, 6vw, 32px); overflow-wrap: anywhere; }
+    .world-library__mobile-heading button { width: 44px; height: 44px; flex-shrink: 0; border: 1px solid var(--line-soft); border-radius: 50%; background: #1c2633; color: #fff; font-size: 24px; }
+    .world-library__mobile-brief p { font-size: 16px; line-height: 1.7; margin: 16px 0; color: #c6d0dc; }
+    .world-library__mobile-brief blockquote { font-size: 20px; line-height: 1.4; color: var(--world-accent); margin: 24px 0 16px; }
+    .world-library__mobile-brief .world-library__mobile-genre { font-size: 13px; }
+    .world-library__mobile-brief .button { display: flex; justify-content: center; width: 100%; margin-top: 24px; }
+  }
+
 </style>
 
 <script>
-  let cleanupTouchEnter = () => {};
+  import { initWorldLibrary } from '@/scripts/world-library';
 
-  const initTouchEnter = () => {
-    cleanupTouchEnter();
-
-    if (!window.matchMedia('(pointer: coarse)').matches) return;
-
-    const viewport = document.querySelector<HTMLElement>('[data-showcase-viewport]');
-    if (!viewport) return;
-
-    const controller = new AbortController();
-    const { signal } = controller;
-    let startX = 0;
-    let startY = 0;
-    let moved = 0;
-
-    viewport.addEventListener('pointerdown', (event) => {
-      startX = event.clientX;
-      startY = event.clientY;
-      moved = 0;
-    }, { signal });
-
-    viewport.addEventListener('pointermove', (event) => {
-      const dx = event.clientX - startX;
-      const dy = event.clientY - startY;
-      moved = Math.max(moved, Math.hypot(dx, dy));
-    }, { signal });
-
-    viewport.addEventListener('click', (event) => {
-      const target = event.target instanceof Element ? event.target : null;
-      const card = target?.closest<HTMLAnchorElement>('[data-showcase-card]');
-      if (!card) return;
-
-      // Preserve dragging without accidentally entering a book.
-      if (moved > 10) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        return;
-      }
-
-      // Touch devices should behave like a normal gallery: one tap enters.
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      window.location.assign(card.href);
-    }, { capture: true, signal });
-
-    cleanupTouchEnter = () => controller.abort();
+  let cleanupWorldLibrary = () => {};
+  const mount = () => {
+    cleanupWorldLibrary();
+    const root = document.querySelector<HTMLElement>('[data-world-library]');
+    cleanupWorldLibrary = root ? initWorldLibrary(root) : () => {};
   };
-
-  document.addEventListener('astro:page-load', initTouchEnter);
-  document.addEventListener('astro:before-preparation', () => cleanupTouchEnter());
-
-  if (document.readyState !== 'loading') {
-    queueMicrotask(initTouchEnter);
-  }
+  document.addEventListener('astro:page-load', mount);
+  document.addEventListener('astro:before-preparation', () => cleanupWorldLibrary());
 </script>
